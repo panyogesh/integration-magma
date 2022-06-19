@@ -1,0 +1,92 @@
+1. Install Certs
+-----------------------------------------------------------------------------------
+sudo mkdir -p /var/opt/magma/certs 
+vim /var/opt/magma/certs/rootCA.pem   << Add your rootCA obtained from orc8r
+openssl x509 -text -noout -in /var/opt/magma/certs/rootCA.pem
+
+2. Fetch the Docker Scripts
+-----------------------------------------------------------------------------------
+wget  https://github.com/magma/magma/raw/master/lte/gateway/deploy/agw_install_docker.sh
+
+3. Rename the interfaces to eth0,eth1 and eth2
+-----------------------------------------------------------------------------------
+sudo su
+sed -i 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0"/g' /etc/default/grub
+sed -i 's/enp0s3/eth0/g' /etc/netplan/50-cloud-init.yaml
+grub-mkconfig -o /boot/grub/grub.cfg
+exit
+exit
+vagrant reload distromagma
+ 
+4. Deploy docker specific packages using ansible scripts 
+-----------------------------------------------------------------------------------
+vagrant ssh distromagma
+sudo chmod 777 agw_install_docker.sh
+sudo bash agw_install_docker.sh
+
+ 
+5. In case if dockers are to be created from scratch
+-----------------------------------------------------------------------------------
+git clone https://github.com/magma/magma
+
+5.1 Use the Following patch 
+-----------------------------------------------------------------------------------
+git diff lte/gateway/docker/services/c/Dockerfile
+diff --git a/lte/gateway/docker/services/c/Dockerfile b/lte/gateway/docker/services/c/Dockerfile
+index 5dfdf2682..22ad29f24 100644
+--- a/lte/gateway/docker/services/c/Dockerfile
++++ b/lte/gateway/docker/services/c/Dockerfile
+@@ -182,6 +182,8 @@ RUN apt-get update && apt-get install -y \
+   tzdata \
+   iproute2 \
+   iptables \
++  libssl-dev \
++  libtspi1 \
+   && rm -rf /var/lib/apt/lists/*
+ 
+ RUN echo "deb https://facebookconnectivity.jfrog.io/artifactory/list/dev-focal/ focal main" > /etc/apt/sources.list.d/magma.list
+
+6. Generate Magma's Docker Images
+-----------------------------------------------------------------------------------
+cd lte/gateway/docker
+docker-compose build
+
+7. Launch the dockers
+-----------------------------------------------------------------------------------
+cd /var/opt/magma/docker/
+sudo ./agw_upgrade.sh  
+
+8. Confirm
+-----------------------------------------------------------------------------------
+vagrant@distro-magma:~/magma/lte/gateway/python$ sudo docker ps
+CONTAINER ID   IMAGE                       COMMAND                  CREATED             STATUS                       PORTS     NAMES
+44622a29cbb5   agw_gateway_c:latest        "sh -c 'mkdir -p /va…"   About an hour ago   Up About an hour (healthy)             sessiond
+132e08e60c7a   agw_gateway_c:latest        "sh -c '/usr/local/b…"   About an hour ago   Up About an hour (healthy)             oai_mme
+8d4e6783eadb   agw_gateway_python:latest   "/usr/bin/env python…"   About an hour ago   Up About an hour (healthy)             state
+36d66e729044   agw_gateway_python:latest   "/usr/bin/env python…"   About an hour ago   Up About an hour (healthy)             directoryd
+eece89c0c65b   agw_gateway_python:latest   "/usr/bin/env python…"   About an hour ago   Up About an hour (healthy)             policydb
+a8cf3e871c56   agw_gateway_python:latest   "/usr/bin/env python…"   About an hour ago   Up About an hour (healthy)             monitord
+324bf87d97f9   agw_gateway_python:latest   "/usr/bin/env python…"   About an hour ago   Up About an hour (healthy)             ctraced
+3aa26206a836   agw_gateway_python:latest   "/bin/bash -c '/usr/…"   About an hour ago   Up About an hour (healthy)             redis
+532f6ff3df88   agw_gateway_python:latest   "/usr/bin/env python…"   About an hour ago   Up About an hour                       magmad
+1b3340e7d565   agw_gateway_python:latest   "/usr/bin/env python…"   About an hour ago   Up About an hour (healthy)             smsd
+26f3788b3435   agw_gateway_python:latest   "sh -c '/usr/local/b…"   About an hour ago   Up About an hour (healthy)             control_proxy
+5fd80223af54   agw_gateway_python:latest   "/usr/bin/env python…"   About an hour ago   Up About an hour (healthy)             eventd
+9d3de486f13d   agw_gateway_c:latest        "/usr/local/bin/conn…"   About an hour ago   Up About an hour (healthy)             connectiond
+3b44c655fc03   agw_gateway_python:latest   "/bin/bash -c '/usr/…"   About an hour ago   Up About an hour (healthy)             td-agent-bit
+defd467ab54a   agw_gateway_c:latest        "/usr/local/bin/sctpd"   About an hour ago   Up About an hour                       sctpd
+021410eeda79   agw_gateway_python:latest   "/usr/bin/env python…"   About an hour ago   Up About an hour (healthy)             subscriberdb
+1149bae1b0b7   agw_gateway_python:latest   "/usr/bin/env python…"   About an hour ago   Up About an hour (healthy)             health
+0c022fd6ff06   agw_gateway_python:latest   "/usr/bin/env python…"   About an hour ago   Up About an hour (healthy)             redirectd
+d77578ab3229   agw_gateway_python:latest   "/usr/bin/env python…"   About an hour ago   Up About an hour (healthy)             enodebd
+70b1298fee5f   agw_gateway_python:latest   "sh -c 'sleep 5 && /…"   About an hour ago   Up About an hour (healthy)             mobilityd
+cd11b6901181   agw_gateway_python:latest   "bash -c '/usr/bin/o…"   About an hour ago   Up About an hour (healthy)             pipelined
+vagrant@distro-magma:~/magma/lte/gateway/python$
+
+
+9. Clean up of dockers
+------------------------------------------------------------------------------------
+sudo docker container stop $(sudo docker container ls -aq)
+sudo docker container rm $(sudo docker container ls -aq)
+sudo docker image prune -a
+sudo docker volume prune
