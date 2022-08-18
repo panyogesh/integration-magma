@@ -1,0 +1,20 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/focal64"
+
+  config.vm.define :destromagma, autostart: false do |destromagma|
+    destromagma.vm.hostname = "destro-magma"
+    destromagma.vm.network "private_network", ip: "192.168.60.176", nic_type: "82540EM"
+    destromagma.vm.network "private_network", ip: "192.168.129.74", nic_type: "82540EM"
+
+    destromagma.vm.provider "virtualbox" do |vb|
+      vb.name = "destro-magma"
+      vb.linked_clone = true
+      vb.customize ["modifyvm", :id, "--memory", "6144"]
+      vb.customize ["modifyvm", :id, "--cpus", "4"]
+      vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+    end
+  end
+end
