@@ -1,0 +1,63 @@
+General Package Installations
+========================================================================
+sudo apt-get update
+sudo apt-get install -y apt-utils software-properties-common apt-transport-https gnupg wget
+sudo apt-get update
+sudo apt-get install -y   sudo   curl   wget   unzip   cmake   git   build-essential   autoconf   libtool   pkg-config   libgflags-dev   libc++-dev   protobuf-compiler   ninja-build   autogen   ccache   libprotoc-dev   libxml2-dev   libxslt-dev   libyaml-cpp-dev   nlohmann-json3-dev   libgoogle-glog-dev   libsctp-dev   libpcap-dev   libmnl-dev   uuid-dev   python3-pip   libcurl4-openssl-dev   libdouble-conversion-dev   libboost-chrono-dev   libboost-context-dev   libboost-program-options-dev   libboost-filesystem-dev   libboost-regex-dev   check   libssl-dev   libsctp-dev   libtspi-dev   libconfig-dev   libgmp3-dev   libczmq-dev   libsqlite3-dev
+sudo su
+sudo apt-get update
+sudo  apt-get install -y   libfolly-dev   oai-asn1c   oai-freediameter   oai-gnutls   oai-nettle   magma-cpp-redis   magma-libfluid   grpc-dev   prometheus-cpp-dev   liblfds710
+sudo apt-get update
+
+Update the Repository Information
+========================================================================
+sudo su
+touch /etc/apt/sources.list.d/magma.list
+root@destro-magma:/home/vagrant# echo "deb https://artifactory.magmacore.org/artifactory/debian-test focal-ci main" >  /etc/apt/sources.list.d/magma.list
+root@destro-magma:/home/vagrant# wget -qO - https://artifactory.magmacore.org:443/artifactory/api/gpg/key/public | apt-key add -
+OK
+root@destro-magma:/home/vagrant#
+exit
+
+Fetch the packages used for building C files like grpc etc
+========================================================================
+sudo apt-get update
+sudo  apt-get install -y   libfolly-dev   oai-asn1c   oai-freediameter   oai-gnutls   oai-nettle   magma-cpp-redis   magma-libfluid   grpc-dev   prometheus-cpp-dev   liblfds710
+sudo apt-get install libgtest-dev
+sudo apt install -y libgmock-dev
+
+Fetch the packages used for building Python/Pipelined files like OVS etc
+========================================================================
+sudo apt-get update
+sudo apt-get install -y   wget   ruby   sudo   ruby-dev   docker.io   python3-pip   python3-dev   python3-eventlet   python3-pystemd   python3-protobuf   git   virtualenv   lsb-release   openjdk-8-jre-headless   openjdk-8-jdk   pkg-config   libsystemd-dev   libprotobuf-dev
+sudo gem install fpm
+export VIRTUAL_ENV=/home/vagrant/build
+sudo apt-get install -y   td-agent-bit   libopenvswitch   openvswitch-datapath-dkms   openvswitch-common   openvswitch-switch   bcc-tools   wireguard
+mkdir ~/.pipcache/
+export PIP_CACHE_HOME=~/.pipcache/
+export SWAGGER_CODEGEN_DIR=/var/tmp/codegen/modules/swagger-codegen-cli/target
+export SWAGGER_CODEGEN_JAR=${SWAGGER_CODEGEN_DIR}/swagger-codegen-cli.jar
+export CODEGEN_VERSION=2.2.3
+export DEBIAN_FRONTEND=noninteractive
+mkdir -p ${SWAGGER_CODEGEN_DIR};
+wget --no-verbose https://repo1.maven.org/maven2/io/swagger/swagger-codegen-cli/${CODEGEN_VERSION}/swagger-codegen-cli-${CODEGEN_VERSION}.jar -O ${SWAGGER_CODEGEN_JAR}
+
+
+Clone the Magma Repository
+========================================================================
+git clone https://github.com/magma/magma.git
+
+Unit test for C Code Repo (MME / AMF)
+========================================================================
+export MAGMA_ROOT=/home/vagrant/magma
+export C_BUILD=/home/vagrant/build/c
+export PYTHON_BUILD=/home/vagrant/build/python
+make test_oai
+clear
+
+Unit test for Python Code Repo (Pipelined / Subscriberdb)
+========================================================================
+cd python/
+make buildenv
+cd ..
+make test_python
