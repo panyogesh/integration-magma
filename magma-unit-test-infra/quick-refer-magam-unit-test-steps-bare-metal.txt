@@ -19,7 +19,7 @@ Fetch the packages used for building C files like grpc etc
 ========================================================================
 sudo apt-get update
 sudo  apt-get install -y   libfolly-dev   oai-asn1c   oai-freediameter   oai-gnutls   oai-nettle   magma-cpp-redis   magma-libfluid   grpc-dev   prometheus-cpp-dev   liblfds710
-sudo apt-get install libgtest-dev
+sudo apt-get install -y libgtest-dev
 sudo apt install -y libgmock-dev
 
 Fetch the packages used for building Python/Pipelined files like OVS etc
