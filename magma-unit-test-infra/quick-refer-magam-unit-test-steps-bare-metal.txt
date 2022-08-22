@@ -4,10 +4,6 @@ sudo apt-get update
 sudo apt-get install -y apt-utils software-properties-common apt-transport-https gnupg wget
 sudo apt-get update
 sudo apt-get install -y   sudo   curl   wget   unzip   cmake   git   build-essential   autoconf   libtool   pkg-config   libgflags-dev   libc++-dev   protobuf-compiler   ninja-build   autogen   ccache   libprotoc-dev   libxml2-dev   libxslt-dev   libyaml-cpp-dev   nlohmann-json3-dev   libgoogle-glog-dev   libsctp-dev   libpcap-dev   libmnl-dev   uuid-dev   python3-pip   libcurl4-openssl-dev   libdouble-conversion-dev   libboost-chrono-dev   libboost-context-dev   libboost-program-options-dev   libboost-filesystem-dev   libboost-regex-dev   check   libssl-dev   libsctp-dev   libtspi-dev   libconfig-dev   libgmp3-dev   libczmq-dev   libsqlite3-dev
-sudo su
-sudo apt-get update
-sudo  apt-get install -y   libfolly-dev   oai-asn1c   oai-freediameter   oai-gnutls   oai-nettle   magma-cpp-redis   magma-libfluid   grpc-dev   prometheus-cpp-dev   liblfds710
-sudo apt-get update
 
 Update the Repository Information
 ========================================================================
