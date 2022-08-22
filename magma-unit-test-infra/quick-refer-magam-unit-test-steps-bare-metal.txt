@@ -37,6 +37,7 @@ sudo apt-get update
 sudo  apt-get install -y   libfolly-dev   oai-asn1c   oai-freediameter   oai-gnutls   oai-nettle   magma-cpp-redis   magma-libfluid   grpc-dev   prometheus-cpp-dev   liblfds710
 sudo apt-get install -y libgtest-dev
 sudo apt install -y libgmock-dev
+sudo apt-get -y install clang-format-11
 
 Fetch the packages used for building Python/Pipelined files like OVS etc
 ========================================================================
@@ -76,16 +77,18 @@ echo "export C_BUILD=/home/$USER/build/c" >> ~/.profile
 echo "export PYTHON_BUILD=/home/$USER/build/python" >> ~/.profile
 source ~/.profile
 
+Unit test for Python Code Repo (Pipelined / Subscriberdb)
+========================================================================
+Directory : cd magma/lte/gateway/python
+make buildenv
 
 Unit test for C Code Repo (MME / AMF)
 ========================================================================
-cd magma/lte/gateway/
-make test_oai
-clear
+Directory : cd magma/lte/gateway/
+  Unit test : make test_python
+  Pre-Lint Step-1 : ./precommit.py --build
+  Pre-Lint Step-2 : ./precommit.py --lint -p  lte/gateway/python/magma
 
-Unit test for Python Code Repo (Pipelined / Subscriberdb)
-========================================================================
-cd python/
-make buildenv
-cd ..
-make test_python
+Direcotry : cd magma/lte/gateway/
+  Pre-Lint Step-1 : make format_all
+  Unit test : make test_oai
