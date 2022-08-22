@@ -59,11 +59,12 @@ Python based configuration
 sudo gem install fpm
 sudo apt-get install -y   td-agent-bit   libopenvswitch   openvswitch-datapath-dkms   openvswitch-common   openvswitch-switch   bcc-tools   wireguard
 mkdir ~/.pipcache/
-export PIP_CACHE_HOME=~/.pipcache/
-export SWAGGER_CODEGEN_DIR=/var/tmp/codegen/modules/swagger-codegen-cli/target
-export SWAGGER_CODEGEN_JAR=${SWAGGER_CODEGEN_DIR}/swagger-codegen-cli.jar
-export CODEGEN_VERSION=2.2.3
-export DEBIAN_FRONTEND=noninteractive
+echo "export PIP_CACHE_HOME=~/.pipcache/" >> ~/.profile
+echo "export SWAGGER_CODEGEN_DIR=/var/tmp/codegen/modules/swagger-codegen-cli/target" >> ~/.profile
+echo "export SWAGGER_CODEGEN_JAR=${SWAGGER_CODEGEN_DIR}/swagger-codegen-cli.jar"  >> ~/.profile
+echo "export CODEGEN_VERSION=2.2.3"  >> ~/.profile
+echo "export DEBIAN_FRONTEND=noninteractive" >> ~/.profile
+source ~/.profile
 mkdir -p ${SWAGGER_CODEGEN_DIR};
 wget --no-verbose https://repo1.maven.org/maven2/io/swagger/swagger-codegen-cli/${CODEGEN_VERSION}/swagger-codegen-cli-${CODEGEN_VERSION}.jar -O ${SWAGGER_CODEGEN_JAR}
 
@@ -73,7 +74,6 @@ echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.profile
 echo "export MAGMA_ROOT=/home/$USER/magma" >> ~/.profile
 echo "export C_BUILD=/home/$USER/build/c" >> ~/.profile
 echo "export PYTHON_BUILD=/home/$USER/build/python" >> ~/.profile
-echo "export PIP_CACHE_HOME=~/.pipcache/" >> ~/.profile
 source ~/.profile
 
 
