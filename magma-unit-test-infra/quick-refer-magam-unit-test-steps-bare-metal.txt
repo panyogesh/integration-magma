@@ -54,14 +54,8 @@ Clone the Magma Repository
 ========================================================================
 git clone https://github.com/magma/magma.git
 
-Setting the env variables for test
+Python based configuration
 ========================================================================
-echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.profile
-echo "export MAGMA_ROOT=/home/$USER/magma" >> ~/.profile
-echo "export C_BUILD=/home/$USER/build/c" >> ~/.profile
-echo "export PYTHON_BUILD=/home/$USER/build/python" >> ~/.profile
-source ~/.profile
-
 sudo gem install fpm
 sudo apt-get install -y   td-agent-bit   libopenvswitch   openvswitch-datapath-dkms   openvswitch-common   openvswitch-switch   bcc-tools   wireguard
 mkdir ~/.pipcache/
@@ -73,6 +67,14 @@ export DEBIAN_FRONTEND=noninteractive
 mkdir -p ${SWAGGER_CODEGEN_DIR};
 wget --no-verbose https://repo1.maven.org/maven2/io/swagger/swagger-codegen-cli/${CODEGEN_VERSION}/swagger-codegen-cli-${CODEGEN_VERSION}.jar -O ${SWAGGER_CODEGEN_JAR}
 
+Setting the env variables for test
+========================================================================
+echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.profile
+echo "export MAGMA_ROOT=/home/$USER/magma" >> ~/.profile
+echo "export C_BUILD=/home/$USER/build/c" >> ~/.profile
+echo "export PYTHON_BUILD=/home/$USER/build/python" >> ~/.profile
+echo "export PIP_CACHE_HOME=~/.pipcache/" >> ~/.profile
+source ~/.profile
 
 
 Unit test for C Code Repo (MME / AMF)
