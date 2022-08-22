@@ -1,6 +1,22 @@
+
+1.
+Afer creating and logging on to VM
+
+Update the VMs interface name as eth0, eht1 etc
+========================================================================
+sudo su
+sed -i 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0"/g' /etc/default/grub
+sed -i 's/enp0s3/eth0/g' /etc/netplan/50-cloud-init.yaml
+grub-mkconfig -o /boot/grub/grub.cfg
+exit
+vagrant reload destromagma
+vagrant ssh destromagma
+
+2.
 General Package Installations
 ========================================================================
 sudo apt-get update
+sudo apt-get install -y net-tools
 sudo apt-get install -y apt-utils software-properties-common apt-transport-https gnupg wget
 sudo apt-get update
 sudo apt-get install -y   sudo   curl   wget   unzip   cmake   git   build-essential   autoconf   libtool   pkg-config   libgflags-dev   libc++-dev   protobuf-compiler   ninja-build   autogen   ccache   libprotoc-dev   libxml2-dev   libxslt-dev   libyaml-cpp-dev   nlohmann-json3-dev   libgoogle-glog-dev   libsctp-dev   libpcap-dev   libmnl-dev   uuid-dev   python3-pip   libcurl4-openssl-dev   libdouble-conversion-dev   libboost-chrono-dev   libboost-context-dev   libboost-program-options-dev   libboost-filesystem-dev   libboost-regex-dev   check   libssl-dev   libsctp-dev   libtspi-dev   libconfig-dev   libgmp3-dev   libczmq-dev   libsqlite3-dev
@@ -26,8 +42,27 @@ Fetch the packages used for building Python/Pipelined files like OVS etc
 ========================================================================
 sudo apt-get update
 sudo apt-get install -y   wget   ruby   sudo   ruby-dev   docker.io   python3-pip   python3-dev   python3-eventlet   python3-pystemd   python3-protobuf   git   virtualenv   lsb-release   openjdk-8-jre-headless   openjdk-8-jdk   pkg-config   libsystemd-dev   libprotobuf-dev
+sudo usermod -aG docker $USER
+newgrp docker 
+
+Prepare for Orc8r related cases
+========================================================================
+wget https://artifactory.magmacore.org/artifactory/generic/go1.18.3.linux-amd64.tar.gz
+sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.18.3.linux-amd64.tar.gz
+
+Clone the Magma Repository
+========================================================================
+git clone https://github.com/magma/magma.git
+
+Setting the env variables for test
+========================================================================
+echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.profile
+echo "export MAGMA_ROOT=/home/$USER/magma" >> ~/.profile
+echo "export C_BUILD=/home/$USER/build/c" >> ~/.profile
+echo "export PYTHON_BUILD=/home/$USER/build/python" >> ~/.profile
+source ~/.profile
+
 sudo gem install fpm
-export VIRTUAL_ENV=/home/vagrant/build
 sudo apt-get install -y   td-agent-bit   libopenvswitch   openvswitch-datapath-dkms   openvswitch-common   openvswitch-switch   bcc-tools   wireguard
 mkdir ~/.pipcache/
 export PIP_CACHE_HOME=~/.pipcache/
@@ -39,15 +74,10 @@ mkdir -p ${SWAGGER_CODEGEN_DIR};
 wget --no-verbose https://repo1.maven.org/maven2/io/swagger/swagger-codegen-cli/${CODEGEN_VERSION}/swagger-codegen-cli-${CODEGEN_VERSION}.jar -O ${SWAGGER_CODEGEN_JAR}
 
 
-Clone the Magma Repository
-========================================================================
-git clone https://github.com/magma/magma.git
 
 Unit test for C Code Repo (MME / AMF)
 ========================================================================
-export MAGMA_ROOT=/home/vagrant/magma
-export C_BUILD=/home/vagrant/build/c
-export PYTHON_BUILD=/home/vagrant/build/python
+cd magma/lte/gateway/
 make test_oai
 clear
 
