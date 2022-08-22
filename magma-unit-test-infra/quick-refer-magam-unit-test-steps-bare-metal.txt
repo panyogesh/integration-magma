@@ -21,6 +21,7 @@ sudo apt-get install -y apt-utils software-properties-common apt-transport-https
 sudo apt-get update
 sudo apt-get install -y   sudo   curl   wget   unzip   cmake   git   build-essential   autoconf   libtool   pkg-config   libgflags-dev   libc++-dev   protobuf-compiler   ninja-build   autogen   ccache   libprotoc-dev   libxml2-dev   libxslt-dev   libyaml-cpp-dev   nlohmann-json3-dev   libgoogle-glog-dev   libsctp-dev   libpcap-dev   libmnl-dev   uuid-dev   python3-pip   libcurl4-openssl-dev   libdouble-conversion-dev   libboost-chrono-dev   libboost-context-dev   libboost-program-options-dev   libboost-filesystem-dev   libboost-regex-dev   check   libssl-dev   libsctp-dev   libtspi-dev   libconfig-dev   libgmp3-dev   libczmq-dev   libsqlite3-dev
 
+3.
 Update the Repository Information
 ========================================================================
 sudo su
@@ -31,6 +32,7 @@ OK
 root@destro-magma:/home/vagrant#
 exit
 
+4.
 Fetch the packages used for building C files like grpc etc
 ========================================================================
 sudo apt-get update
@@ -39,6 +41,7 @@ sudo apt-get install -y libgtest-dev
 sudo apt install -y libgmock-dev
 sudo apt-get -y install clang-format-11
 
+5.
 Fetch the packages used for building Python/Pipelined files like OVS etc
 ========================================================================
 sudo apt-get update
@@ -46,15 +49,18 @@ sudo apt-get install -y   wget   ruby   sudo   ruby-dev   docker.io   python3-pi
 sudo usermod -aG docker $USER
 newgrp docker 
 
+6.
 Prepare for Orc8r related cases
 ========================================================================
 wget https://artifactory.magmacore.org/artifactory/generic/go1.18.3.linux-amd64.tar.gz
 sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.18.3.linux-amd64.tar.gz
 
+7.
 Clone the Magma Repository
 ========================================================================
 git clone https://github.com/magma/magma.git
 
+8.
 Python based configuration
 ========================================================================
 sudo gem install fpm
@@ -69,6 +75,7 @@ source ~/.profile
 mkdir -p ${SWAGGER_CODEGEN_DIR};
 wget --no-verbose https://repo1.maven.org/maven2/io/swagger/swagger-codegen-cli/${CODEGEN_VERSION}/swagger-codegen-cli-${CODEGEN_VERSION}.jar -O ${SWAGGER_CODEGEN_JAR}
 
+9.
 Setting the env variables for test
 ========================================================================
 echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.profile
@@ -77,11 +84,13 @@ echo "export C_BUILD=/home/$USER/build/c" >> ~/.profile
 echo "export PYTHON_BUILD=/home/$USER/build/python" >> ~/.profile
 source ~/.profile
 
+10.
 Unit test for Python Code Repo (Pipelined / Subscriberdb)
 ========================================================================
 Directory : cd magma/lte/gateway/python
 make buildenv
 
+11.
 Unit test for C Code Repo (MME / AMF)
 ========================================================================
 Directory : cd magma/lte/gateway/
@@ -92,3 +101,6 @@ Directory : cd magma/lte/gateway/
 Direcotry : cd magma/lte/gateway/
   Pre-Lint Step-1 : make format_all
   Unit test : make test_oai
+
+Directory : magma/orc8r/gateway/go
+Unit test : go test ./...
