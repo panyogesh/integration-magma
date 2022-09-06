@@ -41,7 +41,6 @@ index 5dfdf2682..22ad29f24 100644
    iproute2 \
    iptables \
 +  libssl-dev \
-+  libtspi1 \
    && rm -rf /var/lib/apt/lists/*
  
  RUN echo "deb https://facebookconnectivity.jfrog.io/artifactory/list/dev-focal/ focal main" > /etc/apt/sources.list.d/magma.list
@@ -49,12 +48,39 @@ index 5dfdf2682..22ad29f24 100644
 6. Generate Magma's Docker Images
 -----------------------------------------------------------------------------------
 cd lte/gateway/docker
-docker-compose build
+docker-compose build <<< Docker images will be created
 
 7. Launch the dockers
 -----------------------------------------------------------------------------------
 cd /var/opt/magma/docker/
-sudo ./agw_upgrade.sh  
+  7.1 sudo ./agw_upgrade.sh  (if we want to get it from standard docker images)
+  
+  7.2 cd /var/opt/magma/docker
+      - sudo docker tag agw_gateway_c panyogesh/5g_agw_c_container_1_8:firstcut
+      - sudo docker tag agw_gateway_python panyogesh/5g_agw_gateway_python_1_8:firstcut
+
+      - vagrant@distro-magma:/var/opt/magma/docker$ cat docker-compose.yaml  | grep panyog -B3 -A4 
+         # Generic python anchor to avoid repetition for agw python services
+         x-agw-python-service: &pyservice
+           <<: *service
+          image: panyogesh/5g_agw_gateway_python_1_8:firstcut
+
+         # Generic anchor for lte c services
+           x-lte-cservice: &ltecservice
+          <<: *service
+           image: panyogesh/5g_agw_c_container_1_8:firstcut
+
+          services:
+          magmad:
+          <<: *pyservice
+
+
+      - docker-compose up -d
+      
+In case it has to be pushed
+   sudo docker push panyogesh/5g_agw_c_container_1_8:firstcut
+   sudo docker push panyogesh/5g_agw_gateway_python_1_8:firstcut
+    
 
 8. Confirm
 -----------------------------------------------------------------------------------
