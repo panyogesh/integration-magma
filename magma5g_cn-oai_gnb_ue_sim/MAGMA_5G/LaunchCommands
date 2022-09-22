@@ -30,10 +30,12 @@ Once magma is up login (vagrant ssh distromagma) and perform following steps
 
 3.
 Package installation on VM (distromagma)
-
+  - Sometimes DNS become unreachable. Check Issue-3
   - sudo su
-  - wget https://raw.githubusercontent.com/magma/magma/master/lte/gateway/deploy/agw_install_ubuntu.sh
-  - bash agw_install_ubuntu.sh
+  For Master
+     - wget https://raw.githubusercontent.com/magma/magma/master/lte/gateway/deploy/agw_install_ubuntu.sh  << For master
+     - wget https://raw.githubusercontent.com/magma/magma/v1.8/lte/gateway/deploy/agw_install_ubuntu.sh  << For 1.8 
+     - bash agw_install_ubuntu.sh   <<<< If the machine loose connectivity go to the Common Issuess
   Note: 
     -> Do you accept those modifications and want to proceed with magma installation?(y/n) y  <<< Enter y
     -> This will install packages and restart the machine
@@ -46,6 +48,7 @@ As this will be default put the AGW in headless mode, following changes are need
 
 1.1
 enable5gFeatures to true in gateway.mconfig (in /etc/magma/gateway.mconfig)
+ -- sed -i 's/\"enable5gFeatures\": false/\"enable5gFeatures\": true/g' gateway.mconfig
   1.1.1 Sample output
   vagrant@distro-magma:/etc/magma$ cat gateway.mconfig | grep enable5
       "enable5gFeatures": true,
@@ -116,7 +119,7 @@ Restart the magma services
 3.1
   sudo service magma@* stop
   sudo service magma@magmad start
-  sudo service magma@mmme status
+  sudo service magma@mme status
 
 4.
 Add the subscribers
@@ -176,10 +179,17 @@ Upgrade to the latest magma agw builds
 Update the agw software
 
   - vagrant@destro-magma:~$ cat /etc/apt/sources.list.d/magma.list
-      deb https://artifactory.magmacore.org/artifactory/debian-test focal-ci main
+      For Master
+         deb https://artifactory.magmacore.org/artifactory/debian-test focal-ci main  <<< For master
+      For 1.8
+         rm -rf /etc/apt/sources.list.d/*
+         wget https://artifactory.magmacore.org:443/artifactory/api/gpg/key/public -O /tmp/public
+         apt-key add /tmp/public
+         echo "deb https://artifactory.magmacore.org/artifactory/debian-test focal-1.8.0 main" > /etc/apt/sources.list.d/magma.list
+
   - sudo apt update
   - sudo apt install -y magma -o Dpkg::Options::="--force-overwrite"
-
+  - sudo apt install -y magma=1.8.0-1655980376-2a0f6a5d_amd64 -o Dpkg::Options::="--force-overwrite" (for installing specific version)
 
 Launch OAI GNB and UE Services
 -----------------------------------------------------------
@@ -216,3 +226,17 @@ In case if their are existing session in redis (fail to establish PDU)
   - redis-cli -p 6380 FLUSHALL
   - redis-cli -p 6380
   - hgetall sessiond:sessions
+ 
+ 3.
+ In case DNS became unreachable
+  sudo systemctl disable systemd-resolved.service
+ sudo systemctl stop systemd-resolved.service
+ ls -lrt /etc/resolv.conf
+ sudo rm /etc/resolv.conf
+ sudo vim /etc/resolv.conf
+ sudo systemctl stop systemd-resolved.service
+ sudo systemctl start systemd-resolved.service
+ sudo systemctl disable systemd-resolved.service
+ sudo systemctl enable systemd-resolved.service
+ sudo systemctl start systemd-resolved.service
+ ping google.com
