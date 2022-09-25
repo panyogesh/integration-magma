@@ -1,0 +1,118 @@
+Pre-Requisites
+Interfaces to be renamed eth0, eth1 and eth2
+=============================================================================================3. Rename the interfaces to eth0,eth1 and eth2
+sudo su
+sed -i 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0"/g' /etc/default/grub
+sed -i 's/enp0s3/eth0/g' /etc/netplan/50-cloud-init.yaml
+grub-mkconfig -o /boot/grub/grub.cfg
+exit
+exit
+vagrant reload distromagma
+
+
+1.
+Prepare the bare metal machine for dockers
+=============================================================================================
+wget  https://github.com/magma/magma/raw/master/lte/gateway/deploy/agw_install_docker.sh
+sudo chmod 777 agw_install_docker.sh
+sudo bash agw_install_docker.sh
+sudo mkdir -p /var/opt/magma/certs
+sudo vim /var/opt/magma/certs/rootCA.pem
+sudo bash agw_install_docker.sh
+
+2.
+Stop any installed docker images, process
+=============================================================================================
+sudo docker ps -a
+sudo docker container stop $(sudo docker container ls -aq)
+sudo docker container rm $(sudo docker container ls -aq)
+sudo docker container prune
+sudo docker image prune -a
+sudo docker volume prune
+sudo docker system prune -a
+sudo docker system prune
+
+3.
+Pull the compiled WL-DISTRO
+=============================================================================================
+docker pull panyogesh/agw_gateway_c_wl_distro:firstcut
+sudo docker pull panyogesh/agw_gateway_c_wl_distro:firstcut
+sudo docker pull panyogesh/agw_gateway_python_wl_distro:firstcut
+sudo docker pull panyogesh/agw_gateway_go_wl_distro:firstcut
+clar
+clear
+history
+vagrant@distro-magma:~$
+
+
+3.1
+Check if the pulled images are correct
+--------------------------------------------------------------------------------------------
+EPOSITORY                               TAG        IMAGE ID       CREATED        SIZE
+panyogesh/agw_gateway_go_wl_distro       firstcut   e9bbe22555f6   37 hours ago   834MB
+panyogesh/agw_gateway_c_wl_distro        firstcut   951e08f758af   37 hours ago   1.28GB
+panyogesh/agw_gateway_python_wl_distro   firstcut   eecf09ca2844   37 hours ago   976MB
+vagrant@distro-magma:/var/opt/magma/docker$
+
+
+3.2 
+Changes the docker entries in compose files
+--------------------------------------------------------------------------------------------
+vagrant@distro-magma:/var/opt/magma/docker$ diff docker-compose.yaml.orig docker-compose.yaml
+32c32
+<   image: ${DOCKER_REGISTRY}agw_gateway_python${OPTIONAL_ARCH_POSTFIX}:${IMAGE_VERSION}
+---
+>   image: panyogesh/agw_gateway_python_wl_distro:firstcut
+37c37
+<   image: ${DOCKER_REGISTRY}agw_gateway_c${OPTIONAL_ARCH_POSTFIX}:${IMAGE_VERSION}
+---
+>   image: panyogesh/agw_gateway_c_wl_distro:firstcut
+vagrant@distro-magma:/var/opt/magma/docker$
+
+4.
+Trigger the docker images
+=============================================================================================
+sudo ./agw_upgrade.sh
+
+5.
+Check whehter correc images are picked up
+=============================================================================================
+
+5.1
+Check MME and PIPELINED
+--------------------------------------------------------------------------------------------
+vagrant@distro-magma:/var/opt/magma/docker$ sudo docker ps -a | grep -i pipe
+0040cfb3e45f   panyogesh/agw_gateway_python_wl_distro:firstcut   "bash -c '/usr/bin/o…"    About a minute ago   Up About a minute (healthy)               pipelined
+vagrant@distro-magma:/var/opt/magma/docker$ sudo docker ps -a | grep -i mme
+4693b1d60974   panyogesh/agw_gateway_c_wl_distro:firstcut        "sh -c '/usr/local/b…"    About a minute ago   Up About a minute (healthy)               oai_mme
+vagrant@distro-magma:/var/opt/magma/docker$
+
+
+
+5.2
+Check all the process
+--------------------------------------------------------------------------------------------
+vagrant@distro-magma:/var/opt/magma/docker$ sudo docker ps -a
+CONTAINER ID   IMAGE                                             COMMAND                   CREATED          STATUS                          PORTS     NAMES
+e3ce2720f9ad   panyogesh/agw_gateway_c_wl_distro:firstcut        "sh -c 'mkdir -p /va…"    46 seconds ago   Up 46 seconds (healthy)                   sessiond
+8169297888fc   panyogesh/agw_gateway_python_wl_distro:firstcut   "/usr/bin/env python…"    47 seconds ago   Up 46 seconds (healthy)                   policydb
+64040896c88a   panyogesh/agw_gateway_python_wl_distro:firstcut   "/usr/bin/env python…"    47 seconds ago   Up 46 seconds (healthy)                   directoryd
+67bf953c6cfd   panyogesh/agw_gateway_python_wl_distro:firstcut   "/usr/bin/env python…"    47 seconds ago   Up 46 seconds (healthy)                   state
+4693b1d60974   panyogesh/agw_gateway_c_wl_distro:firstcut        "sh -c '/usr/local/b…"    47 seconds ago   Up 46 seconds (healthy)                   oai_mme
+7654244f655d   panyogesh/agw_gateway_python_wl_distro:firstcut   "/usr/bin/env python…"    47 seconds ago   Up 46 seconds (healthy)                   health
+8721bae35256   panyogesh/agw_gateway_python_wl_distro:firstcut   "/usr/bin/env python…"    47 seconds ago   Up 46 seconds (healthy)                   redirectd
+421b7a15275c   panyogesh/agw_gateway_python_wl_distro:firstcut   "/usr/bin/env python…"    47 seconds ago   Up 46 seconds (healthy)                   monitord
+b1dcef9bdd42   panyogesh/agw_gateway_c_wl_distro:firstcut        "/usr/local/bin/sctpd"    47 seconds ago   Up 46 seconds                             sctpd
+0632c6e31ba8   panyogesh/agw_gateway_python_wl_distro:firstcut   "/usr/bin/env python…"    47 seconds ago   Up 47 seconds (healthy)                   ctraced
+0ecbf9f4bafa   panyogesh/agw_gateway_c_wl_distro:firstcut        "/usr/local/bin/conn…"    47 seconds ago   Up 47 seconds (healthy)                   connectiond
+d4056a875460   panyogesh/agw_gateway_python_wl_distro:firstcut   "/usr/bin/env python…"    47 seconds ago   Up 47 seconds (healthy)                   subscriberdb
+0e0e037cf12a   panyogesh/agw_gateway_python_wl_distro:firstcut   "sh -c 'sleep 5 && /…"    47 seconds ago   Up 46 seconds (healthy)                   mobilityd
+9bb36c6c1511   panyogesh/agw_gateway_python_wl_distro:firstcut   "/usr/bin/env python…"    47 seconds ago   Up 47 seconds (healthy)                   smsd
+d42afaeac628   panyogesh/agw_gateway_python_wl_distro:firstcut   "sh -c '/usr/local/b…"    47 seconds ago   Restarting (0) 15 seconds ago             control_proxy
+0040cfb3e45f   panyogesh/agw_gateway_python_wl_distro:firstcut   "bash -c '/usr/bin/o…"    47 seconds ago   Up 47 seconds (healthy)                   pipelined
+c27dc44a1d9f   panyogesh/agw_gateway_python_wl_distro:firstcut   "/bin/bash -c '/usr/…"    47 seconds ago   Up 47 seconds (healthy)                   redis
+94bffcffc43b   panyogesh/agw_gateway_python_wl_distro:firstcut   "/bin/bash -c '\n  /u…"   48 seconds ago   Up 47 seconds                             magmad
+5d70f611e6e4   panyogesh/agw_gateway_python_wl_distro:firstcut   "/usr/bin/env python…"    48 seconds ago   Up 47 seconds (healthy)                   enodebd
+d824772194ea   panyogesh/agw_gateway_python_wl_distro:firstcut   "/usr/bin/env python…"    48 seconds ago   Up 47 seconds (healthy)                   eventd
+b4280250efb8   panyogesh/agw_gateway_python_wl_distro:firstcut   "/bin/bash -c '/usr/…"    48 seconds ago   Up 47 seconds (healthy)                   td-agent-bit
+vagrant@distro-magma:/var/opt/magma/docker$
