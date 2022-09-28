@@ -15,7 +15,7 @@ vagrant up oai_gnb_ue_sim --provider=virtualbox
 Installing dockers in virtualbox (oai_gnb_ue_sim)
 
 2.1 Install dockers (https://docs.docker.com/engine/install/ubuntu/)
-2.2 Install docker-compose (https://docs.docker.com/compose/install/)
+2.2 Install docker-compose (https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04)
 
 (High level steps added in : AdditionalDockerSteps.txt)
 
