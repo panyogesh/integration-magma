@@ -1,5 +1,12 @@
 # DHCP based testing
-1. Test is for allocating ip address to subscriber using DHCP server 
+Changes
+ - Configuration for allocating ip address to subscriber using DHCP server
+ - Reference PR : [#3291](https://github.com/magma/magma/pull/3291)
+
+Test Case
+ - UERANSIM & Magma AGW 2 Subsciber and PDU Creation
+
+
 
 ## TOPOLOGY
 
