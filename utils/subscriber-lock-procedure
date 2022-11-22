@@ -1,0 +1,66 @@
+Reference : 
+  * https://github.com/magma/magma/pull/11438
+  * [link](https://github.com/magma/magma/files/8011179/Test-Logs-Subscriberdb-Lock-Feb-7.txt)
+  
+Steps to simulate the issue
+
+>>> import sqlite3
+>>> subscriber_id="IMSI222456000000121"
+>>> connection = sqlite3.connect("file:/var/opt/magma/subscriber21.db?cache=shared", uri=True)
+>>> connection.isolation_level = 'EXCLUSIVE'
+>>> connection.execute('BEGIN EXCLUSIVE')
+<sqlite3.Cursor object at 0x7fb715cc9500>
+
+
+1.
+With subscriberdb lock
+=====================================================================
+Feb  6 19:44:58 magma-dev-focal subscriberdb[2785574]: /var/opt/magma/subscriber21.db:
+
+1.a Process which has hold the lock
+---------------------------------------------------------------------
+Feb  6 19:44:58 magma-dev-focal subscriberdb[2785574]:                      root      2784266 F.... (root)python3
+Feb  6 19:44:58 magma-dev-focal subscriberdb[2785574]:                      root      2785490 F.... (root)python3.8
+Feb  6 19:44:58 magma-dev-focal subscriberdb[2784266]: ERROR:root:Sqlite3 DB is loceked for 222456000000121: IMSI222456000000121
+
+1.b Error message towards AMF Server Busy
+---------------------------------------------------------------------
+Feb  6 19:44:58 magma-dev-focal subscriberdb[2784266]: INFO:root:M5GAuthenticationInformation Response:
+Feb  6 19:44:58 magma-dev-focal subscriberdb[2784266]: INFO:root:GRPC message:
+Feb  6 19:44:58 magma-dev-focal subscriberdb[2784266]:   magma.lte.M5GAuthenticationInformationAnswer {
+Feb  6 19:44:58 magma-dev-focal subscriberdb[2784266]:     "errorCode": "TOO_BUSY"
+Feb  6 19:44:58 magma-dev-focal subscriberdb[2784266]:   }
+
+
+
+1.c Error logs in AMF
+---------------------------------------------------------------------
+000374 Sun Feb 06 20:03:10 2022 7FD3B5DE3700 ERROR NAS-AM tasks/amf/nas_proc.cpp          :0695    result=3004, nb_of_vectors received is zero from subscriberdb
+
+
+
+2. After Unlocking the database
+=====================================================================
+
+>>> import sqlite3
+>>> subscriber_id="IMSI222456000000121"
+>>> connection = sqlite3.connect("file:/var/opt/magma/subscriber21.db?cache=shared", uri=True)
+>>> connection.isolation_level = 'EXCLUSIVE'
+>>> connection.execute('BEGIN EXCLUSIVE')
+<sqlite3.Cursor object at 0x7fb715cc9500>
+>>> connection.close()                   <<<<<<<<<<<< Executing this step
+>>>
+
+
+2.a
+From Simulator
+----------------------------------------------------------------------
+2022-02-06 20:04:19.607] [nas] [info] PDU Session establishment is successful PSI[1]
+[2022-02-06 20:04:19.633] [app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 192.168.128.25] is up.
+
+From Magma
+-----------------------------------------------------------------------
+
+
+000404 Sun Feb 06 20:04:17 2022 7FD3B5DE3700 INFO  AMF-AP tasks/amf/nas5g_message.cpp     :0193    Decoded msg(nas5g) id: [57]-name [AUTH_RESPONSE]
+000405 Sun Feb 06 20:04:17 2022 7FD3B5DE3700 INFO  AMF-AP tasks/amf/nas5g_message.cpp     :0313    Encoded msg(nas5g) id: [5d]-name [SEC_MODE_COMMAND]
