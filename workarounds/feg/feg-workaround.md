@@ -1,6 +1,6 @@
 ## Saturn
 
-* Use the patch
+### Use the patch
 * Create Magma VM..it will fail
 * vagrant ssh magma
 * cd magma/lte/gateway 
