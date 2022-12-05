@@ -1,0 +1,152 @@
+diff --git a/lte/gateway/Vagrantfile b/lte/gateway/Vagrantfile
+index 29056e451c..114c711c23 100644
+--- a/lte/gateway/Vagrantfile
++++ b/lte/gateway/Vagrantfile
+@@ -48,7 +48,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+     # - `type` specified due to https://github.com/hashicorp/vagrant/issues/12839
+     # - `netmask` specified to enforce correct mask when using internal network
+     magma.vm.network "private_network", ip: "192.168.129.1", nic_type: "82540EM", virtualbox__intnet: "ipv4_sgi"
+-    magma.vm.network "private_network", ip: "3001::10", nic_type: "82540EM", virtualbox__intnet: "ipv6_network", type: "static6", netmask: "64"
+ 
+ 
+     magma.vm.provider "virtualbox" do |vb|
+@@ -83,7 +82,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+     # - `type` specified due to https://github.com/hashicorp/vagrant/issues/12839
+     # - `netmask` specified to enforce correct mask when using internal network
+     magma_trfserver.vm.network "private_network", ip: "192.168.129.42", nic_type: "82540EM", virtualbox__intnet: "ipv4_sgi"
+-    magma_trfserver.vm.network "private_network", ip: "3001::2", nic_type: "82540EM", virtualbox__intnet: "ipv6_network", type: "static6", netmask: "64"
+ 
+     magma_trfserver.vm.provider "virtualbox" do |vb|
+       vb.name = "magma-trfserver"
+@@ -93,26 +91,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+       vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+     end
+ 
+-    config.vm.provider :libvirt do |domain, override|
+-      override.vm.synced_folder "../..", "/home/vagrant/magma", type: 'nfs', linux__nfs_options: ['rw','no_subtree_check','no_root_squash'], mount_options: ['nolock']
+-      domain.uri = "qemu+unix:///system"
+-      domain.memory = 6144
+-      domain.cpus = 4
+-      domain.disk_driver :cache => "unsafe"
+-      domain.driver = "kvm"
+-      domain.host = "localhost"
+-      domain.connect_via_ssh = false
+-      domain.username = $user
+-      domain.storage_pool_name = "default"
+-      domain.nic_model_type = "virtio"
+-      domain.management_network_name = "magma-mgmt-net"
+-      domain.management_network_address = "172.17.2.0/24"
+-      domain.nested = true
+-      domain.cpu_mode = "host-passthrough"
+-      domain.disk_bus = "virtio"
+-      domain.graphics_ip = "0.0.0.0"
+-    end
+-
+     magma_trfserver.vm.provision "ansible" do |ansible|
+       ansible.host_key_checking = false
+       ansible.playbook = "deploy/magma_trfserver.yml"
+@@ -137,7 +115,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+     # - `type` specified due to https://github.com/hashicorp/vagrant/issues/12839
+     # - `netmask` specified to enforce correct mask when using internal network
+     magma_test.vm.network "private_network", ip: "192.168.128.11", nic_type: "82540EM", virtualbox__intnet: "ipv4_ue"
+-    magma_test.vm.network "private_network", ip: "3001::3", nic_type: "82540EM", virtualbox__intnet: "ipv6_network", type: "static6", netmask: "64"
+     config.ssh.forward_agent = true
+ 
+     magma_test.vm.provider "virtualbox" do |vb|
+@@ -148,26 +125,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+       vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+     end
+ 
+-    config.vm.provider :libvirt do |domain, override|
+-      override.vm.synced_folder "../..", "/home/vagrant/magma", type: 'nfs', linux__nfs_options: ['rw','no_subtree_check','no_root_squash'], mount_options: ['nolock']
+-      domain.uri = "qemu+unix:///system"
+-      domain.memory = 1024
+-      domain.cpus = 1
+-      domain.disk_driver :cache => "unsafe"
+-      domain.driver = "kvm"
+-      domain.host = "localhost"
+-      domain.connect_via_ssh = false
+-      domain.username = $user
+-      domain.storage_pool_name = "default"
+-      domain.nic_model_type = "virtio"
+-      domain.management_network_name = "magma-mgmt-net"
+-      domain.management_network_address = "172.17.2.0/24"
+-      domain.nested = true
+-      domain.cpu_mode = "host-passthrough"
+-      domain.disk_bus = "virtio"
+-      domain.graphics_ip = "0.0.0.0"
+-    end
+-
+     magma_test.vm.provision "ansible" do |ansible|
+       ansible.host_key_checking = false
+       ansible.playbook = "deploy/magma_test.yml"
+@@ -231,7 +188,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+     # - `type` specified due to https://github.com/hashicorp/vagrant/issues/12839
+     # - `netmask` specified to enforce correct mask when using internal network
+     magma_deb.vm.network "private_network", ip: "192.168.129.1", nic_type: "82540EM", virtualbox__intnet: "ipv4_sgi"
+-    magma_deb.vm.network "private_network", ip: "3001::10", nic_type: "82540EM", virtualbox__intnet: "ipv6_network", type: "static6", netmask: "64"
+ 
+     magma_deb.vm.provider "virtualbox" do |vb|
+       vb.name = "magma_deb"
+diff --git a/lte/gateway/deploy/magma_dev.yml b/lte/gateway/deploy/magma_dev.yml
+index a2b2318e40..78087654c7 100644
+--- a/lte/gateway/deploy/magma_dev.yml
++++ b/lte/gateway/deploy/magma_dev.yml
+@@ -14,6 +14,7 @@
+ 
+ - name: Set up Magma dev build environment on a local machine
+   hosts: dev
++  connection: local
+   become: yes
+ 
+   vars:
+diff --git a/lte/gateway/python/integ_tests/federated_tests/fabfile.py b/lte/gateway/python/integ_tests/federated_tests/fabfile.py
+index f7bf7d2a23..7f8c481155 100644
+--- a/lte/gateway/python/integ_tests/federated_tests/fabfile.py
++++ b/lte/gateway/python/integ_tests/federated_tests/fabfile.py
+@@ -76,7 +76,7 @@ def build_orc8r(on_vagrant='False'):
+     Build orc8r locally on the host VM
+     """
+     on_vagrant = strtobool(on_vagrant)
+-    command = './build.py -a'
++    command = 'sudo PWD=$PWD ./build.py --all'
+     if not on_vagrant:
+         subprocess.check_call(command, shell=True, cwd=orc8_docker_path)
+     else:
+@@ -90,7 +90,7 @@ def start_orc8r(on_vagrant='False'):
+     Start orc8r locally on Docker
+     """
+     on_vagrant = strtobool(on_vagrant)
+-    command = './run.py'
++    command = 'sudo PWD=$PWD ./run.py'
+     if not on_vagrant:
+         subprocess.check_call(command, shell=True, cwd=orc8_docker_path)
+     else:
+@@ -104,7 +104,7 @@ def stop_orc8r(on_vagrant='False'):
+     Start orc8r locally on Docker
+     """
+     on_vagrant = strtobool(on_vagrant)
+-    command = './run.py --down'
++    command = 'sudo PWD=$PWD ./run.py --down'
+     if not on_vagrant:
+         subprocess.check_call(command, shell=True, cwd=orc8_docker_path)
+     else:
+diff --git a/orc8r/tools/fab/vagrant.py b/orc8r/tools/fab/vagrant.py
+index 4466f11968..12a0ea1871 100644
+--- a/orc8r/tools/fab/vagrant.py
++++ b/orc8r/tools/fab/vagrant.py
+@@ -24,9 +24,11 @@ def __ensure_in_vagrant_dir():
+     if not os.path.isfile(pwd + '/Vagrantfile'):
+         # check if we are on a vagrant subdirectory
+         with cd(pwd):
+-            if not local('vagrant validate', capture=True):
+-                print("Error: Vagrantfile not found")
+-                exit(1)
++            print("-----")
++            print(pwd)
++            #if not local('vagrant validate', capture=True):
++            #   print("Error: Vagrantfile not found")
++                # exit(1)
+     return
+ 
+ 

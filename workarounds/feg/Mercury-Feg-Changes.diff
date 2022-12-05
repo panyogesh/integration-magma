@@ -1,0 +1,31 @@
+diff --git a/lte/gateway/python/integ_tests/federated_tests/fabfile.py b/lte/gateway/python/integ_tests/federated_tests/fabfile.py
+index f7bf7d2a23..7f8c481155 100644
+--- a/lte/gateway/python/integ_tests/federated_tests/fabfile.py
++++ b/lte/gateway/python/integ_tests/federated_tests/fabfile.py
+@@ -76,7 +76,7 @@ def build_orc8r(on_vagrant='False'):
+     Build orc8r locally on the host VM
+     """
+     on_vagrant = strtobool(on_vagrant)
+-    command = './build.py -a'
++    command = 'sudo PWD=$PWD ./build.py --all'
+     if not on_vagrant:
+         subprocess.check_call(command, shell=True, cwd=orc8_docker_path)
+     else:
+@@ -90,7 +90,7 @@ def start_orc8r(on_vagrant='False'):
+     Start orc8r locally on Docker
+     """
+     on_vagrant = strtobool(on_vagrant)
+-    command = './run.py'
++    command = 'sudo PWD=$PWD ./run.py'
+     if not on_vagrant:
+         subprocess.check_call(command, shell=True, cwd=orc8_docker_path)
+     else:
+@@ -104,7 +104,7 @@ def stop_orc8r(on_vagrant='False'):
+     Start orc8r locally on Docker
+     """
+     on_vagrant = strtobool(on_vagrant)
+-    command = './run.py --down'
++    command = 'sudo PWD=$PWD ./run.py --down'
+     if not on_vagrant:
+         subprocess.check_call(command, shell=True, cwd=orc8_docker_path)
+     else:
