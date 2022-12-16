@@ -1,7 +1,7 @@
 # 4G TEST TOOL
 
 ## Overview
-This tool is based on (fasferraz)[https://github.com/fasferraz/eNB.git].
+This tool is based on [fasferraz](https://github.com/fasferraz/eNB.git).
 Its a wonderful tool for doing quick 4G testing.
 Have integrated this tool on docker so as to create a scenario based test.
 Docker image uses the host interface for SCTP connection and uses a tun device
