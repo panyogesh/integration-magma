@@ -1,0 +1,50 @@
+# Docker command :-
+# Build : 
+#     sudo docker build -t enbsim:dec13 .
+# Pre-burnt config :
+#     sudo docker run  --name enbsim-app --cap-add=NET_ADMIN --device /dev/net/tun --rm  enbsim:dec13 
+# With Updated Configs
+#     sudo docker run  --name enbsim-app --cap-add=NET_ADMIN --device /dev/net/tun --rm  enbsim:dec13 "192.168.62.176" "724990000000008" "72498"
+
+# Python Simulator command :-
+#     sudo python3.8 SimLaunch.py 192.168.62.176 724990000000008 72499
+
+# Original fasferraz command
+# sudo python3.8 /home/vagrant/eNB/eNB_LOCAL.py -i 192.168.62.154 -m 192.168.62.176 -I 724990000000008 -K 465B5CE8B199B49FAA5F0A2EE238A6BC -C E8ED289DEBA952E4283B54E88E6183CA -o 72499
+
+
+FROM ubuntu:20.04
+
+RUN apt update && apt install software-properties-common -y
+
+RUN apt install python3.8
+
+RUN apt-get install -y python3-pip libsctp-dev swig python3-pyscard git python3-psutil python3-pexpect
+
+RUN apt-get install net-tools
+
+RUN apt-get install iputils-ping
+
+WORKDIR /app
+
+RUN git clone https://github.com/fasferraz/eNB.git /app/eNB
+
+RUN ls
+
+WORKDIR /app/eNB
+
+RUN ls -lrt
+
+RUN pip3 install -r requirements.txt
+
+COPY SimLaunch.py  /app/eNB
+
+ENV MME_IP_ADDRESS="192.168.62.176"
+
+ENV MCC_MNC_STR=72499
+
+ENTRYPOINT ["python3.8",  "/app/eNB/SimLaunch.py"]
+
+CMD ["192.168.62.176", "724990000000008", "72499"]
+
+#CMD ["/bin/sh"]

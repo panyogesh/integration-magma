@@ -4,7 +4,16 @@ Quick Integration steps with Open source Magma Repository especially with AGW so
 Have written some small sample programmes helping to integrate mamga beyond the usual stuff.
 Hopefully it helps some of the folks in the community 
 
-- MAGMA5GCN-OAIGNBUESim 
+- deployment-test-magma
+    DHCP based testing for magma
+
+- magma-unit-test-infra
+    To capture how to do unit testing on bare-metal
+
+- workarounds
+    Various workarounds cheat-sheet in magma
+
+- magma5g_cn-oai_gnb_ue_sim 
     Simple guide to provide Integration of core with open source GNB and UE Simulators
     References : https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/docker/README.md
      - git pull origin main
@@ -14,5 +23,8 @@ Hopefully it helps some of the folks in the community
     * Utilties beyond the one provided by Magma like cleaning up core and gz files at regular intervals
     * Workarounds to keep things up
 
-- DockerizedMagmaTest
+- dockerized-magma-test
     This utlity provides the comibination of dockerized agw with S1AP testing possibility
+
+- test-tool-4G
+    This is a tool based on fasferraz
