@@ -7,8 +7,7 @@ Have integrated this tool on docker so as to create a scenario based test.
 Docker image uses the host interface for SCTP connection and uses a tun device
 to mme UE-Interface
 
-### Quick Start Document
-
+## Quick Start Steps
 * Topology assumption
      <4G-Core> (192.168.62.176) ------ (192.168.62.154) Test-Tool
 * Install dockers on the system
