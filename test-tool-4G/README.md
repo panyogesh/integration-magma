@@ -16,8 +16,8 @@ to mme UE-Interface
     - wget https://github.com/panyogesh/integration-magma/blob/main/test-tool-4G/Dockerfile
     - wget https://github.com/panyogesh/integration-magma/blob/main/test-tool-4G/SimLaunch.py
 * Change the parameters in Docker file based on the enviornment
-    MME_IP_ADDRESS=<Remote IP of the Machine>
-    MCC_MNC_STR=<MCCMNC> MCC+MNC to be used
+    MME_IP_ADDRESS="Remote IP of the Machine"
+    MCC_MNC_STR="MCCMNC" MCC+MNC to be used
     in CMD options are [MME-IP, IMSI, MCCMNC]
 * Key and OPC are already hardcoded in the SimLaunch.py
 * BUILD COMMAND : sudo docker build -t enbsim:dec13 .
