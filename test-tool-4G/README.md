@@ -12,8 +12,8 @@ to mme UE-Interface
      <4G-Core> (192.168.62.176) ------ (192.168.62.154) Test-Tool
 * Install dockers on the system
 * Get the files : 
-    - wget https://github.com/panyogesh/integration-magma/blob/main/test-tool-4G/Dockerfile
-    - wget https://github.com/panyogesh/integration-magma/blob/main/test-tool-4G/SimLaunch.py
+    - wget https://raw.githubusercontent.com/panyogesh/integration-magma/main/test-tool-4G/Dockerfile
+    - wget https://raw.github.com/panyogesh/integration-magma/blob/main/test-tool-4G/SimLaunch.py
 * Change the parameters in Docker file based on the enviornment
     - MME_IP_ADDRESS="Remote IP of the Machine"
     - MCC_MNC_STR="MCCMNC" MCC+MNC to be used
