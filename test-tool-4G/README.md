@@ -22,5 +22,5 @@ to mme UE-Interface
 * Key and OPC are already hardcoded in the SimLaunch.py
 * BUILD COMMAND : sudo docker build -t enbsim:dec13 .
 * RUN COMMAND : sudo docker run  --name enbsim-app --cap-add=NET_ADMIN --device /dev/net/tun --rm  enbsim:dec13
-* OVERRIDE COMMAND : sudo docker run  --name enbsim-app --cap-add=NET_ADMIN --device /dev/net/tun --rm  enbsim:dec13 "192.168.62.176" "724990000000008" "72498"
+* OVERRIDE COMMAND : sudo docker run  --name enbsim-app --cap-add=NET_ADMIN --device /dev/net/tun --rm  enbsim:dec13 "192.168.62.176" "724990000000008" "72499"
           
