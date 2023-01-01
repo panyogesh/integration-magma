@@ -1,243 +1,499 @@
 #!/usr/bin/python3.8
 
+import argparse
+import os
 import sys
 import pexpect
 from pexpect import spawn, EOF
 import ipaddress
 import time
 import socket
-import psutil
+import netifaces 
 from typing import NamedTuple, Tuple, Optional
 import asyncio
+from enum import Enum
+import subprocess
+import logging
+import paramiko
+import select
 
-class SIM_GNB_UE_PARAMS(NamedTuple):
-    enb_local_ip_addr: str
+# Tuple for configuration parameters
+# Remote machine parameters
+class DUTMachineParams(NamedTuple):
     mme_remote_ip_addr: str
+    username: str
+    password: str
+
+class SimGNBUEParams(NamedTuple):
+    enb_local_ip_addr: str
     imsi_id: str
     ue_key: str
     ue_opc: str
     mcc_mnc: str
+    dut_params: NamedTuple("DUTMachineParams",
+                          [('mme_remote_ip_addr', str), ('username', str),
+                           ('password', str)])
 
+# Utility class for related actions
 class UtilManager:
 
-    remote_machine_params=''
-    rem_mac_password=''
-    config_verify_cmd=''
-    traffic_verify_cmd=''
+    logger = logging.getLogger()
 
-    @classmethod
-    def for_remote_excution_intialize(cls, rem_mac_ip, rem_mac_login="vagrant",
-                                      rem_mac_password="vagrant"):
-
-        # Store the password
-        cls.rem_mac_password=rem_mac_password
-
-        # Store the remote machine params
-        cls.remote_machine_params="{}@{}".format(rem_mac_login, rem_mac_ip)
- 
-        # Update the Configuration verify command
-        cls.config_verify_cmd="sudo ovs-ofctl dump-flows gtp_br0 table=13"
-
+    # For getting the ip address of the interface
+    # This interface gets connected to mme
     @classmethod
     def get_ip_addresses(cls, family) -> str:
+        for iface in netifaces.interfaces():
+            if iface == 'lo':
+                continue
 
-        for interface, snics in psutil.net_if_addrs().items():
-            for snic in snics:
-                if snic.family == family and snic.address != '127.0.0.1':
-                    return (snic.address)
+            iface_details = netifaces.ifaddresses(iface)
+            if iface_details[netifaces.AF_INET]:
+                return iface_details[netifaces.AF_INET][0]['addr']
         return None
 
+    # Util: For validating the ip address
     @classmethod
     def validate_ip_address(cls, ip_string) -> bool:
         try:
            ip_object = ipaddress.ip_address(ip_string)
            return True
         except ValueError:
-            print("The IP address '{ip_string}' is not valid")
+            cls.logger.error("The IP address '{ip_string}' is not valid")
 
         return False
+
+# Seperate class for configuration validation
+class ConfigValidator:
+    config_verify_cmd='sudo ovs-ofctl dump-flows gtp_br0 table=13'
+    logger = logging.getLogger()
+
+    @classmethod
+    def update_dut_params(cls, dut_params):
+        cls.dut_params= dut_params
 
     # Method to fetch the ipaddress of interface by tun name
     @classmethod
-    def get_tun_ip_addresses(cls, family) -> str:
-        for interface, snics in psutil.net_if_addrs().items():
-            for snic in snics:
-                if 'tun' in interface:
-                   if snic.family == family and \
-                      UtilManager.validate_ip_address(snic.address):
-                    return (snic.address)
-        return None
+    def get_tun_ip_addresses(cls, family, tun_name: str) -> str:
+        iface_details = netifaces.ifaddresses(tun_name)
+        
+        if family in iface_details and \
+           family == netifaces.AF_INET and \
+           iface_details[netifaces.AF_INET][0]:
+            ip = iface_details[netifaces.AF_INET][0]['addr']
+            return ip
 
-    # Method to fetch table-13 greped by tun ip address
+        return None    
+
     @classmethod
-    def validate_config_entry_by_ipaddress(cls) -> bool:
-        # Get the tunnel interface address
-        tun_interface_ip = cls.get_tun_ip_addresses(socket.AF_INET)
+    def get_ue_rules_from_dut(cls, imsi_str: str):
+        tun_name="tun"+str((int(imsi_str[-4:]) + 10000))
+        if tun_name not in netifaces.interfaces():
+            return False
+
+        # Fetch the tunnel ip address
+        tun_interface_ip = cls.get_tun_ip_addresses(socket.AF_INET, tun_name)
         if tun_interface_ip is  None:
-            print ("Failed in retriving tunnel IP address")
-            return False;
+            cls.logger.error("Failed in retriving tunnel IP address")
+            return False
+
+        return True
+'''
+        table_string=\
+          "sudo ovs-ofctl dump-flows gtp_br0 table=13 | grep {}".format(
+          tun_interface_ip)
 
         # Get the command to check if table=13 has the entries of configured IP
-        rule_verify_cmd="{} | grep {} | wc -l".format(cls.config_verify_cmd, tun_interface_ip)
+        cmd='"--mme_ip {}""  "--exec_command {}"'.format(
+             cls.dut_params.mme_remote_ip_addr, table_string)
 
-        # Run the command on remote machine
-        command = [
-          "sshpass", "-p", cls.rem_mac_password, "ssh", cls.remote_machine_params,
-           rule_verify_cmd,
-        ]
+        dut_process=\
+          subprocess.Popen(["python3.8", "./dutcmdexec.py",
+                            "--mme_ip", cls.dut_params.mme_remote_ip_addr,
+                            "--exec_command", table_string],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
 
-        output=subprocess.run(command, stdout=subprocess.PIPE, text=True)
+        try:    
+            stdout, stderr = dut_process.communicate()
+        except:
+            cls.logger.error(" %% Not able execute remote command")
 
-        if "2" in output.stdout:
-            print ("Rules Installed")
-            return True
+        cls.logger.info(stdout)
 
-        print ("Fast Path Rules are not present")
-        return False
+        return stdout 
+'''
 
+# Class for simulating client process
 class SimProcess(object):
-    def __init__(self, create_child):
-        self.child=create_child
-        self.child.logfile_read=sys.stdout.buffer
-        self.current_settings="0"
-        self.s1ap_setup_cmd="15"
-        self.attach_cmd="20"
-        self.detach_cmd="21"
-        self.setup_process_failure = 0
-        self.attach_command_failure = 0
-        self.detach_command_failure = 0
-        self.tunnel_creation_failed = 0
-        self.loop = asyncio.get_event_loop()
 
-    def process_expect(self, match_str='Option:') -> bool: 
-        try:
-            self.child.expect(match_str, timeout=5)
-            return True
-        except pexpect.exceptions.EOF:
-            print("EOF Reached")
-        except pexpect.exceptions.TIMEOUT as pexpect_timeout:
-            print("Timed out waiting for string {}".format(match_str))    
+    def __init__(self, server_detail, imsi_id):
+        self.server_info=server_detail + imsi_id
+        self.imsi_str = imsi_id
+        self.client_sock=0
+        self.socket_buffer=1024
+        self.logger = logging.getLogger()
+        self.list_msg = [] 
+
+        self.cmd_db = {
+            # Show current settings
+            'CURRENT_SETTINGS_CMD':
+               {'CMD_ID' : '0', 'FailStats' : 0},
+
+            # S1AP Setup entry
+            'S1AP_SETUP_CMD':
+               {'CMD_ID' : '15\n', 'FailStats' : 0,
+                'MATCH_RESP': 'S1AP: S1SetupResponse received'},
+
+            # S1AP RESET entry
+            'S1AP_RESET_CMD':
+               {'CMD_ID' : '16\n', 'FailStats' : 0,
+                'MATCH_RESP': 'S1AP: S1AP: ResetAcknowledge received'},
+
+            # Attach command entry
+            'ATTACH_CMD':
+               {'CMD_ID' : '20\n', 'FailStats' : 0,
+                'MATCH_RESP': 'NAS: EMMInformation received'},
+
+            # Detach command entry
+            'DETACH_CMD':
+               {'CMD_ID' : '21\n', 'FailStats' : 0,
+                'MATCH_RESP': 'NAS: DetachAccept received'},
+
+            # Service request entry
+            'SERVICE_REQUEST':
+               {'CMD_ID' : '24\n', 'FailStats' : 0,
+                'MATCH_RESP': 'S1AP: sending InitialContextSetupResponse'},
+
+            # Release ue context entry
+            'RELEASE_UE_CTXT_CMD':
+               {'CMD_ID' : '25\n', 'FailStats' : 0,
+                'MATCH_RESP' : 'S1AP: sending UEContextReleaseComplete'},
+
+            # Activate GTPU IP entry
+            'ACTIVATE_GTPU_IP':
+               {'CMD_ID' : '50\n', 'FailStats' : 0,
+                'MATCH_RESP' : 'GTP-U/IP over ControlPlane: Activation'},
+
+            # Deactivate GTPU IP entry
+            'DEACTIVATE_GTPU_IP':
+               {'CMD_ID' : '51\n', 'FailStats' : 0,
+                'MATCH_RESP' : 'GTP-U/IP over ControlPlane: Desactivation'},
+
+            # Cler log command
+            'CLEAR_LOG_CMD':
+               {'CMD_ID' : '99\n', 'FailStats' : 0},
+
+            # Quit the eNB and UE simulator
+            'QUIT_CMD':
+               {'CMD_ID' : 'Q\n'},
+
+            # Additional verification commands
+
+            # Datapath command 
+            'TUNNEL_DATAPATH_CMD': {'FailStats' : 0}
+        }
+
+    # Connect to FassFeraz server
+    def connect_to_server(self):
+        self.client_sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_sock.connect(("127.0.0.1", 65432))
+
+    # For expect handling
+    def read_server_response(self, match_str) -> bool:
+       
+        while True:
+
+            # Wait for 45 seconds to timeout
+            read_socket, _, _ =\
+                select.select([self.client_sock], [], [], 45)
+
+            # Timeout reached return fails
+            if not read_socket:
+                break
+
+            # Read messages if the socket is in read_socket
+            if self.client_sock in read_socket:
+                msg_from_server=\
+                    self.client_sock.recv(self.socket_buffer)
+           
+                self.logger.error(msg_from_server.decode())
+
+                # Append the messages in list_msg      
+                self.list_msg.append(msg_from_server.decode())
+
+                # If this is the exected message reutrn in less then 2 attempts
+                # and within timeout of 45 seconds each return
+                if (msg_from_server.decode() == match_str):
+                    return True
 
         return False
 
-    def s1ap_setup_process(self) -> Tuple[int, int, int]:
-        self.child.sendline(self.s1ap_setup_cmd)
-        if (self.process_expect("S1AP: S1SetupResponse received") == False):
-            self.setup_process_failure = self.setup_process_failure + 1
-     
-        return self.get_failure_information()
+    # For clearing the logs
+    def clear_logs(self):
+        self.list_msg.clear()
 
-    async def tunnel_creation_status(self):
-        if (UtilManager().validate_config_entry_by_ipaddress() == False):
-            await asyncio.sleep(7)
+    # Increment failure
+    def increment_fail_stats(self, exec_cmd: str):
+        if exec_cmd in self.cmd_db.keys():
+            self.cmd_db[exec_cmd]['FailStats']+=1
 
-        if (UtilManager().validate_config_entry_by_ipaddress() == False):
-            self.tunnel_creation_failed = self.tunnel_creation_failed + 1
+    # Establish the connection with server
+    def setup_connection_with_server(self):
+        # Attempt connection 10 times with a delay of second
+        conn_attempt=0
+        while conn_attempt < 100:
+            try:
+                self.connect_to_server()
+                return True
+            except ConnectionResetError:
+                conn_attempt+=1
+                time.sleep(1)
+            except ConnectionRefusedError:
+                conn_attempt+=1
+                time.sleep(1)
 
-    def attach_command_process(self) -> Tuple[int, int, int]:
-        self.child.sendline(self.attach_cmd)
-        if (self.process_expect("NAS: EMMInformation received") == False):
-            self.attach_command_failure = self.attach_command_failure + 1
+        return False
 
-        self.loop.create_task(self.tunnel_creation_status())
-        return self.get_failure_information()
+    # Execute the command in fassferraz
+    def send_command_to_server(self, cmd_str: str) -> bool:
+        #self.child.sendline(self.cmd_db.get(cmd_str).get('CMD_ID'))
 
-    def detach_command_process(self) -> Tuple[int, int, int]:
-        self.child.sendline(self.detach_cmd)
-        if (self.process_expect("NAS: DetachAccept received") == False):
-            self.detach_command_failure = self.detach_command_failure + 1
+        self.logger.debug("Executing : {}".format(cmd_str))
+        cmd_to_server=str.encode(self.cmd_db.get(cmd_str).get('CMD_ID'))
+       
+        if cmd_str in ['QUIT_CMD', 'CLEAR_LOG_CMD']:
+            self.client_sock.sendall(cmd_to_server)
+            self.client_sock.close()
+        else:    
+            self.client_sock.sendall(cmd_to_server)
+            if (self.read_server_response(
+                self.cmd_db.get(cmd_str).get('MATCH_RESP')) == False):
+                self.increment_fail_stats(cmd_str)
+                return False
 
-        return self.get_failure_information()
-    
-    def get_failure_information(self) -> Tuple[int, int, int]:
-        return (self.setup_process_failure, self.attach_command_failure,
-                self.tunnel_creation_failed, self.detach_command_failure)
+        return True
+
+    #Verify tunnel datapath
+    def verify_tunnel_data_path(self):
+        return (ConfigValidator.get_ue_rules_from_dut(self.imsi_str))
+
+    # S1AP_SETUP_CMD : For setup request
+    def s1ap_setup_process(self) -> bool:
+        return (self.send_command_to_server('S1AP_SETUP_CMD'))
+
+    # For reseting the S1AP Connection
+    def s1ap_reset_request(self) -> bool:
+        return (self.send_command_to_server('S1AP_RESET_CMD'))
+
+    # ATTACH_CMD : For attach command
+    def attach_command_process(self) -> bool:
+        return (self.send_command_to_server('ATTACH_CMD'))
+
+    # DETACH_CMD : For detach command
+    def detach_command_process(self) -> bool:
+        return (self.send_command_to_server('DETACH_CMD'))
+
+    # RELEASE_UE_CTXT_CMD : For releasing the ue context
+    def release_ue_context_command_process(self) -> bool:
+        return (self.send_command_to_server('RELEASE_UE_CTXT_CMD'))
+
+    # For service request command 
+    def service_request_command_process(self) -> bool:
+        return (self.send_command_to_server('SERVICE_REQUEST'))
+
+    # For Activate GTPU IP command
+    def activate_gtpu_ip_command_process(self) -> bool:
+        return (self.send_command_to_server('ACTIVATE_GTPU_IP'))
+
+    # For Deactivate GTPU IP command
+    def deactivate_gtpu_ip_command_process(self) -> bool:
+        return (self.send_command_to_server('DEACTIVATE_GTPU_IP'))
 
     def show_current_settings(self):
-        self.process_expect()
-        self.child.sendline(self.current_settings)
+        self.read_server_response()
+        #self.child.sendline(self.current_settings)
 
     def cleanup(self):
-        self.child.close()
-        sys.exit(self.child.status)
+        self.logger.info('Message entries : %s', '\n -> '.
+                         join(entries for entries in self.list_msg))
+        self.logger.debug(" Clean up called ") 
+        self.send_command_to_server('QUIT_CMD')
+
+# Launch the client process
+def launch_client(imsi_id: str):
+    #sim_process=SimProcess(spawn(cmd, timeout=300))
+    sim_process=SimProcess("FasFerraz-Client", imsi_id)
+
+    if (sim_process.setup_connection_with_server() == False):
+        sim_process.logger.error("%% Failed to setup connection with server")
+        return
+
+    # Start the s1setup procedure & Wait for Expect
+    if (sim_process.s1ap_setup_process() == False):
+        sim_process.logger.error("%% Failed to have setup procedure completed")
+        return False
+
+    # Start the attach procedure & Wait for Expect
+    if (sim_process.attach_command_process() == False):
+        sim_process.logger.error("%% Attach command failed")
+        sim_process.cleanup()
+        return False
+
+    time.sleep(1)
+
+    if (sim_process.activate_gtpu_ip_command_process() == False):
+        sim_process.logger.error("%% Failed in activating gtpu ip")
+        sim_process.cleanup()
+        return False
+
+    time.sleep(1)
+    if (sim_process.verify_tunnel_data_path() == False):
+        sim_process.logger.error("%% Traffic Tests are not through")
+        #sim_process.cleanup()
+        #return False
 
 
-# Validate thte strings and return imsi and mcc_mnc strings 
-def validate_parameters(sys) ->  Tuple[str, str]: 
-    n=len(sys.argv)
-    if n != 4:
-        print(" Usage : {} <remote-mme-ip> <imsi> <mcc-mnc>".format(sys.argv[0]))
-        exit()
+    time.sleep(1)
+    if (sim_process.deactivate_gtpu_ip_command_process() == False):
+        sim_process.logger.error("%% Failed in deactivating gtpu ")
+        sim_process.cleanup()
+        return False
+
+    time.sleep(1)
+    if (sim_process.release_ue_context_command_process() == False):
+        sim_process.logger.error("%% Failed to release ue context")
+        sim_process.cleanup()
+        return False
+
+    time.sleep(1)
+    if (sim_process.service_request_command_process() == False):
+        sim_process.logger.error("%% Failed to send service request command")
+        sim_process.cleanup()
+        return False
+
+    time.sleep(1)
+    if (sim_process.activate_gtpu_ip_command_process() == False):
+        sim_process.logger.error("%% Failed in activating gtpu ip")
+        sim_process.cleanup()
+        return False
+
+    time.sleep(1)
+    if (sim_process.verify_tunnel_data_path() == False):
+        sim_process.logger.error("%% Traffic Tests are not through")
+        #sim_process.cleanup()
+
+    time.sleep(1)
+
+    # Start the detach procedure & Wait for Expect
+    if (sim_process.detach_command_process() == False):
+        sim_process.logger.error("%% Detach command failed")
+        if (sim_process.s1ap_reset_request() == False):
+            sim_process.logger.error("%% S1AP Reset also failed")
+
+    sim_process.cleanup()
+    return True
+
+# Validate thte strings and return imsi and mcc_mnc strings
+def update_sim_dut_params(arguments) -> SimGNBUEParams:
 
     # Check whether MME IP is in correct format
-    if (UtilManager.validate_ip_address(sys.argv[1]) == False):
-        print("Validate the IP Address {}".format(sys.argv[1]))
+    if (UtilManager.validate_ip_address(arguments.mme_ip) == False):
+        print("Validate the mme IP Address {}".format(arguments.mme_ip))
         exit()
 
-    # Store the details for verifying configuration on remote machines
-    UtilManager.for_remote_excution_intialize(sys.argv[1])
+    # Check whether ENB LOCAL IP is in correct format
+    if arguments.enb_ip and \
+       UtilManager.validate_ip_address(arguments.enb_ip) == False:
+        print("Validate the local IP Address {}".format(arguments.enb_ip))
+        exit()
 
     # Check if imsi length
-    imsi_str=sys.argv[2]
-    if len(imsi_str) != 15 or (imsi_str.isdigit() == False) :
+    if len(arguments.imsi) != 15 or (arguments.imsi.isdigit() == False) :
         print(" IMSI should be 15 digits ")
         exit()
 
-    mcc_mnc=sys.argv[3]
-    if mcc_mnc.isdigit() == False:
+    # Check format of mcc-mnc
+    if arguments.mcc_mnc.isdigit() == False:
         print("MCC-MNC is not in correct format")
         exit()
- 
-    return (imsi_str, mcc_mnc)
 
-def excute_lte_call_flow(sys):
-    (imsi_str, mcc_mnc) = validate_parameters(sys)
+    if arguments.dut_login:
+       login=arguments.username
+    else:
+       login='vagrant'
+
+    if arguments.dut_passwd:
+       password=arguments.dut_passwd
+    else:
+       password='vagrant'
 
     key_str="465B5CE8B199B49FAA5F0A2EE238A6BC"
     opc_str="E8ED289DEBA952E4283B54E88E6183CA"
 
-    config_params=SIM_GNB_UE_PARAMS(UtilManager.get_ip_addresses(socket.AF_INET), sys.argv[1],
-                                imsi_str, key_str, opc_str, sys.argv[3])
+    dut_params=DUTMachineParams(arguments.mme_ip, login, password)
 
-    cmd="python3.8 ./eNB_LOCAL.py -i {} -m {} -I {} -K {} -C {} -o {}".format(
-          config_params.enb_local_ip_addr, config_params.mme_remote_ip_addr,
-          config_params.imsi_id, config_params.ue_key, config_params.ue_opc,
-          config_params.mcc_mnc)
+    ConfigValidator.update_dut_params(dut_params)
 
-    print(cmd)
+    if arguments.enb_ip:
+        local_ip = arguments.enb_ip
+    else:
+        local_ip = UtilManager.get_ip_addresses(socket.AF_INET)
+
+    return SimGNBUEParams(local_ip, arguments.imsi, key_str, opc_str,
+                          arguments.mcc_mnc, dut_params)
+
+def excute_lte_call_flow(sys):
+    parser = argparse.ArgumentParser()
     
-    sim_process=SimProcess(spawn(cmd, timeout=300))
+    parser.add_argument('--mme_ip', type=str, help="MME/DUT IP to connect",
+                        required=True)
+    
+    parser.add_argument('--imsi', type=str, help="IMSI or Subscriber identifier",
+                        required=True)
+    
+    parser.add_argument('--mcc_mnc', type=str, help="MCC and MNC of operator",
+                        required=True)
 
-    # Wait for the expect prompt
-    sim_process.process_expect()
+    parser.add_argument('--enb_ip', type=str, help="Local enb ip to connect to mme")
 
-    # Start the s1setup procedure & Wait for Expect
-    (setup_process_failure,_,_,_) = sim_process.s1ap_setup_process()
-    if setup_process_failure:
-        print("%% Failed to have setup procedure completed")
-        exit()
+    parser.add_argument('--dut_login', type=str,
+                        help="username of dut machine")
+    
+    parser.add_argument('--dut_passwd', type=str, help="password of dut machine")
 
-    time.sleep(2)
+    arguments = parser.parse_args() 
 
-    # Start the attach procedure & Wait for Expect
-    (_, attach_command_failure, tunnel_creation_failed,_) = sim_process.attach_command_process()
-    if attach_command_failure:
-        print("%% Attach command failed")
-        sim_process.cleanup()
-        exit()
+    config_params=update_sim_dut_params(arguments)
 
-    if tunnel_creation_failed:
-        print("%% Tunnel creation failed")
+    server_launch_cmd=\
+         "python3.8 ./eNB_LOCAL.py -i {} -m {} -I {} -K {} -C {} -o {}".format(
+         config_params.enb_local_ip_addr,
+         config_params.dut_params.mme_remote_ip_addr,
+         config_params.imsi_id, config_params.ue_key, config_params.ue_opc,
+         config_params.mcc_mnc)
 
-    time.sleep(3)
+    #Launching server      
+    sim_proc_id=0
+    sim_proc_id=subprocess.Popen(server_launch_cmd.split()).pid
+    print(server_launch_cmd)
 
-    # Start the detach procedure & Wait for Expect
-    (_,_,_,detach_command_failure) = sim_process.detach_command_process()
-    if detach_command_failure:
-        print("%% Detach command failed")
+    time.sleep(1)
 
-    time.sleep(2)
-    sim_process.cleanup()
+    #Launching client 
+    launch_client(config_params.imsi_id)
+
+    try:
+        pid, status = os.waitpid(sim_proc_id, 0)
+    except ChildProcessError:
+        print(" Child process cleanly exited ")
+
 
 if __name__ == '__main__':
+   logging.basicConfig(
+       filename="simprocess.log",
+       level=logging.DEBUG,
+       format='[%(asctime)s %(levelname)s %(name)s %(funcName)s] %(message)s',
+    )
+
    excute_lte_call_flow(sys) 

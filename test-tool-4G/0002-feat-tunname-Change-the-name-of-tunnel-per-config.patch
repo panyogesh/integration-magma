@@ -1,0 +1,55 @@
+From 75bfc6c43cee0e29f9054bb0fccc0346647299eb Mon Sep 17 00:00:00 2001
+From: Yogesh Pandey <yogesh@wavelabs.ai>
+Date: Sun, 1 Jan 2023 12:53:27 +0000
+Subject: [PATCH 2/2] feat(tunname): Change the name of tunnel per config
+
+1. By default tun is named as tun1
+   With the fix tun name will be changed to tun+IMSI-last-4-digit+10000
+
+Signed-off-by: Yogesh Pandey <yogesh@wavelabs.ai>
+---
+ eNB_LOCAL.py | 21 +++++++++++++++++----
+ 1 file changed, 17 insertions(+), 4 deletions(-)
+
+diff --git a/eNB_LOCAL.py b/eNB_LOCAL.py
+index 2691a53..232c4b1 100644
+--- a/eNB_LOCAL.py
++++ b/eNB_LOCAL.py
+@@ -201,7 +201,12 @@ def session_dict_initialization(session_dict):
+     session_dict['MOBILE-IDENTITY-TYPE'] = "IMSI" 
+     session_dict['SESSION-SESSION-TYPE'] = "NONE"
+     session_dict['SESSION-TYPE'] = "4G"
+-    session_dict['SESSION-TYPE-TUN'] = 1
++
++    if session_dict['IMSI']:
++        tun_id=(int(session_dict['IMSI'][-4:]) + 10000)
++        session_dict['SESSION-TYPE-TUN'] = tun_id
++    else:
++        session_dict['SESSION-TYPE-TUN'] = 1
+     session_dict['PDP-TYPE'] = 1
+     session_dict['ATTACH-PDN'] = None
+     session_dict['ATTACH-TYPE'] = 1
+@@ -2615,9 +2620,17 @@ def main():
+     s_gtpu = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+     s_gtpu.bind((options.eNB_ip, 2152))
+     #for gtp-u
+-    dev = open_tun(1)
+-    #for s1ap
+-    dev_nbiot = open_tun(2)
++    if session_dict['IMSI']:
++        tun_id=(int(session_dict['IMSI'][-4:]) + 10000)
++        nbiot_tun_id=tun_id+10000
++        dev = open_tun(tun_id)
++        #for s1ap
++        dev_nbiot = open_tun(nbiot_tun_id)
++    else:
++        dev = open_tun(1)
++        #for s1ap
++        dev_nbiot = open_tun(2)
++
+     session_dict['NBIOT-TUN'] = dev_nbiot
+     
+     pipe_in_gtpu_encapsulate, pipe_out_gtpu_encapsulate = os.pipe()
+-- 
+2.25.1
+
