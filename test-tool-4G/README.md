@@ -23,7 +23,7 @@ to mme UE-Interface
     - in CMD options are [MME-IP, IMSI, MCCMNC]
     
 * Key and OPC are already hardcoded in the SimLaunch.py
-* BUILD COMMAND : sudo docker build -t enbsim:dec13 .
+* BUILD COMMAND : ```sudo docker build -t enbsim:dec13 .```
 
 ## For Host based networking
 * RUN COMMAND : sudo docker run  --name enbsim-app --cap-add=NET_ADMIN --device /dev/net/tun --rm  enbsim:dec13
