@@ -1,0 +1,78 @@
+From d3756412e3baa5584e8f806520c1f0d06ae1a06c Mon Sep 17 00:00:00 2001
+From: Yogesh Pandey <yogesh@wavelabs.ai>
+Date: Tue, 3 Jan 2023 07:18:34 +0000
+Subject: [PATCH 3/3] feat(mutliport): Making the port imsi specific
+
+1. Making the comm between client and server port
+   based on imsi being used.
+
+Signed-off-by: Yogesh Pandey <yogesh@wavelabs.ai>
+---
+ eMENU.py       | 2 ++
+ eNB_LOCAL.py   | 5 ++---
+ eServerMgmt.py | 7 ++++---
+ 3 files changed, 8 insertions(+), 6 deletions(-)
+
+diff --git a/eMENU.py b/eMENU.py
+index 50973f3..1363ca0 100644
+--- a/eMENU.py
++++ b/eMENU.py
+@@ -565,6 +565,8 @@ def print_log(session_dict, log_message):
+     eCONMGMT.conn_addr[0].sendall(send_msg_to_client)
+ 
+     session_dict['LOG'] = session_dict['LOG'][-LOG_SIZE:]
++    
++    # SERVER-CHANGES
+     print_menu(session_dict['LOG'])
+     
+     return session_dict    
+diff --git a/eNB_LOCAL.py b/eNB_LOCAL.py
+index 232c4b1..06b94c1 100644
+--- a/eNB_LOCAL.py
++++ b/eNB_LOCAL.py
+@@ -2508,9 +2508,6 @@ def decapsulate_gtp_u(args):
+ ######################################################################################################################################
+ def main():
+ 
+-    # SERVER-CHANGES
+-    eCONMGMT.create_server_endpoint()
+-
+     session_dict = {}
+ 
+     parser = OptionParser()    
+@@ -2558,6 +2555,8 @@ def main():
+         session_dict['IMSI'] = None
+     else:
+         session_dict['IMSI'] = options.imsi
++        # SERVER-CHANGES
++        eCONMGMT.create_server_endpoint(int(session_dict['IMSI'][-4:]))
+ 
+     if options.imei is None:
+         session_dict['IMEISV'] = None
+diff --git a/eServerMgmt.py b/eServerMgmt.py
+index 8d4755f..65dd9b6 100644
+--- a/eServerMgmt.py
++++ b/eServerMgmt.py
+@@ -1,15 +1,16 @@
+ import socket
+ 
+ class eCONMGMT:
+-    server_ep=("127.0.0.1", 65432)
+     server_ep_sock=0
+     server_buffer=1024
+     conn_addr=()
+ 
+     @classmethod
+-    def create_server_endpoint(cls):
++    def create_server_endpoint(cls, imsi_port: int):
+         cls.server_ep_sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+-        cls.server_ep_sock.bind(cls.server_ep)
++        server_ep=("127.0.0.1", 65432 + imsi_port)
++        print(server_ep)
++        cls.server_ep_sock.bind(server_ep)
+         cls.server_ep_sock.listen()
+         conn, addr=cls.server_ep_sock.accept()
+         cls.conn_addr=(conn, addr)
+-- 
+2.25.1
+

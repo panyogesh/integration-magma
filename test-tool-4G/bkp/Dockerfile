@@ -9,8 +9,7 @@
 # Python Simulator command :-
 #     sudo python3.8 SimLaunch.py --mme_ip 192.168.62.176 --imsi 724990000000008 --mcc_mnc 72499
 #     sudo python3.8 SimLaunch.py --mme_ip 192.168.62.176 --imsi 724990000000008 --mcc_mnc 72499 --enb_ip 192.168.62.154
-#     sudo python3.8 SimLaunch.py --mme_ip 192.168.62.176 --imsi 724990000000008 --mcc_mnc 72499 --enb_ip 192.168.62.154 connected_loop=True
-
+#
 # Original fasferraz command
 # Host Machine : sudo python3.8 /home/vagrant/eNB/eNB_LOCAL.py -i 192.168.62.154 -m 192.168.62.176 -I 724990000000008 -K 465B5CE8B199B49FAA5F0A2EE238A6BC -C E8ED289DEBA952E4283B54E88E6183CA -o 72499
 # Docker Machine : python3.8 ./eNB_LOCAL.py -i 172.17.0.2 -m 192.168.62.176 -I 724990000000008 -K 465B5CE8B199B49FAA5F0A2EE238A6BC -C E8ED289DEBA952E4283B54E88E6183CA -o 72499

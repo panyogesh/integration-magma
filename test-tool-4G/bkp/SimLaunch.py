@@ -30,7 +30,6 @@ class SimGNBUEParams(NamedTuple):
     ue_key: str
     ue_opc: str
     mcc_mnc: str
-    connected_loop: bool
     dut_params: NamedTuple("DUTMachineParams",
                           [('mme_remote_ip_addr', str), ('username', str),
                            ('password', str)])
@@ -196,9 +195,9 @@ class SimProcess(object):
         }
 
     # Connect to FassFeraz server
-    def connect_to_server(self, imsi_port:int):
+    def connect_to_server(self):
         self.client_sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_sock.connect(("127.0.0.1", 65432+imsi_port))
+        self.client_sock.connect(("127.0.0.1", 65432))
 
     # For expect handling
     def read_server_response(self, match_str) -> bool:
@@ -218,6 +217,8 @@ class SimProcess(object):
                 msg_from_server=\
                     self.client_sock.recv(self.socket_buffer)
            
+                self.logger.error(msg_from_server.decode())
+
                 # Append the messages in list_msg      
                 self.list_msg.append(msg_from_server.decode())
 
@@ -238,12 +239,12 @@ class SimProcess(object):
             self.cmd_db[exec_cmd]['FailStats']+=1
 
     # Establish the connection with server
-    def setup_connection_with_server(self, imsi_port: int):
+    def setup_connection_with_server(self):
         # Attempt connection 10 times with a delay of second
         conn_attempt=0
         while conn_attempt < 100:
             try:
-                self.connect_to_server(imsi_port)
+                self.connect_to_server()
                 return True
             except ConnectionResetError:
                 conn_attempt+=1
@@ -314,13 +315,46 @@ class SimProcess(object):
         #self.child.sendline(self.current_settings)
 
     def cleanup(self):
-        self.logger.info('\nMessage entries : %s', '\n -> '.
+        self.logger.info('Message entries : %s', '\n -> '.
                          join(entries for entries in self.list_msg))
         self.logger.debug(" Clean up called ") 
         self.send_command_to_server('QUIT_CMD')
 
-# Loop for connected request
-def service_connect_loop(sim_process: SimProcess):
+# Launch the client process
+def launch_client(imsi_id: str):
+    #sim_process=SimProcess(spawn(cmd, timeout=300))
+    sim_process=SimProcess("FasFerraz-Client", imsi_id)
+
+    if (sim_process.setup_connection_with_server() == False):
+        sim_process.logger.error("%% Failed to setup connection with server")
+        return
+
+    # Start the s1setup procedure & Wait for Expect
+    if (sim_process.s1ap_setup_process() == False):
+        sim_process.logger.error("%% Failed to have setup procedure completed")
+        return False
+
+    # Start the attach procedure & Wait for Expect
+    if (sim_process.attach_command_process() == False):
+        sim_process.logger.error("%% Attach command failed")
+        sim_process.cleanup()
+        return False
+
+    time.sleep(1)
+
+    if (sim_process.activate_gtpu_ip_command_process() == False):
+        sim_process.logger.error("%% Failed in activating gtpu ip")
+        sim_process.cleanup()
+        return False
+
+    time.sleep(1)
+    if (sim_process.verify_tunnel_data_path() == False):
+        sim_process.logger.error("%% Traffic Tests are not through")
+        #sim_process.cleanup()
+        #return False
+
+
+    time.sleep(1)
     if (sim_process.deactivate_gtpu_ip_command_process() == False):
         sim_process.logger.error("%% Failed in deactivating gtpu ")
         sim_process.cleanup()
@@ -350,52 +384,6 @@ def service_connect_loop(sim_process: SimProcess):
         #sim_process.cleanup()
 
     time.sleep(1)
-    return True
-
-# Launch the client process
-def launch_client(imsi_id: str, connected_loop: bool):
-    #sim_process=SimProcess(spawn(cmd, timeout=300))
-    sim_process=SimProcess("FasFerraz-Client", imsi_id)
-
-    if (sim_process.setup_connection_with_server(int(imsi_id[-4:])) == False):
-        sim_process.logger.error("%% Failed to setup connection with server")
-        return
-
-    # Start the s1setup procedure & Wait for Expect
-    if (sim_process.s1ap_setup_process() == False):
-        sim_process.logger.error("%% Failed to have setup procedure completed")
-        return False
-
-    # Start the attach procedure & Wait for Expect
-    if (sim_process.attach_command_process() == False):
-        sim_process.logger.error("%% Attach command failed")
-        sim_process.cleanup()
-        return False
-
-    time.sleep(1)
-
-    if (sim_process.activate_gtpu_ip_command_process() == False):
-        sim_process.logger.error("%% Failed in activating gtpu ip")
-        sim_process.cleanup()
-        return False
-
-    time.sleep(1)
-    if (sim_process.verify_tunnel_data_path() == False):
-        sim_process.logger.error("%% Traffic Tests are not through")
-        #sim_process.cleanup()
-        #return False
-
-    iteration=1
-    if connected_loop:
-        iteration=5
-
-    while iteration:
-        if service_connect_loop(sim_process) == False:
-            sim_process.logger.error(
-               "%% Failed service request at {} iteration".format(iteration))
-        iteration-=1
-        sim_process.logger.info(" --- Looping {} itertions ---".format(iteration))
-        time.sleep (30)
 
     # Start the detach procedure & Wait for Expect
     if (sim_process.detach_command_process() == False):
@@ -430,19 +418,11 @@ def update_sim_dut_params(arguments) -> SimGNBUEParams:
         print("MCC-MNC is not in correct format")
         exit()
 
-    #Do we need connected loop test
-    if arguments.connected_loop == True:
-        connected_loop = arguments.connected_loop
-    else:
-        connected_loop = False
-
-    # Dut login parameters
     if arguments.dut_login:
        login=arguments.username
     else:
        login='vagrant'
 
-    # Dut login password
     if arguments.dut_passwd:
        password=arguments.dut_passwd
     else:
@@ -461,12 +441,33 @@ def update_sim_dut_params(arguments) -> SimGNBUEParams:
         local_ip = UtilManager.get_ip_addresses(socket.AF_INET)
 
     return SimGNBUEParams(local_ip, arguments.imsi, key_str, opc_str,
-                          arguments.mcc_mnc, connected_loop, dut_params)
+                          arguments.mcc_mnc, dut_params)
 
-def excute_lte_call_flow(config_params: SimGNBUEParams):
+def excute_lte_call_flow(sys):
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument('--mme_ip', type=str, help="MME/DUT IP to connect",
+                        required=True)
+    
+    parser.add_argument('--imsi', type=str, help="IMSI or Subscriber identifier",
+                        required=True)
+    
+    parser.add_argument('--mcc_mnc', type=str, help="MCC and MNC of operator",
+                        required=True)
+
+    parser.add_argument('--enb_ip', type=str, help="Local enb ip to connect to mme")
+
+    parser.add_argument('--dut_login', type=str,
+                        help="username of dut machine")
+    
+    parser.add_argument('--dut_passwd', type=str, help="password of dut machine")
+
+    arguments = parser.parse_args() 
+
+    config_params=update_sim_dut_params(arguments)
 
     server_launch_cmd=\
-         "python3.8 /home/vagrant/eNB/eNB_LOCAL.py -i {} -m {} -I {} -K {} -C {} -o {}".format(
+         "python3.8 ./eNB_LOCAL.py -i {} -m {} -I {} -K {} -C {} -o {}".format(
          config_params.enb_local_ip_addr,
          config_params.dut_params.mme_remote_ip_addr,
          config_params.imsi_id, config_params.ue_key, config_params.ue_opc,
@@ -480,7 +481,7 @@ def excute_lte_call_flow(config_params: SimGNBUEParams):
     time.sleep(1)
 
     #Launching client 
-    launch_client(config_params.imsi_id, config_params.connected_loop)
+    launch_client(config_params.imsi_id)
 
     try:
         pid, status = os.waitpid(sim_proc_id, 0)
@@ -489,36 +490,10 @@ def excute_lte_call_flow(config_params: SimGNBUEParams):
 
 
 if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('--mme_ip', type=str, help="MME/DUT IP to connect",
-                        required=True)
-
-    parser.add_argument('--imsi', type=str, help="IMSI or Subscriber identifier",
-                        required=True)
-
-    parser.add_argument('--mcc_mnc', type=str, help="MCC and MNC of operator",
-                        required=True)
-
-    parser.add_argument('--enb_ip', type=str, help="Local enb ip to connect to mme")
-
-    parser.add_argument('--dut_login', type=str,
-                        help="username of dut machine")
-
-    parser.add_argument('--dut_passwd', type=str, help="password of dut machine")
-
-    parser.add_argument('--connected_loop', type=bool, default=False)
-
-    arguments = parser.parse_args()
-
-    log_file_name="simprocess_{}.log".format(arguments.imsi[-4:])
-    logging.basicConfig(
-       filename=log_file_name,
+   logging.basicConfig(
+       filename="simprocess.log",
        level=logging.DEBUG,
        format='[%(asctime)s %(levelname)s %(name)s %(funcName)s] %(message)s',
     )
 
-    config_params=update_sim_dut_params(arguments)
-
-    excute_lte_call_flow(config_params)
+   excute_lte_call_flow(sys) 

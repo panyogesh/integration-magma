@@ -1,7 +1,7 @@
 From 75bfc6c43cee0e29f9054bb0fccc0346647299eb Mon Sep 17 00:00:00 2001
 From: Yogesh Pandey <yogesh@wavelabs.ai>
 Date: Sun, 1 Jan 2023 12:53:27 +0000
-Subject: [PATCH 2/3] feat(tunname): Change the name of tunnel per config
+Subject: [PATCH 2/2] feat(tunname): Change the name of tunnel per config
 
 1. By default tun is named as tun1
    With the fix tun name will be changed to tun+IMSI-last-4-digit+10000
