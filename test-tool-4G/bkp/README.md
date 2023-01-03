@@ -14,8 +14,10 @@ to mme UE-Interface
 * Get the files : 
     - wget https://raw.githubusercontent.com/panyogesh/integration-magma/main/test-tool-4G/Dockerfile
     - wget https://raw.githubusercontent.com/panyogesh/integration-magma/main/test-tool-4G/SimLaunch.py
-    - wget https://github.com/panyogesh/integration-magma/blob/main/test-tool-4G/0001-feat-integration-Integrated-with-client.patch
-    - wget https://github.com/panyogesh/integration-magma/blob/main/test-tool-4G/0002-feat-tunname-Change-the-name-of-tunnel-per-config.patch
+    - wget [https://github.com/panyogesh/integration-magma/blob/main/test-tool-4G/0001-feat-integration-Integrated-with-client.patch](https://raw.githubusercontent.com/panyogesh/integration-magma/main/test-tool-4G/0001-feat-integration-Integrated-with-client.patch)
+    - wget [https://github.com/panyogesh/integration-magma/blob/main/test-tool-4G/0002-feat-tunname-Change-the-name-of-tunnel-per-config.patch](https://raw.githubusercontent.com/panyogesh/integration-magma/main/test-tool-4G/0003-feat-mutliport-Making-the-port-imsi-specific.patch)
+    - wget https://raw.githubusercontent.com/panyogesh/integration-magma/main/test-tool-4G/0003-feat-mutliport-Making-the-port-imsi-specific.patch
+   
     
 * Change the parameters in Docker file based on the enviornment
     - MME_IP_ADDRESS="Remote IP of the Machine"
