@@ -25,3 +25,6 @@ Also the idea was to have the solutions in docker so that it can mimick multi-en
 
 ## Work under progress
 * Traffic testing support
+* Linting
+    - sudo apt-get install python3-autopep8 : ```autopep8 SimLaunch.py```
+    - sudo apt install pylint : ```pylint SimLaunch.py --generated-members=netifaces.*```
