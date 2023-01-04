@@ -1,0 +1,17 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/focal64"
+
+  config.vm.define :sim_test_tool, autostart: false do |sim_test_tool|
+    sim_test_tool.vm.hostname = "simtesttool"
+    sim_test_tool.vm.network "private_network", ip: "192.168.62.159", nic_type: "82540EM"
+    sim_test_tool.vm.network "private_network", ip: "192.168.129.57", nic_type: "82540EM"
+
+    sim_test_tool.vm.provider "virtualbox" do |vb|
+      vb.name = "simtesttool"
+      vb.linked_clone = true
+      vb.customize ["modifyvm", :id, "--memory", "6144"]
+      vb.customize ["modifyvm", :id, "--cpus", "4"]
+      vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+    end
+  end
+end
