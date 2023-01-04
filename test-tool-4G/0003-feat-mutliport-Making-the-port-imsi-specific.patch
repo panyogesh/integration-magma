@@ -1,4 +1,4 @@
-From d3756412e3baa5584e8f806520c1f0d06ae1a06c Mon Sep 17 00:00:00 2001
+From bee9a128e8a36ade3d22a4ddd82ce84ac9d0d38a Mon Sep 17 00:00:00 2001
 From: Yogesh Pandey <yogesh@wavelabs.ai>
 Date: Tue, 3 Jan 2023 07:18:34 +0000
 Subject: [PATCH 3/3] feat(mutliport): Making the port imsi specific
@@ -8,16 +8,31 @@ Subject: [PATCH 3/3] feat(mutliport): Making the port imsi specific
 
 Signed-off-by: Yogesh Pandey <yogesh@wavelabs.ai>
 ---
- eMENU.py       | 2 ++
- eNB_LOCAL.py   | 5 ++---
- eServerMgmt.py | 7 ++++---
- 3 files changed, 8 insertions(+), 6 deletions(-)
+ eMENU.py       |  7 +++++--
+ eNB_LOCAL.py   | 27 ++++++++++++++-------------
+ eServerMgmt.py |  7 ++++---
+ 3 files changed, 23 insertions(+), 18 deletions(-)
 
 diff --git a/eMENU.py b/eMENU.py
-index 50973f3..1363ca0 100644
+index 50973f3..10cb63b 100644
 --- a/eMENU.py
 +++ b/eMENU.py
-@@ -565,6 +565,8 @@ def print_log(session_dict, log_message):
+@@ -501,11 +501,12 @@ def ProcessMenu(PDU, client, session_dict, msg):
+         if session_dict['GTP-U'] == b'\x01': 
+             session_dict['GTP-U'] = b'\x02' 
+             if len(session_dict['SGW-GTP-ADDRESS']) > 0:
++                print(" %% REACHED Here %% ", file=sys.stderr)
+                 os.write(session_dict['PIPE-OUT-GTPU-ENCAPSULATE'],session_dict['GTP-U'] + session_dict['SGW-GTP-ADDRESS'][-1] + session_dict['SGW-TEID'][-1])
+                 os.write(session_dict['PIPE-OUT-GTPU-DECAPSULATE'],session_dict['GTP-U'] + session_dict['SGW-GTP-ADDRESS'][-1] + b'\x00\x00\x00' + bytes([session_dict['RAB-ID'][-1]]))
+             if session_dict['PDN-ADDRESS-IPV4'] is not None:     
+-                subprocess.call("route del -net 0.0.0.0/1 gw " + session_dict['PDN-ADDRESS-IPV4'], shell=True)    
+-                subprocess.call("route del -net 128.0.0.0/1 gw " + session_dict['PDN-ADDRESS-IPV4'], shell=True)
++                subprocess.call("route del -net 8.8.8.8/1 gw " + session_dict['PDN-ADDRESS-IPV4'], shell=True)
++                #subprocess.call("route del -net 128.0.0.0/1 gw " + session_dict['PDN-ADDRESS-IPV4'], shell=True)
+             if session_dict['PDN-ADDRESS-IPV6'] is not None:
+                 subprocess.call("route -A inet6 del ::/1 dev tun" + str(session_dict['SESSION-TYPE-TUN']) , shell=True) 
+                 subprocess.call("route -A inet6 del 8000::/1 dev tun" + str(session_dict['SESSION-TYPE-TUN'])  , shell=True)    
+@@ -565,6 +566,8 @@ def print_log(session_dict, log_message):
      eCONMGMT.conn_addr[0].sendall(send_msg_to_client)
  
      session_dict['LOG'] = session_dict['LOG'][-LOG_SIZE:]
@@ -27,10 +42,67 @@ index 50973f3..1363ca0 100644
      
      return session_dict    
 diff --git a/eNB_LOCAL.py b/eNB_LOCAL.py
-index 232c4b1..06b94c1 100644
+index 232c4b1..15f6cee 100644
 --- a/eNB_LOCAL.py
 +++ b/eNB_LOCAL.py
-@@ -2508,9 +2508,6 @@ def decapsulate_gtp_u(args):
+@@ -113,8 +113,6 @@ NON_IP_PACKET_4 = '0102030405060708090a0102030405060708090a0102030405060708090a0
+ def session_dict_initialization(session_dict):
+ 
+     session_dict['STATE'] = 0
+-    session_dict['ENB-UE-S1AP-ID'] = 1000
+-    session_dict['ENB-NAME'] = 'Fabricio-eNB'
+     session_dict['ENB-PLMN'] = return_plmn_s1ap(session_dict['PLMN'])
+     session_dict['XRES'] = b'xresxres'
+ 
+@@ -141,8 +139,10 @@ def session_dict_initialization(session_dict):
+     if session_dict['ENB-TAC2'] is None:
+         session_dict['ENB-TAC2'] = b'\x00\x03'
+     session_dict['ENB-TAC'] = session_dict['ENB-TAC1']
+-    session_dict['ENB-TAC-NBIOT'] = b'\x00\x02'     
+-    session_dict['ENB-ID'] = 1
++    session_dict['ENB-TAC-NBIOT'] = b'\x00\x02'
++
++    #SERVER-CHANGES
++    session_dict['ENB-ID'] = random.randrange(10, 99, 2)
+     session_dict['ENB-CELLID'] = 1000000
+     
+     session_dict['NAS-KEY-EEA1'] = return_key(session_dict['KASME'],1,'NAS-ENC')
+@@ -162,10 +162,10 @@ def session_dict_initialization(session_dict):
+     session_dict['ENC-KEY'] = None
+     session_dict['INT-KEY'] = None  
+     session_dict['APN'] = APN
+-    
+-    
++
++
+     session_dict['NAS-SMS-MT'] = None
+-    
++
+     if session_dict['LOCAL_KEYS'] == True:
+         if session_dict['IMSI'] == None:
+             session_dict['IMSI'] = IMSI
+@@ -205,6 +205,8 @@ def session_dict_initialization(session_dict):
+     if session_dict['IMSI']:
+         tun_id=(int(session_dict['IMSI'][-4:]) + 10000)
+         session_dict['SESSION-TYPE-TUN'] = tun_id
++        session_dict['ENB-UE-S1AP-ID'] = tun_id + random.randrange(100, 10000, 3)
++        session_dict['ENB-NAME'] = 'Fabricio-eNB' + session_dict['IMSI'][-4:]
+     else:
+         session_dict['SESSION-TYPE-TUN'] = 1
+     session_dict['PDP-TYPE'] = 1
+@@ -1913,9 +1915,9 @@ def ProcessInitialContextSetupRequest(IEs, dic):
+     IEs_RABs_List = []
+     for m in range(Num_eRAB):
+         e_RAB_id = eRAB_list[m]['value'][1]['e-RAB-ID']
+-        IEs_RAB = {'id': 50, 'value': ('E-RABSetupItemCtxtSURes', {'e-RAB-ID': e_RAB_id, 'transportLayerAddress': (dic['ENB-GTP-ADDRESS-INT'], 32), 'gTP-TEID': b'\x00\x00\x00' + bytes([e_RAB_id]) }), 'criticality': 'ignore'}
++        IEs_RAB = {'id': 50, 'value': ('E-RABSetupItemCtxtSURes', {'e-RAB-ID': e_RAB_id, 'transportLayerAddress': (dic['ENB-GTP-ADDRESS-INT'], 32), 'gTP-TEID': b'\x00\x00\x00' + bytes([e_RAB_id+random.randrange(10, 150, 2)]) }), 'criticality': 'ignore'}
+         IEs_RABs_List.append(IEs_RAB)
+-        
++
+     IEs.append({'id': 51, 'value': ('E-RABSetupListCtxtSURes', IEs_RABs_List), 'criticality': 'ignore'})   
+     val.append(('successfulOutcome', {'procedureCode': 9, 'value': ('InitialContextSetupResponse', {'protocolIEs': IEs}), 'criticality': 'ignore'}))
+     dic = eMENU.print_log(dic, "S1AP: sending InitialContextSetupResponse")
+@@ -2508,9 +2510,6 @@ def decapsulate_gtp_u(args):
  ######################################################################################################################################
  def main():
  
@@ -40,7 +112,7 @@ index 232c4b1..06b94c1 100644
      session_dict = {}
  
      parser = OptionParser()    
-@@ -2558,6 +2555,8 @@ def main():
+@@ -2558,6 +2557,8 @@ def main():
          session_dict['IMSI'] = None
      else:
          session_dict['IMSI'] = options.imsi
@@ -49,6 +121,15 @@ index 232c4b1..06b94c1 100644
  
      if options.imei is None:
          session_dict['IMEISV'] = None
+@@ -2618,7 +2619,7 @@ def main():
+     client.connect(server_address)
+ 
+     s_gtpu = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+-    s_gtpu.bind((options.eNB_ip, 2152))
++    #s_gtpu.bind((options.eNB_ip, 2152))
+     #for gtp-u
+     if session_dict['IMSI']:
+         tun_id=(int(session_dict['IMSI'][-4:]) + 10000)
 diff --git a/eServerMgmt.py b/eServerMgmt.py
 index 8d4755f..65dd9b6 100644
 --- a/eServerMgmt.py

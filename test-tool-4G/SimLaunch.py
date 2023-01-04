@@ -3,13 +3,15 @@
 import argparse
 import os
 import sys
-import pexpect
 from pexpect import spawn, EOF
 import ipaddress
 import time
 import socket
-import netifaces 
-from typing import NamedTuple, Tuple, Optional
+import netifaces
+from typing import (
+        NamedTuple,
+        Tuple,
+        Optional)
 import asyncio
 from enum import Enum
 import subprocess
@@ -262,10 +264,18 @@ class SimProcess(object):
         cmd_to_server=str.encode(self.cmd_db.get(cmd_str).get('CMD_ID'))
        
         if cmd_str in ['QUIT_CMD', 'CLEAR_LOG_CMD']:
-            self.client_sock.sendall(cmd_to_server)
-            self.client_sock.close()
-        else:    
-            self.client_sock.sendall(cmd_to_server)
+            try:
+                self.client_sock.sendall(cmd_to_server)
+            except OSError:
+                self.logger.error(" Bad File descriptor {}".format(cmd_to_server))
+                return False
+        else:
+            try:
+                self.client_sock.sendall(cmd_to_server)
+            except OSError:
+                self.logger.error(" Bad File descriptor {}".format(cmd_to_server))
+                return False
+
             if (self.read_server_response(
                 self.cmd_db.get(cmd_str).get('MATCH_RESP')) == False):
                 self.increment_fail_stats(cmd_str)
@@ -314,9 +324,9 @@ class SimProcess(object):
         #self.child.sendline(self.current_settings)
 
     def cleanup(self):
-        self.logger.info('\nMessage entries : %s', '\n -> '.
+        self.logger.error('\nMessage entries : %s', '\n -> '.
                          join(entries for entries in self.list_msg))
-        self.logger.debug(" Clean up called ") 
+        self.logger.error(" Clean up called ") 
         self.send_command_to_server('QUIT_CMD')
 
 # Loop for connected request
@@ -329,19 +339,16 @@ def service_connect_loop(sim_process: SimProcess):
     time.sleep(1)
     if (sim_process.release_ue_context_command_process() == False):
         sim_process.logger.error("%% Failed to release ue context")
-        sim_process.cleanup()
         return False
 
     time.sleep(1)
     if (sim_process.service_request_command_process() == False):
         sim_process.logger.error("%% Failed to send service request command")
-        sim_process.cleanup()
         return False
 
     time.sleep(1)
     if (sim_process.activate_gtpu_ip_command_process() == False):
         sim_process.logger.error("%% Failed in activating gtpu ip")
-        sim_process.cleanup()
         return False
 
     time.sleep(1)
@@ -369,30 +376,28 @@ def launch_client(imsi_id: str, connected_loop: bool):
     # Start the attach procedure & Wait for Expect
     if (sim_process.attach_command_process() == False):
         sim_process.logger.error("%% Attach command failed")
-        sim_process.cleanup()
         return False
 
     time.sleep(1)
 
     if (sim_process.activate_gtpu_ip_command_process() == False):
         sim_process.logger.error("%% Failed in activating gtpu ip")
-        sim_process.cleanup()
         return False
 
     time.sleep(1)
     if (sim_process.verify_tunnel_data_path() == False):
         sim_process.logger.error("%% Traffic Tests are not through")
-        #sim_process.cleanup()
-        #return False
 
     iteration=1
     if connected_loop:
         iteration=5
-
+  
     while iteration:
         if service_connect_loop(sim_process) == False:
             sim_process.logger.error(
                "%% Failed service request at {} iteration".format(iteration))
+            break
+
         iteration-=1
         sim_process.logger.info(" --- Looping {} itertions ---".format(iteration))
         time.sleep (30)
@@ -442,7 +447,7 @@ def update_sim_dut_params(arguments) -> SimGNBUEParams:
     else:
        login='vagrant'
 
-    # Dut login password
+    # Dut login password 
     if arguments.dut_passwd:
        password=arguments.dut_passwd
     else:
@@ -466,7 +471,7 @@ def update_sim_dut_params(arguments) -> SimGNBUEParams:
 def excute_lte_call_flow(config_params: SimGNBUEParams):
 
     server_launch_cmd=\
-         "python3.8 /home/vagrant/eNB/eNB_LOCAL.py -i {} -m {} -I {} -K {} -C {} -o {}".format(
+         "python3.8 ./eNB_LOCAL.py -i {} -m {} -I {} -K {} -C {} -o {}".format(
          config_params.enb_local_ip_addr,
          config_params.dut_params.mme_remote_ip_addr,
          config_params.imsi_id, config_params.ue_key, config_params.ue_opc,
@@ -474,7 +479,10 @@ def excute_lte_call_flow(config_params: SimGNBUEParams):
 
     #Launching server      
     sim_proc_id=0
-    sim_proc_id=subprocess.Popen(server_launch_cmd.split()).pid
+    sim_proc_id=subprocess.Popen(server_launch_cmd.split(),
+                                 stdout=subprocess.DEVNULL,
+                                 stderr=subprocess.PIPE).pid
+
     print(server_launch_cmd)
 
     time.sleep(1)
@@ -486,7 +494,12 @@ def excute_lte_call_flow(config_params: SimGNBUEParams):
         pid, status = os.waitpid(sim_proc_id, 0)
     except ChildProcessError:
         print(" Child process cleanly exited ")
-
+    except CalledProcessError as e:
+        res = sim_proc_id.communicate()
+        print("retcode = ", sim_proc_id.returncode, file=sys.stderr)
+        print("res=", res, file=sys.stderr)
+    except:
+        print("Server fail reason unknown", file=sys.stderr)
 
 if __name__ == '__main__':
 
@@ -521,4 +534,4 @@ if __name__ == '__main__':
 
     config_params=update_sim_dut_params(arguments)
 
-    excute_lte_call_flow(config_params)
+    excute_lte_call_flow(config_params) 
