@@ -11,7 +11,7 @@ Also the idea was to have the solutions in docker so that it can mimick multi-en
 ## Architecture
 [ SimLaunch(client) -- Fassferraz(server) ] ----- 4GCore (MAMGA-AGW)
 
-## Quick Start Steps
+## Quick Start
 * Please check the ```install``` directory   
     
 * Change the parameters in Docker file based on the enviornment
