@@ -12,6 +12,7 @@
 * git clone --depth 1 --no-checkout https://github.com/panyogesh/integration-magma.git
 * cd integration-magma
 * git sparse-checkout set test-tool-4G
+* cd test-tool-4G/
 
 ## Preparing the docker build
 * sudo docker build -t enbsim:dec13 .
