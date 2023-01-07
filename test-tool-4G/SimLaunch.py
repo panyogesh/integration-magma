@@ -172,7 +172,7 @@ class SimProcess():
 
             # Quit the eNB and UE simulator
             'QUIT_CMD':
-            {'CMD_ID': 'Q\n'},
+            {'CMD_ID': 'Q\n', 'FailStats': 0},
 
             # Additional verification commands
 

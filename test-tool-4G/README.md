@@ -2,16 +2,16 @@
 
 ## Overview
 This tool is based on [fasferraz](https://github.com/fasferraz/eNB.git).
-Its a wonderful tool for performing quick 4G testing including some level of scale test.
-Have integrated this tool with our application to have a flow based testing without
-manually putting thie commands.
+Its a wonderful tool for performing quick 4G testing.
+Idea for putting up this repository is to integrate with our framework and create a flow based testing
+where manually putting the values in tool is not required.
 
 Also the idea was to have the solutions in docker so that it can mimick multi-enb scenarios as well
 
 ## Architecture
 [ SimLaunch(client) -- Fassferraz(server) ] ----- 4GCore (MAMGA-AGW)
 
-## Quick Start Steps
+## Quick Start
 * Please check the ```install``` directory   
     
 * Change the parameters in Docker file based on the enviornment
@@ -25,3 +25,6 @@ Also the idea was to have the solutions in docker so that it can mimick multi-en
 
 ## Work under progress
 * Traffic testing support
+* Linting
+    - sudo apt-get install python3-autopep8 : ```autopep8 SimLaunch.py```
+    - sudo apt install pylint : ```pylint SimLaunch.py --generated-members=netifaces.*```

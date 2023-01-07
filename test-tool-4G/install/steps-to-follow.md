@@ -26,3 +26,5 @@
 * sudo ifconfig mac0 up
 * sudo ip link set enp0s8 promisc on
 * sudo docker run --rm --cap-add=NET_ADMIN --device /dev/net/tun -it --network=enb_net --entrypoint bash enbsim:dec13
+* python3.8 SimLaunch.py --mme_ip 192.168.62.176 --imsi 724990000000009 --mcc_mnc 72499 --connected_loop True
+
