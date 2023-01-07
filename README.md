@@ -27,4 +27,7 @@ Hopefully it helps some of the folks in the community
     This utlity provides the comibination of dockerized agw with S1AP testing possibility
 
 - test-tool-4G
-    This is a tool based on fasferraz
+    4G test tool for scaling UEs and eNBs and testing magma. This is a tool based on fasferraz
+    
+- srs-ran-setup
+    Docker files for srs-ran simulator
