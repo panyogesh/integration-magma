@@ -48,7 +48,7 @@ class UtilManager:
     def get_ip_addresses(cls, family) -> str:
         """ Get the first no-lo ip address for docker """
         for iface in netifaces.interfaces():
-            if iface == 'lo':
+            if iface == 'lo' or 'tun' in iface:
                 continue
 
             if family == socket.AF_INET:
