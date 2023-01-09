@@ -5,7 +5,7 @@
 
 ## Launch the docker image
 * sudo docker run  --name srsransim-app -it --cap-add=NET_ADMIN --device /dev/net/tun --privileged --rm srsranlocal:jan07 /bin/bash
-*sudo docker exec -it srsransim-app
+* sudo docker exec -it srsransim-app
 
 ## Launch the srsen and srsue binaries
 - srsenb
