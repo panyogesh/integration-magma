@@ -50,6 +50,8 @@ COPY 0002-feat-tunname-Change-the-name-of-tunnel-per-config.patch /app/eNB
 
 COPY 0003-feat-mutliport-Making-the-port-imsi-specific.patch /app/eNB
 
+COPY 0004-fix-portno-Fix-the-port-number.patch /app/eNB
+
 RUN git apply 0001-feat-integration-Integrated-with-client.patch
 
 RUN git apply 0002-feat-tunname-Change-the-name-of-tunnel-per-config.patch
