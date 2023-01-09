@@ -30,19 +30,19 @@
 * python3.8 SimLaunch.py --mme_ip 192.168.62.176 --imsi 724990000000009 --mcc_mnc 72499 --connected_loop True
 
 ## How to overaload 
-* Launch multiple docker images.  
-      - sudo docker run --rm --cap-add=NET_ADMIN --device /dev/net/tun --name appTest4G -it --network=enb_net --entrypoint bash enbsim:dec13
-      - sudo docker run --rm --cap-add=NET_ADMIN --device /dev/net/tun --name appTest4G1 -it --network=enb_net --entrypoint bash enbsim:dec13
-      - sudo docker run --rm --cap-add=NET_ADMIN --device /dev/net/tun --name appTest4G2 -it --network=enb_net --entrypoint bash enbsim:dec13
-      - sudo docker run --rm --cap-add=NET_ADMIN --device /dev/net/tun --name appTest4G3 -it --network=enb_net --entrypoint bash enbsim:dec13
-      - sudo docker run --rm --cap-add=NET_ADMIN --device /dev/net/tun --name appTest4G4 -it --network=enb_net --entrypoint bash enbsim:dec13
+### Launch multiple docker images.  
+* sudo docker run --rm --cap-add=NET_ADMIN --device /dev/net/tun --name appTest4G -it --network=enb_net --entrypoint bash enbsim:dec13
+* sudo docker run --rm --cap-add=NET_ADMIN --device /dev/net/tun --name appTest4G1 -it --network=enb_net --entrypoint bash enbsim:dec13
+* sudo docker run --rm --cap-add=NET_ADMIN --device /dev/net/tun --name appTest4G2 -it --network=enb_net --entrypoint bash enbsim:dec13
+* sudo docker run --rm --cap-add=NET_ADMIN --device /dev/net/tun --name appTest4G3 -it --network=enb_net --entrypoint bash enbsim:dec13
+* sudo docker run --rm --cap-add=NET_ADMIN --device /dev/net/tun --name appTest4G4 -it --network=enb_net --entrypoint bash enbsim:dec13
 
-* In each of the docker shell launch the following command
-      - python3.8 launch_script.py --lower_limit 724990000000008 --upper_limit 724990000000108
-      - python3.8 launch_script.py --lower_limit 724990000000109 --upper_limit 724990000000209
-      - python3.8 launch_script.py --lower_limit 724990000000211 --upper_limit 724990000000311
-      - python3.8 launch_script.py --lower_limit 724990000000312 --upper_limit 724990000000412
-      - python3.8 launch_script.py --lower_limit 724990000000413 --upper_limit 724990000000513
+### In each of the docker shell launch the following command
+* python3.8 launch_script.py --lower_limit 724990000000008 --upper_limit 724990000000108
+* python3.8 launch_script.py --lower_limit 724990000000109 --upper_limit 724990000000209
+* python3.8 launch_script.py --lower_limit 724990000000211 --upper_limit 724990000000311
+* python3.8 launch_script.py --lower_limit 724990000000312 --upper_limit 724990000000412
+* python3.8 launch_script.py --lower_limit 724990000000413 --upper_limit 724990000000513
 
 
 
