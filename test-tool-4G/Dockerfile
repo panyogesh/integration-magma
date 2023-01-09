@@ -16,10 +16,15 @@
 # Docker Machine : python3.8 ./eNB_LOCAL.py -i 172.17.0.2 -m 192.168.62.176 -I 724990000000008 -K 465B5CE8B199B49FAA5F0A2EE238A6BC -C E8ED289DEBA952E4283B54E88E6183CA -o 72499
 
 # Debugging the image
-# Running in bash mode : sudo docker run --rm --cap-add=NET_ADMIN --device /dev/net/tun -it --entrypoint bash enbsim:dec13
+# Running in bash mode :-
+# sudo docker run --rm --cap-add=NET_ADMIN --device /dev/net/tun --name appTest4G -it --entrypoint bash enbsim:dec13
+# sudo docker run --rm --cap-add=NET_ADMIN --device /dev/net/tun --name appTest4G -it --network=enb_net --entrypoint bash enbsim:dec13
+
 #                        sudo docker exec -it  gracious_heisenberg /bin/bash
 
 # Patch generated using : git format-patch -1 HEAD
+
+# Launch command : python3.8 launch_script.py --lower_limit  724990000000008 --upper_limit 724990000000018
  
 FROM ubuntu:20.04
 
@@ -27,11 +32,7 @@ RUN apt update && apt install software-properties-common -y
 
 RUN apt install python3.8
 
-RUN apt-get install -y python3-pip libsctp-dev swig python3-pyscard git python3-netifaces python3-pexpect python3-paramiko iproute2
-
-RUN apt-get install net-tools
-
-RUN apt-get install iputils-ping
+RUN apt-get install -y python3-pip libsctp-dev swig python3-pyscard git python3-netifaces python3-pexpect python3-paramiko iproute2 net-tools iputils-ping vim
 
 WORKDIR /app
 
@@ -55,9 +56,13 @@ RUN git apply 0002-feat-tunname-Change-the-name-of-tunnel-per-config.patch
 
 RUN git apply 0003-feat-mutliport-Making-the-port-imsi-specific.patch
 
+RUN git apply 0004-fix-portno-Fix-the-port-number.patch
+
 RUN pip3 install -r requirements.txt
 
 COPY SimLaunch.py  /app/eNB
+
+COPY launch_script.py /app/eNB
 
 ENV MME_IP_ADDRESS="192.168.62.176"
 

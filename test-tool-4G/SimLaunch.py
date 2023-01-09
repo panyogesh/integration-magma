@@ -184,7 +184,7 @@ class SimProcess():
     def connect_to_server(self, imsi_port: int):
         """ Initiate connection to server """
         self.client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_sock.connect(("127.0.0.1", 65432+imsi_port))
+        self.client_sock.connect(("127.0.0.1", 50001 +imsi_port))
 
     # For expect handling
     def read_server_response(self, match_str) -> bool:

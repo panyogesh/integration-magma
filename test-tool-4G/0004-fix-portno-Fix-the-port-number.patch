@@ -1,0 +1,28 @@
+From 491cdf6fae9f43e36f3d79b06df86ed56656e643 Mon Sep 17 00:00:00 2001
+From: Yogesh Pandey <yogesh@wavelabs.ai>
+Date: Mon, 9 Jan 2023 17:07:16 +0000
+Subject: [PATCH 4/4] fix(portno): Fix the port number
+
+1. Changed the port number from 65432 to 50001
+
+Signed-off-by: Yogesh Pandey <yogesh@wavelabs.ai>
+---
+ eServerMgmt.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/eServerMgmt.py b/eServerMgmt.py
+index 65dd9b6..3459b06 100644
+--- a/eServerMgmt.py
++++ b/eServerMgmt.py
+@@ -8,7 +8,7 @@ class eCONMGMT:
+     @classmethod
+     def create_server_endpoint(cls, imsi_port: int):
+         cls.server_ep_sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+-        server_ep=("127.0.0.1", 65432 + imsi_port)
++        server_ep=("127.0.0.1", 50001 + imsi_port)
+         print(server_ep)
+         cls.server_ep_sock.bind(server_ep)
+         cls.server_ep_sock.listen()
+-- 
+2.25.1
+
