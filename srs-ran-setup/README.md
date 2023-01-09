@@ -12,5 +12,5 @@
 - srsue ~/.config/srsran/ue.conf
 
 ## Additional configuation
-ip route add 8.8.8.8/32 dev <tun_srsue_ip>
-ping 8.8.8.8 -I <tun_srsue_ip>
+- ip route add 8.8.8.8/32 dev <tun_srsue_ip>
+- ping 8.8.8.8 -I <tun_srsue_ip>
