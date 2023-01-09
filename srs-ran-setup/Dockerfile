@@ -1,3 +1,15 @@
+#Build Steps : sudo docker build -t srsranlocal:jan07 .
+#Execution Steps :
+# Launch
+# Terminal 1:
+# ----------
+#  sudo docker run  --name srsransim-app -it --cap-add=NET_ADMIN --device /dev/net/tun --privileged --rm srsranlocal:jan07 /bin/bash
+
+#Terminal 2:
+#-----------
+# sudo docker exec -it srsransim-app
+
+
 FROM ubuntu:20.04
 
 ENV TZ=Asia/Kolkata
@@ -12,7 +24,7 @@ RUN apt-get update -y
 
 RUN apt-get upgrade -y
 
-RUN apt-get -y install build-essential cmake libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev libzmq3-dev git net-tools
+RUN apt-get -y install build-essential cmake libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev libzmq3-dev git net-tools iputils-ping iproute2 vim
 
 WORKDIR enb4GSim
 
@@ -32,9 +44,13 @@ RUN make install
 
 RUN ldconfig
 
-RUN mkdir /root/.config
+RUN mkdir -p /root/.config
 
-RUN mkdir /root/.config/srsran
+RUN mkdir -p /root/.config/srsran
+
+RUN cp srs-integration-changes.diff /enb4GSim/srsRAN
+
+RUN patch -p1 < /enb4GSim/srsRAN/srs-integration-changes.diff 
 
 RUN cp /enb4GSim/srsRAN/srsepc/epc.conf.example ~/.config/srsran/epc.conf
 

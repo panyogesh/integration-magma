@@ -1,0 +1,87 @@
+diff --git a/srsenb/enb.conf.example b/srsenb/enb.conf.example
+index 5e8eb88a2..ad028112f 100644
+--- a/srsenb/enb.conf.example
++++ b/srsenb/enb.conf.example
+@@ -22,9 +22,9 @@
+ enb_id = 0x19B
+ mcc = 001
+ mnc = 01
+-mme_addr = 127.0.1.100
+-gtp_bind_addr = 127.0.1.1
+-s1c_bind_addr = 127.0.1.1
++mme_addr = 192.168.62.176
++gtp_bind_addr = 192.168.62.154
++s1c_bind_addr = 192.168.62.154
+ s1c_bind_port = 0
+ n_prb = 50
+ #tm = 4
+@@ -80,8 +80,8 @@ rx_gain = 40
+ #time_adv_nsamples = auto
+ 
+ # Example for ZMQ-based operation with TCP transport for I/Q samples
+-#device_name = zmq
+-#device_args = fail_on_disconnect=true,tx_port=tcp://*:2000,rx_port=tcp://localhost:2001,id=enb,base_srate=23.04e6
++device_name = zmq
++device_args = fail_on_disconnect=true,tx_port=tcp://*:2000,rx_port=tcp://localhost:2001,id=enb,base_srate=23.04e6
+ 
+ #####################################################################
+ # Packet capture configuration
+diff --git a/srsenb/rb.conf.example b/srsenb/rb.conf.example
+index 010599f29..8939bce24 100644
+--- a/srsenb/rb.conf.example
++++ b/srsenb/rb.conf.example
+@@ -40,7 +40,7 @@
+ 
+ qci_config = (
+ {
+-  qci = 7;
++  qci = 5;
+   pdcp_config = {
+     discard_timer = -1;                
+     pdcp_sn_size = 12;                  
+diff --git a/srsenb/rr.conf.example b/srsenb/rr.conf.example
+index 78b2df154..c4e4a0a66 100644
+--- a/srsenb/rr.conf.example
++++ b/srsenb/rr.conf.example
+@@ -55,7 +55,7 @@ cell_list =
+   {
+     // rf_port = 0;
+     cell_id = 0x01;
+-    tac = 0x0007;
++    tac = 0x0001;
+     pci = 1;
+     // root_seq_idx = 204;
+     dl_earfcn = 3350;
+@@ -114,4 +114,4 @@ cell_list =
+ nr_cell_list =
+ (
+   // no NR cells
+-);
+\ No newline at end of file
++);
+diff --git a/srsue/ue.conf.example b/srsue/ue.conf.example
+index 5bae8ce76..a9f87ec50 100644
+--- a/srsue/ue.conf.example
++++ b/srsue/ue.conf.example
+@@ -42,8 +42,8 @@ tx_gain = 80
+ #continuous_tx     = auto
+ 
+ # Example for ZMQ-based operation with TCP transport for I/Q samples
+-#device_name = zmq
+-#device_args = tx_port=tcp://*:2001,rx_port=tcp://localhost:2000,id=ue,base_srate=23.04e6
++device_name = zmq
++device_args = tx_port=tcp://*:2001,rx_port=tcp://localhost:2000,id=ue,base_srate=23.04e6
+ 
+ #####################################################################
+ # EUTRA RAT configuration
+@@ -180,8 +180,8 @@ imei = 353490069873319
+ #                      Supported: 0 - NULL, 1 - Snow3G, 2 - AES, 3 - ZUC
+ #####################################################################
+ [nas]
+-#apn = internetinternet
+-#apn_protocol = ipv4
++apn = internet
++apn_protocol = ipv4
+ #user = srsuser
+ #pass = srspass
+ #force_imsi_attach = false
