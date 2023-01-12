@@ -32,8 +32,6 @@ sudo apt-get install strongswan
            valid_lft forever preferred_lft forever
     ```
 
-
-
 * Configure PSK in ipsec.secrets
   - Contents of ipsec.secrets
     ```
