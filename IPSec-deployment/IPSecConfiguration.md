@@ -56,7 +56,7 @@ sudo apt-get install strongswan
 * Configure ipsec.conf
   - ipsec.conf configuration
 
-    ```
+```
     vagrant@distro-magma:~$ cat /etc/ipsec.conf
     # ipsec.conf - strongSwan IPsec configuration file
 
@@ -255,4 +255,3 @@ listening on enp0s8, link-type EN10MB (Ethernet), capture size 262144 bytes
 08:25:21.119486 IP 192.168.62.176 > 192.168.62.154: ESP(spi=0xc25abe12,seq=0x7), length 136
 ^C^C08:25:21.119486 IP 1.1.1.1 > 2.2.2.2: ICMP echo request, id 950, seq 7, length 64
 ```
- 
