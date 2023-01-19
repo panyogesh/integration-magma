@@ -1,0 +1,23 @@
+#!/usr/bin/python3.8
+
+import psutil
+import subprocess
+import time
+from subprocess import check_output
+import datetime
+
+def get_pid(name):
+    return int(check_output(["pidof",name]))
+
+pidofmme=get_pid("mme")
+p = psutil.Process(pidofmme)
+
+while True:
+    with open("/tmp/mme_trace.logs", "a") as f:
+        now = datetime.datetime.now()
+        print("{} CPU Utilization = {}".format(now.strftime("%Y-%m-%d %H:%M:%S"), p.cpu_percent(interval=1.0)), end = ", ", file=f)
+        cmd="sudo ovs-ofctl dump-flows gtp_br0 table=0 | grep tun | wc -l"
+        ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+        output = ps.communicate()[0]
+        print("Number of UEs = {} \n\n".format(int(output)), file=f)
+        time.sleep(3)
