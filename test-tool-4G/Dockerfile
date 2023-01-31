@@ -25,6 +25,7 @@
 # Patch generated using : git format-patch -1 HEAD
 
 # Launch command : python3.8 launch_script.py --lower_limit  724990000000008 --upper_limit 724990000000018
+# With Volumes : sudo docker run --rm --cap-add=NET_ADMIN --device /dev/net/tun -v /home/vagrant/integration-magma/test-tool-4G:/app/eNB/log --name appTest4G -it --entrypoint bash enbsim:dec13
  
 FROM ubuntu:20.04
 
@@ -41,6 +42,10 @@ RUN git clone https://github.com/fasferraz/eNB.git /app/eNB
 RUN ls
 
 WORKDIR /app/eNB
+
+RUN mkdir -p /app/eNB/log
+
+ENV LOGPATH=/app/eNB/log
 
 RUN git checkout 87f73ac0280e2d250df0d0bf71a914f42da0917a
 

@@ -363,9 +363,59 @@ def service_connect_loop(sim_process: SimProcess):
     time.sleep(1)
     return True
 
+# Loop for attach and service request
+def attach_process_in_loop(sim_process: SimProcess, connected_loop: bool):
+    """ Iteration for attach and service request """
+    attach_iteration = 1
+    service_request_iteration = 1
+    time_interval = 1
+
+    if connected_loop:
+        attach_iteration = 2
+        service_request_iteration = 2
+        time_interval = 10
+
+    while attach_iteration:
+        # Start the attach procedure & Wait for Expect
+        if not sim_process.attach_command_process():
+            sim_process.logger.error("%% Attach command failed")
+            return False
+
+        time.sleep(1)
+
+        if not sim_process.activate_gtpu_ip_command_process():
+            sim_process.logger.error("%% Failed in activating gtpu ip")
+            return False
+
+        time.sleep(1)
+        if not sim_process.verify_tunnel_data_path():
+            sim_process.logger.error("%% Traffic Tests are not through")
+
+        while service_request_iteration:
+            if not service_connect_loop(sim_process):
+                sim_process.logger.error(
+                    "%% Failed service request at %d iteration",
+                    service_request_iteration)
+                break
+
+            service_request_iteration -= 1
+            sim_process.logger.info(
+                " --- Looping %d service_request_iteration ---",
+                service_request_iteration)
+            time.sleep(time_interval)
+
+        # Start the detach procedure & Wait for Expect
+        if not sim_process.detach_command_process():
+            sim_process.logger.error("%% Detach command failed")
+            if not sim_process.s1ap_reset_request():
+                sim_process.logger.error("%% S1AP Reset also failed")
+
+        attach_iteration -= 1
+        sim_process.logger.info(
+                " --- Looping %d attach_iteration ---", attach_iteration)
+        time.sleep(time_interval)
+
 # Launch the client process
-
-
 def launch_client(imsi_id: str, connected_loop: bool) -> bool:
     """ Launch the client and connect with FassFerraz server """
     sim_process = SimProcess("FasFerraz-Client", imsi_id)
@@ -379,41 +429,8 @@ def launch_client(imsi_id: str, connected_loop: bool) -> bool:
         sim_process.logger.error("%% Failed to have setup procedure completed")
         return False
 
-    # Start the attach procedure & Wait for Expect
-    if not sim_process.attach_command_process():
-        sim_process.logger.error("%% Attach command failed")
-        return False
 
-    time.sleep(1)
-
-    if not sim_process.activate_gtpu_ip_command_process():
-        sim_process.logger.error("%% Failed in activating gtpu ip")
-        return False
-
-    time.sleep(1)
-    if not sim_process.verify_tunnel_data_path():
-        sim_process.logger.error("%% Traffic Tests are not through")
-
-    iteration = 1
-    if connected_loop:
-        iteration = 5
-
-    while iteration:
-        if not service_connect_loop(sim_process):
-            sim_process.logger.error(
-                "%% Failed service request at %d iteration", iteration)
-            break
-
-        iteration -= 1
-        sim_process.logger.info(
-            " --- Looping %d itertions ---", iteration)
-        time.sleep(30)
-
-    # Start the detach procedure & Wait for Expect
-    if not sim_process.detach_command_process():
-        sim_process.logger.error("%% Detach command failed")
-        if not sim_process.s1ap_reset_request():
-            sim_process.logger.error("%% S1AP Reset also failed")
+    attach_process_in_loop(sim_process, connected_loop)
 
     sim_process.cleanup()
     return True
@@ -536,7 +553,9 @@ if __name__ == '__main__':
 
     ARGUMENTS = PARSER.parse_args()
 
-    LOG_FILE_NAME = "simprocess_{}.log".format(ARGUMENTS.imsi[-4:])
+    LOG_FILE_NAME = os.path.join(os.environ['LOGPATH'],
+                            "simprocess_{}.log".format(ARGUMENTS.imsi[-4:]))
+
     logging.basicConfig(
         filename=LOG_FILE_NAME,
         level=logging.DEBUG,
