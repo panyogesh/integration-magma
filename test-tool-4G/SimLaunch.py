@@ -10,6 +10,7 @@ import socket
 import subprocess
 import select
 import logging
+import random
 from typing import (
     NamedTuple)
 import netifaces
@@ -365,6 +366,38 @@ def service_connect_loop(sim_process: SimProcess):
 
 # Loop for attach and service request
 def attach_process_in_loop(sim_process: SimProcess, connected_loop: bool):
+    """ Iteration for attach and service request """
+    attach_iteration = 1
+    service_request_iteration = 1
+    time_interval = 1
+
+    if connected_loop:
+        attach_iteration = 1000
+        service_request_iteration = 5
+        time_interval = 60
+
+    while attach_iteration:
+        # Start the attach procedure & Wait for Expect
+        if not sim_process.attach_command_process():
+            sim_process.logger.error("%% Attach command failed")
+            return False
+
+        time.sleep(random.randint(80, 180))
+
+        # Start the detach procedure & Wait for Expect
+        if not sim_process.detach_command_process():
+            sim_process.logger.error("%% Detach command failed")
+            if not sim_process.s1ap_reset_request():
+                sim_process.logger.error("%% S1AP Reset also failed")
+
+        attach_iteration -= 1
+        sim_process.logger.info(
+                " --- Looping %d attach_iteration ---", attach_iteration)
+        time.sleep(time_interval)
+
+
+# Loop for attach and service request
+def service_request_process_in_loop(sim_process: SimProcess, connected_loop: bool):
     """ Iteration for attach and service request """
     attach_iteration = 1
     service_request_iteration = 1

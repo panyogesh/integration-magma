@@ -1,0 +1,12 @@
+version: "3.1"
+services:
+  app4Gtest:
+    image: enbsim:dec13
+    build: ./
+    container_name: appTest4G
+    volumes:
+      - ./log_repo:/app/eNB/log
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
