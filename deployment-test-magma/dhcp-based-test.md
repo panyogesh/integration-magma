@@ -71,6 +71,13 @@ vagrant@oai-gnb-ue-sim:~$ sudo systemctl status isc-dhcp-server.service
              +-71834 dhcpd -user dhcpd -group dhcpd -f -4 -pf /run/dhcp-server/dhcpd.pid -cf /etc/dhcp/dhcpd.co>
 ```
 
+* For Vlan configuration on linux
+```
+sudo modprobe --first-time 8021q
+sudo ip link add link enp0s9 name enp0s9.4 type vlan id 4
+sudo ifconfig enp0s9 0.0.0.0
+sudo ifconfig enp0s9.4 192.168.129.52/24
+```
 ## AGW
 
 Configuration on agw
