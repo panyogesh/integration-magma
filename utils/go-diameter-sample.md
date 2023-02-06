@@ -66,5 +66,16 @@ vagrant@oai-gnb-ue-sim:~/go-diameter$
 ``` go run github.com/fiorix/go-diameter/v4/examples/s6a_client -addr 127.0.0.1:3868 -network_type tcp```
 
 * S6a Client/Server Logs
+``` 
+Authentication-Information-Request (AIR) ...
+Authentication-Information-Answer (AIA) ...
+2023/02/06 10:21:35 Unmarshaled Authentication-Information Answer:
+main.AIA{SessionID:"session;3475979806", ResultCode:0x7d1, OriginHost:"server", OriginRealm:"go-diameter", AuthSessionState:"", ExperimentalResult:main.ExperimentalResult{ExperimentalResultCode:0x0}, AIs:[]main.AuthenticationInfo{main.AuthenticationInfo{EUtranVector:main.EUtranVector{RAND:"\x94\xbf/T\xc3v\xf3\x0e\x87\x83\x06k'\x18Z\x19", XRES:"F\xf0\"\xb9%#\xf58", AUTN:"\xc7G!;\xad~\x80\x00)\bo%\x11\fP_", KASME:"\xbf\x00\xf9\x80h3\"\x0e\xa1\x1c\xfa\x93\x03@\xd6\xf8\x02\xd51Y\xebĝ=\t\x14{\xeb!\xec\xcb:"}}}}
+2023/02/06 10:21:35
+Sending ULR to 127.0.0.1:3868
+Update-Location-Request (ULR) ...
+Update-Location-Answer (ULA) ...
+2023/02/06 10:21:35 Unmarshaled UL Answer:```
+
 
 
