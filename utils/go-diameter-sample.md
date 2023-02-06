@@ -76,3 +76,8 @@ Sending ULR to 127.0.0.1:3868
 Update-Location-Request (ULR) ...
 Update-Location-Answer (ULA) ...
 2023/02/06 10:21:35 Unmarshaled UL Answer:```
+
+## Run the test on s6a_proxy and s6a_server
+* go-diameter/examples/s6a_proxy/service/test
+* go test 
+   ```ok      github.com/fiorix/go-diameter/v4/examples/s6a_proxy/service/test        0.546s```
