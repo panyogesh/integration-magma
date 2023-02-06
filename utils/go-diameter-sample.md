@@ -19,7 +19,7 @@
 * git clone https://github.com/fiorix/go-diameter.git
 * cd go-diameter/
 
-## Run the go-diameter server program
+## Run the go-diameter client/server program
 
 ### Run the server program
 [TERMINAL-1]$ source ~/.profile
@@ -55,3 +55,16 @@ Hello-Message-Answer (HMA)
         Destination-Host {Code:293,Flags:0x40,Length:16,VendorId:0,Value:DiameterIdentity{client},Padding:2}
 vagrant@oai-gnb-ue-sim:~/go-diameter$
 ```
+
+
+## Run the go-diameter s6a_client/s6a_server program
+
+* Running s6a_server
+``` go run github.com/fiorix/go-diameter/v4/examples/s6a_server```
+
+* Running s6a_client
+``` go run github.com/fiorix/go-diameter/v4/examples/s6a_client -addr 127.0.0.1:3868 -network_type tcp```
+
+* S6a Client/Server Logs
+
+
