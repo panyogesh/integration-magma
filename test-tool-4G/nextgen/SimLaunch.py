@@ -34,6 +34,7 @@ class SimGNBUEParams(NamedTuple):
     ue_key: str
     ue_opc: str
     mcc_mnc: str
+    service_request: bool
     connected_loop: bool
     dut_params: NamedTuple("DUTMachineParams",
                            [('mme_remote_ip_addr', str), ('username', str),
@@ -121,7 +122,10 @@ class SimProcess():
         self.imsi_str = imsi_id
         self.upper_limit_imsi = upper_limit_imsi
         self.ran_id_list = []
-    
+        self.control_plane_stats =  {'attach_success': 0, 'detach_success': 0,
+                                     'service_request_success': 0,
+                                     'release_success': 0}
+
         # Populate the ran id list
         lower_limit=int(self.imsi_str)
         upper_limit=int(self.upper_limit_imsi)
@@ -328,6 +332,7 @@ class SimProcess():
             time.sleep(random.randint(5, 10))
 
         if attach_success == len(self.ran_id_list):
+            self.control_plane_stats['attach_success'] += attach_success
             return True
 
         return False
@@ -343,12 +348,13 @@ class SimProcess():
                 detach_success += 1
                 res = self.read_server_response("sending UEContextReleaseComplete")
                 if not res:
-                    self.logger.warn(
+                    self.logger.warning(
                      "%% {ran_tuple[0]} UEContextReleaseComplete missing")
 
             time.sleep(random.randint(5, 10))
 
         if detach_success == len(self.ran_id_list):
+            self.control_plane_stats['detach_success'] += detach_success
             return True
 
         return False
@@ -366,6 +372,7 @@ class SimProcess():
             time.sleep(random.randint(5, 10))
 
         if release_success == len(self.ran_id_list):
+            self.control_plane_stats['release_success'] += release_success
             return True
 
         return False
@@ -378,11 +385,13 @@ class SimProcess():
         for ran_tuple in self.ran_id_list:
             service_request_comand=(ran_tuple[0], 'SERVICE_REQUEST')
             if self.send_command_to_server(service_request_comand):
-                release_success += 1
+                service_request_success += 1
 
             time.sleep(random.randint(5, 10))
 
         if service_request_success == len(self.ran_id_list):
+            self.control_plane_stats['service_request_success'] += \
+                    service_request_success
             return True
 
         return False
@@ -434,39 +443,6 @@ class SimProcess():
         self.send_command_to_server(quit_cmd_default_ue)
 
 
-# Loop for connected request
-
-
-def service_connect_loop(sim_process: SimProcess):
-    """ Function for calling service connect in loop """
-    if not sim_process.deactivate_gtpu_ip_command_process():
-        sim_process.logger.error("%% Failed in deactivating gtpu ")
-        sim_process.cleanup()
-        return False
-
-    time.sleep(1)
-    if not sim_process.release_ue_context_command_process():
-        sim_process.logger.error("%% Failed to release ue context")
-        return False
-
-    time.sleep(1)
-    if not sim_process.service_request_command_process():
-        sim_process.logger.error("%% Failed to send service request command")
-        return False
-
-    time.sleep(1)
-    if not sim_process.activate_gtpu_ip_command_process():
-        sim_process.logger.error("%% Failed in activating gtpu ip")
-        return False
-
-    time.sleep(1)
-    if not sim_process.verify_tunnel_data_path():
-        sim_process.logger.error("%% Traffic Tests are not through")
-        # sim_process.cleanup()
-
-    time.sleep(1)
-    return True
-
 # Loop for attach and service request
 def attach_process_in_loop(sim_process: SimProcess, connected_loop: bool):
     """ Iteration for attach and service request """
@@ -498,9 +474,49 @@ def attach_process_in_loop(sim_process: SimProcess, connected_loop: bool):
                 " --- Looping %d attach_iteration ---", attach_iteration)
         time.sleep(time_interval)
 
+# Loop for service request
+def service_connect_loop(sim_process: SimProcess, connected_loop: bool):
+    """ Iteration for attach and service request """
+    service_request_iteration = 1
+    time_interval = 1
+
+    # Start the attach procedure & Wait for Expect
+    if not sim_process.attach_command_process():
+        sim_process.logger.error("%% Attach command failed")
+        return False
+
+    if connected_loop:
+        service_request_iteration = 600
+        time_interval = 60
+
+    while service_request_iteration:
+        # Start the ue context release process & wait for expect
+        if not sim_process.release_ue_context_command_process():
+            sim_process.logger.error("%% Release UE Context failed")
+            break
+
+        time.sleep(random.randint(50, 150))
+
+        # Start the service request process & wait for expect
+        if not sim_process.service_request_command_process():
+            sim_process.logger.error("%% Service request command failed")
+            break
+
+        service_request_iteration -= 1
+        sim_process.logger.info(
+                " --- Looping %d service_request_iteration ---", service_request_iteration)
+        time.sleep(time_interval)
+
+
+    # Start the detach procedure & wait for expect
+    if not sim_process.detach_command_process():
+        sim_process.logger.error("%% Detach command failed")
+        if not sim_process.s1ap_reset_request():
+            sim_process.logger.error("%% S1AP Reset also failed")
+
 # Launch the client process
 def launch_client(imsi_id: str, upper_limit_imsi: str,
-                  connected_loop: bool) -> bool:
+                  service_request: bool, connected_loop: bool) -> bool:
     """ Launch the client and connect with FassFerraz server """
     sim_process = SimProcess("FasFerraz-Client", imsi_id, upper_limit_imsi)
     if len(sim_process.ran_id_list) == 0:
@@ -516,7 +532,20 @@ def launch_client(imsi_id: str, upper_limit_imsi: str,
         sim_process.logger.error("%% Failed to have setup procedure completed")
         return False
 
-    attach_process_in_loop(sim_process, connected_loop)
+    if service_request:
+        service_connect_loop(sim_process, connected_loop)
+    else:
+        attach_process_in_loop(sim_process, connected_loop)
+
+    sim_process.logger.info(" Control Plane Packets     Counters ")
+    sim_process.logger.info("attach_success             = %d ", 
+                    sim_process.control_plane_stats['attach_success'])
+    sim_process.logger.info("detach_success             = %d ", 
+                    sim_process.control_plane_stats['detach_success'])
+    sim_process.logger.info("service_request_success    = %d ", 
+                    sim_process.control_plane_stats['service_request_success'])
+    sim_process.logger.info("release_success            = %d ", 
+                    sim_process.control_plane_stats['release_success'])
 
     sim_process.cleanup()
     return True
@@ -556,6 +585,12 @@ def update_sim_dut_params(args) -> SimGNBUEParams:
         print("MCC-MNC is not in correct format")
         sys.exit()
 
+    # Check if operation is service request
+    if args.service_request:
+        service_request = args.service_request
+    else:
+        service_request = False
+
     # Do we need connected loop test
     if args.connected_loop:
         connected_loop = args.connected_loop
@@ -588,7 +623,8 @@ def update_sim_dut_params(args) -> SimGNBUEParams:
 
     return SimGNBUEParams(local_ip, args.imsi, upper_limit_imsi,
                           key_str, opc_str,
-                          args.mcc_mnc, connected_loop, dut_params)
+                          args.mcc_mnc, service_request, connected_loop,
+                          dut_params)
 
 
 def excute_lte_call_flow(conf_params: SimGNBUEParams):
@@ -614,7 +650,7 @@ def excute_lte_call_flow(conf_params: SimGNBUEParams):
 
     # Launching client
     launch_client(conf_params.imsi_id, conf_params.upper_limit_imsi,
-                  conf_params.connected_loop)
+                  conf_params.service_request, conf_params.connected_loop)
 
     try:
         os.waitpid(sim_proc_id.pid, 0)
@@ -652,7 +688,11 @@ if __name__ == '__main__':
     PARSER.add_argument('--dut_passwd', type=str,
                         help="password of dut machine")
 
-    PARSER.add_argument('--connected_loop', type=bool, default=False)
+    PARSER.add_argument('--service_request', type=bool, default=False,
+                        help="Trigger the service request operations")
+
+    PARSER.add_argument('--connected_loop', type=bool, default=False,
+                        help="If set to true will iterate more then 500 iterations")
 
     ARGUMENTS = PARSER.parse_args()
 

@@ -57,8 +57,6 @@ RUN pip3 install -r requirements.txt
 
 COPY SimLaunch.py  /app/eNB
 
-COPY launch_script.py /app/eNB
-
 ENV MME_IP_ADDRESS "192.168.62.176"
 
 ENV IMSI_BASE "724990000000008"
@@ -67,6 +65,10 @@ ENV MCC_MNC_STR "72499"
 
 ENV UPPER_LIMIT_IMSI "724990000000011"
 
-CMD ["sh", "-c", "python3.8 /app/eNB/SimLaunch.py --mme_ip ${MME_IP_ADDRESS} --imsi  ${IMSI_BASE} --mcc_mnc ${MCC_MNC_STR} --upper_limit_imsi  ${UPPER_LIMIT_IMSI}"]
+ENV SERVICE_REQUEST True
+
+ENV CONNECTED_LOOP False
+
+CMD ["sh", "-c", "python3.8 /app/eNB/SimLaunch.py --mme_ip ${MME_IP_ADDRESS} --imsi  ${IMSI_BASE} --mcc_mnc ${MCC_MNC_STR} --upper_limit_imsi  ${UPPER_LIMIT_IMSI} --service_request ${SERVICE_REQUEST}"]
 
 #CMD ["/bin/sh"]
