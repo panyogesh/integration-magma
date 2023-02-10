@@ -49,8 +49,6 @@ class UtilManager:
     @classmethod
     def get_ip_addresses(cls, family) -> str:
 
-        return "192.168.62.154"
-
         """ Get the first no-lo ip address for docker """
         for iface in netifaces.interfaces():
             if iface == 'lo' or 'tun' in iface:
@@ -596,7 +594,7 @@ def update_sim_dut_params(args) -> SimGNBUEParams:
 def excute_lte_call_flow(conf_params: SimGNBUEParams):
     """ Main starter function. Launches server and then client """
     server_launch_cmd =\
-        "python3.8 -O ./eNB/eNB_LOCAL.py -i {} -m {} -I {} -K {} -C {} -o {}\
+        "python3.8 -O ./eNB_LOCAL.py -i {} -m {} -I {} -K {} -C {} -o {}\
         --upper_limit_imsi {}".format(
             conf_params.enb_local_ip_addr,
             conf_params.dut_params.mme_remote_ip_addr,
