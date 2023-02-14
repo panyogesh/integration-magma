@@ -9,3 +9,5 @@ sudo python3.8 ./eNB/eNB_LOCAL.py -i 192.168.62.154 -m 192.168.62.176 -I 7249900
 ## Inside the container
 python3.8 /app/eNB/SimLaunch.py --mme_ip ${MME_IP_ADDRESS} --imsi  ${IMSI_BASE} --mcc_mnc ${MCC_MNC_STR} --upper_limit_imsi  ${UPPER_LIMIT_IMSI} --service_request ${SERVICE_REQUEST}
 
+# Taking the patch
+git format-patch -1 <Commit-ID>
