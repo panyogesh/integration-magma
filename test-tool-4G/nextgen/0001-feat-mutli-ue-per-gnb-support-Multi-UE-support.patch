@@ -1,17 +1,19 @@
-From 3f5a5d4e2d63890d641f28048ee13f666a3195db Mon Sep 17 00:00:00 2001
+From 8c58bcb4ac6d5b30e81538c2ad68a21f42eda803 Mon Sep 17 00:00:00 2001
 From: Yogesh Pandey <yogesh@wavelabs.ai>
-Date: Thu, 9 Feb 2023 17:26:34 +0000
-Subject: [PATCH] fix(multi-ue-support): Add multi ue support
+Date: Thu, 16 Feb 2023 17:55:04 +0000
+Subject: [PATCH] feat(mutli-ue-per-gnb-support): Multi UE support
 
-1. Fix for multi ue support
+1. Multi ue support on single gnb
+2. Support for test mcc/mnc
 
 Signed-off-by: Yogesh Pandey <yogesh@wavelabs.ai>
 ---
  4GToolsReadme.md  |   8 +
  eMENU.py          |  18 +-
+ eNAS.py           |  19 ++-
  eNB_LOCAL.py      | 419 ++++++++++++++++++++++++++++------------------
  eNB_ServerMgmt.py |  16 ++
- 4 files changed, 290 insertions(+), 171 deletions(-)
+ 5 files changed, 303 insertions(+), 177 deletions(-)
  create mode 100644 4GToolsReadme.md
  create mode 100644 eNB_ServerMgmt.py
 
@@ -66,8 +68,51 @@ index d2fd7bd..9e2113b 100644
 +    return session_dict
 +
 + 
+diff --git a/eNAS.py b/eNAS.py
+index 05fe379..6bee402 100644
+--- a/eNAS.py
++++ b/eNAS.py
+@@ -1148,10 +1148,14 @@ def encode_apn(apn):
+         apn_bytes += struct.pack("!B", len(word)) + word.encode()
+     return apn_bytes
+     
+-def encode_guti(mcc_mnc, mme_group_id, mme_code, m_tmsi):
++def encode_guti(mcc_mnc_r, mme_group_id, mme_code, m_tmsi):
+     guti = b'\xf6'
+-    mcc_mnc = str(mcc_mnc)
+-    
++    mcc_mnc = str(mcc_mnc_r)
++
++    #Length < 5 indicates leading 0s are missed out
++    if len(mcc_mnc) < 5:
++        mcc_mnc = f'{mcc_mnc_r:05d}'
++
+     if len(mcc_mnc) == 5: mcc_mnc += 'f'
+     guti += unhexlify(mcc_mnc[1] + mcc_mnc[0] + mcc_mnc[5] +mcc_mnc[2]+ mcc_mnc[4]+ mcc_mnc[3])
+     guti += struct.pack("!H", mme_group_id)
+@@ -1159,8 +1163,11 @@ def encode_guti(mcc_mnc, mme_group_id, mme_code, m_tmsi):
+     guti += struct.pack("!L", m_tmsi)
+     return guti
+ 
+-def encode_imsi(imsi):
+-    imsi = str(imsi)
++def encode_imsi(imsi_r):
++    imsi = str(imsi_r)
++    if len(imsi) < 15:
++        imsi = f'{imsi_r:015d}'
++
+     aux = unhexlify(imsi[0] + '9')
+     for i in range(1,15,2):
+         aux += unhexlify(imsi[i+1] + imsi[i])
+@@ -1176,4 +1183,4 @@ def encode_imei(imei):
+     for i in range(1,len(imei)-1,2):
+         aux += unhexlify(imei[i+1] + imei[i])
+     return aux 
+-    
+\ No newline at end of file
++    
 diff --git a/eNB_LOCAL.py b/eNB_LOCAL.py
-index 8a86f77..b283026 100644
+index fcae881..60674e1 100644
 --- a/eNB_LOCAL.py
 +++ b/eNB_LOCAL.py
 @@ -19,7 +19,7 @@ from threading import Thread
@@ -385,7 +430,7 @@ index 8a86f77..b283026 100644
      elif type == 'unsuccessfulOutcome':
          
          exit(1)
-@@ -2496,14 +2622,32 @@ def decapsulate_gtp_u(args):
+@@ -2497,14 +2623,32 @@ def decapsulate_gtp_u(args):
  ######################################################################################################################################
  ######################################################################################################################################
  
@@ -421,7 +466,7 @@ index 8a86f77..b283026 100644
      parser = OptionParser()    
      parser.add_option("-i", "--ip", dest="eNB_ip", help="eNB Local IP Address")
      parser.add_option("-m", "--mme", dest="mme_ip", help="MME IP Address")
-@@ -2517,161 +2661,104 @@ def main():
+@@ -2518,161 +2662,104 @@ def main():
      parser.add_option("-o", "--operator", dest="plmn", help="Operator MCC+MNC")
      parser.add_option("--tac1", dest="tac1", help="1st tracking area code")
      parser.add_option("--tac2", dest="tac2", help="2nd tracking area code")

@@ -47,11 +47,11 @@ RUN mkdir -p /app/eNB/log
 
 ENV LOGPATH=/app/eNB/log
 
-RUN git checkout 27b48105a8dc4ef241bc6f2e7ab3a94a4a600a64
+RUN git checkout 60f5196691bcfc25657b60b3a13bcb790adc7a2d
 
-COPY 0001-fix-multi-ue-support-Add-multi-ue-support.patch /app/eNB
+COPY 0001-feat-mutli-ue-per-gnb-support-Multi-UE-support.patch /app/eNB
 
-RUN git apply 0001-fix-multi-ue-support-Add-multi-ue-support.patch
+RUN git apply 0001-feat-mutli-ue-per-gnb-support-Multi-UE-support.patch
 
 RUN pip3 install -r requirements.txt
 
