@@ -1,0 +1,19 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/jammy64"
+  config.disksize.size = '100GB'
+
+  config.vm.define :orc8r, autostart: false do |orc8r|
+    orc8r.vm.hostname = "orc8r"
+
+    orc8r.vm.provider "virtualbox" do |vb|
+      vb.name = "orc8r"
+      vb.linked_clone = true
+      vb.customize ["modifyvm", :id, "--memory", "16384"]
+      vb.customize ["modifyvm", :id, "--cpus", "8"]
+      vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+    end
+  end
+end

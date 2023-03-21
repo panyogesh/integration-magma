@@ -224,6 +224,14 @@ class SimProcess():
                     self.client_sock.recv(self.socket_buffer)
                 except ConnectionResetError:
                     self.logger.error("Connection reset")
+                    return False
+                except Exception as e:
+                    self.logger.error(e)
+                    self.logger.error(" Server got killed ")
+                    return False
+
+                if len(msg_from_server) == 0:
+                    return False
 
                 # Append the messages in list_msg
                 self.list_msg.append(msg_from_server.decode())
@@ -538,13 +546,13 @@ def launch_client(imsi_id: str, upper_limit_imsi: str,
         attach_process_in_loop(sim_process, connected_loop)
 
     sim_process.logger.info(" Control Plane Packets     Counters ")
-    sim_process.logger.info("attach_success             = %d ", 
+    sim_process.logger.info("attach_success             = %d ",
                     sim_process.control_plane_stats['attach_success'])
-    sim_process.logger.info("detach_success             = %d ", 
+    sim_process.logger.info("detach_success             = %d ",
                     sim_process.control_plane_stats['detach_success'])
-    sim_process.logger.info("service_request_success    = %d ", 
+    sim_process.logger.info("service_request_success    = %d ",
                     sim_process.control_plane_stats['service_request_success'])
-    sim_process.logger.info("release_success            = %d ", 
+    sim_process.logger.info("release_success            = %d ",
                     sim_process.control_plane_stats['release_success'])
 
     sim_process.cleanup()
@@ -586,7 +594,7 @@ def update_sim_dut_params(args) -> SimGNBUEParams:
         sys.exit()
 
     # Check if operation is service request
-    if args.service_request:
+    if args.service_request == "True":
         service_request = args.service_request
     else:
         service_request = False
