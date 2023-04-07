@@ -1,6 +1,7 @@
 # Few quick information about production level orchestrator
 
-## Script for collecting logs from all orchestrator
+## Log Collection
+### Script for collecting logs from all orchestrator
 ```
 #!/usr/bin/env bash
 
@@ -14,3 +15,24 @@ for p in $(kubectl get pods | grep ^${DEPLOYMENT}- | cut -f 1 -d ' '); do
     kubectl logs $p
 done
 ```
+
+## Quick Steps to install production level orchestration
+* Refernce : https://github.com/magma/magma/blob/master/docs/readmes/orc8r/deploy_using_ansible.md
+* Steps 
+   - sudo bash -c "$(curl -sL https://github.com/magma/magma-deployer/raw/main/deploy-orc8r.sh)"
+   - sudo su - magma
+   - kubectl get pods
+   - cd ~/magma-deployer
+   - ansible-playbook config-orc8r.yml
+
+## Curl Command Examples
+* Reference : https://github.com/ShubhamTatvamasi/magma-curl
+* Steps
+    - Follow the steps mentioned above for installing production level orchestrator
+    - Got secrets : cd magma-deployer/secrets
+    - Execute the following command : 
+      ```
+      curl  -k --cert ./admin_operator.pem --key admin_operator.key.pem -X 'GET'   'https://api.magma.local/magma/v1/tenants'   -H 'accept: application/json'
+      []
+      ```
+     
