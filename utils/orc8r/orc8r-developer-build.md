@@ -1,8 +1,9 @@
-# Building Orchestrator
+# Quick Reference for Developer based Orchestrator
 
-## Install pre-requisites
+## Installation
+### Install pre-requisites
 
-### Install dockers
+#### Install dockers
 
 Refrence : https://docs.docker.com/engine/install/ubuntu/
 * sudo apt-get update
@@ -24,7 +25,7 @@ Refrence : https://docs.docker.com/engine/install/ubuntu/
 ### Install go language
 sudo apt install golang-go
 
-## Verify the packages
+### Verify the packages
 
 * Verifying dockers
 ```
@@ -66,26 +67,26 @@ go version go1.18.1 linux/amd64
 vagrant@ubuntu-jammy:~/magma/orc8r/cloud/test-results$
 ```
 
-## Checkout the code 
+### Checkout the code 
 git clone https://github.com/magma/magma.git
 
-## Building & Installing Orchestrator
+### Building & Installing Orchestrator
 * cd magma/orc8r/cloud/docker 
 * sudo PWD=$PWD ./build.py --all   
 * sudo PWD=$PWD ./run.py --metrics 
 
-## Connecting to Swagger
+### Connecting to Swagger
 * cd ../../../.cache/test_certs 
 * cp admin_operator.pfx ../../../ 
 * https://172.16.9.3:9443/swagger/v1/ui 
 
-## Building and Installing NMS
+### Building and Installing NMS
 * cd magma/nms
 * sudo docker-compose build magmalte  
 * sudo docker-compose up -d 
 * sudo ./scripts/dev_setup.sh 
 
-## Update the hosts file
+### Update the hosts file
 
 * C:\Windows\System32\drivers\etc\hosts 
 
@@ -96,6 +97,15 @@ git clone https://github.com/magma/magma.git
 192.168.56.101 master.magma.test 
 192.168.56.101 host
 
-## Access the NMS
+### Access the NMS
 magma-test : https://magma-test/
 host : https://host
+
+# Curl Based Configurations
+Path: magma/.cache/test_certs
+
+```
+curl  -k --cert ./admin_operator.pem --key admin_operator.key.pem -X 'GET'   'https://172.16.9.6:9443/magma/v1/tenants'   -H 'accept: application/json'
+
+[{"id":1,"name":"host","networks":null},{"id":2,"name":"fb-test","networks":null},{"id":3,"name":"magma-test","networks":["feg_lte_test","feg_test","mpk_test","test"]}]
+```  
