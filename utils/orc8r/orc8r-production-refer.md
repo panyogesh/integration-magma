@@ -1,4 +1,4 @@
-# Few quick information about production level orchestrator
+# Quick refernce to production level orchestrator
 
 ## Log Collection
 ### Script for collecting logs from all orchestrator
