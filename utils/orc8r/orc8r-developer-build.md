@@ -110,9 +110,10 @@ curl  -k --cert ./admin_operator.pem --key admin_operator.key.pem -X 'GET'   'ht
 
 [{"id":1,"name":"host","networks":null},{"id":2,"name":"fb-test","networks":null},{"id":3,"name":"magma-test","networks":["feg_lte_test","feg_test","mpk_test","test"]}]
 ```  
-**Configure APN and fetch APN list for a network** 
+**Configure APN and fetch APN list for a network**
+
 a. Create apn conf file apn.json
-'''
+```
 root@pmn-orc8r:~/pmn-systems/.cache/test_certs# cat apn.json
 {
   "apn_configuration": {
@@ -131,12 +132,16 @@ root@pmn-orc8r:~/pmn-systems/.cache/test_certs# cat apn.json
   "apn_name": "inet6"
 }
 root@pmn-orc8r:~/pmn-systems/.cache/test_certs#
-'''
+```
 b. Configure apn to Orc8r using file apn.json
-'''
+
+```
 curl -k --cert ./admin_operator.pem --key admin_operator.key.pem -X 'POST'   'https://172.16.5.93:9443/magma/v1/lte/test1/apns'   -H 'accept: application/json'   -H 'Content-Type: application/json' --data-binary @apn.json
-'''
+
+```
 c. 
-'''
+
+```
 curl -k --cert ./admin_operator.pem --key admin_operator.key.pem -X 'GET'   'https://172.16.5.93:9443/magma/v1/lte/test1/apns'   -H 'accept: application/json' | json_pp
-'''
+
+```
