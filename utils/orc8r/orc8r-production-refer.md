@@ -35,4 +35,5 @@ done
       curl  -k --cert ./admin_operator.pem --key admin_operator.key.pem -X 'GET'   'https://api.magma.local/magma/v1/tenants'   -H 'accept: application/json'
       []
       ```
-     
+## References
+https://wiki.magmacore.org/display/HOME/2023-03-09+Meeting
