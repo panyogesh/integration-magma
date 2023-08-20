@@ -1,6 +1,6 @@
 # This document for the ebpf using python Quick How to Guide
 
-# Package installation
+## Package installation
 * sudo apt install python3-pip
 * pip install bcc
 * pip install pytest
@@ -10,3 +10,12 @@
 https://github.com/lizrice/ebpf-beginners/blob/main/hello.py
 ```
 From other terminal do some operations.
+
+## C code installation for EBPF
+* sudo apt install clang
+* git clone --depth 1 https://github.com/libbpf/libbpf
+* cd libbpf/src/
+* sudo make install
+
+Sample code : learning-ebpf/chapter3
+
