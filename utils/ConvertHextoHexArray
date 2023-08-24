@@ -1,0 +1,30 @@
+#include <iostream>
+#include  <iomanip>
+
+bool StringToHex(const std::string &inStr, unsigned char *outStr)
+{
+    size_t len = inStr.length();
+    int j=0;
+    for (size_t i = 0; i < len; i += 2) {
+        sscanf(inStr.c_str() + i, "%2hhx", outStr+j);
+        j++;
+    }
+    return true;
+}
+
+int main () {
+        unsigned char outstr[4096]={};
+        std::string hexstr =
+        "000c40030e000000544019a2ba8b005f000006000800020001001a002d2c176bf1100019b01000864001400060bf4b51010741010bf600f110000201f200465307e0010c4001000000400501d011d191e06f04e0f26000004300060000f1100007006440080000f1100019b01000860201d011d191e06f04e000060040f2004653";
+
+   StringToHex(hexstr, outstr);
+
+   int i=0;
+   for (i=0; i<hexstr.length()/2; i++){
+       if (i==0) { std::cout <<"       ";}
+       std::cout <<std::hex << "0x"<< std::setfill('0') << std::setw(2) << int(outstr[i]) << ", ";
+       if (i%16 == 0) std::cout<<std::endl <<"       ";
+   }
+
+   return (0);
+}
