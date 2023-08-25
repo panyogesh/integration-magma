@@ -12,7 +12,10 @@ https://github.com/lizrice/ebpf-beginners/blob/main/hello.py
 From other terminal do some operations.
 
 ## C code installation for EBPF
+### Installing CLANG tool
 * sudo apt install clang
+
+### Installing libbpf
 * Following are specific to ubuntu 22.0.4  
   * sudo apt install pkg-config
   * sudo apt install build-essential
@@ -21,6 +24,18 @@ From other terminal do some operations.
 * git clone --depth 1 https://github.com/libbpf/libbpf
 * cd libbpf/src/
 * sudo make install
+
+### Installing bpftools
+* sudo apt update && sudo apt install -y git
+* git clone --recurse-submodules https://github.com/libbpf/bpftool.git
+* cd bpftool/src
+* sudo ln -s /usr/bin/llvm-strip-14 /usr/bin/llvm-strip
+* make
+* sudo make install
+*  bpftool
+
+  
+
 
 Sample code : learning-ebpf/chapter3
 
