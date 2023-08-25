@@ -13,6 +13,11 @@ From other terminal do some operations.
 
 ## C code installation for EBPF
 * sudo apt install clang
+* Following are specific to ubuntu 22.0.4  
+  * sudo apt install pkg-config
+  * sudo apt install build-essential
+  * sudo apt install libelf-dev
+
 * git clone --depth 1 https://github.com/libbpf/libbpf
 * cd libbpf/src/
 * sudo make install
