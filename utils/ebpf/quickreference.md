@@ -34,8 +34,28 @@ From other terminal do some operations.
 * sudo make install
 *  bpftool
 
-  
-
-
 Sample code : learning-ebpf/chapter3
+
+## Quick Notes on EBPF
+### Compiling BPF files
+hello.bpf.o: %.o: %.c clang -target bpf -I/usr/include/$(shell uname -m)-linux-gnu -g -O2 -c $< -o $@
+
+### Inspect BPF files
+llvm-objdump -S hello.bpf.o
+
+### Load BPF program
+* bpftool prog load hello.bpf.o /sys/fs/bpf/hello
+* ls /sys/fs/bpf
+
+### Inspecting BPF program
+bpftool prog list
+bpftool prog show id 540 --pretty   <<< 540 is the ID of program
+
+### Translated byte code
+bpftool prog dump xlated name hello 
+
+
+
+
+
 
