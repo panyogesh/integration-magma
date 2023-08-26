@@ -43,16 +43,28 @@ hello.bpf.o: %.o: %.c clang -target bpf -I/usr/include/$(shell uname -m)-linux-g
 ### Inspect BPF files
 llvm-objdump -S hello.bpf.o
 
-### Load BPF program
-* bpftool prog load hello.bpf.o /sys/fs/bpf/hello
-* ls /sys/fs/bpf
+### Cheat Sheet
+* sudo bpftool prog load hello.bpf.o /sys/fs/bpf/hello  ```Load the hello program in kernel```
+* sudo ls /sys/fs/bpf                                   ```To check the loaded program```
+* sudo bpftool prog list                                ```Inspect the loaded program```
+                                                        ```Every loded program has been assigned the ID```
+                                                      ```Use this command to get the ID```
+* sudo bpftool prog show id 540 --pretty                ```Certain information about the program```
+* sudo bpftool prog dump xlated name hello              ```Translated bytecode```
+* sudo bpftool net attach xdp id 111 dev enp0s3         ```Attach the program with interface```
 
-### Inspecting BPF program
-bpftool prog list
-bpftool prog show id 540 --pretty   <<< 540 is the ID of program
+* sudo ip link set dev eth0 xdp obj hello.bpf.o sec xdp ```Otherways of attaching```
+* sudo ip link set dev eth0 xdp off
 
-### Translated byte code
-bpftool prog dump xlated name hello 
+* sudo bpftool net list                                 ```To see the attached interface```
+* sudo cat /sys/kernel/debug/tracing/trace_pipe         ```for checking the packet output```
+* sudo bpftool prog tracelog                            ```Tracing the contents```
+* sudo bpftool map list                                 ```Maps loaded in the kernel```
+* sudo bpftool map dump name hello.bss                  ```To access global variables```
+* sudo bpftool net detach xdp dev enp0s3                ```Detach the program from the interface```
+* sudo  rm /sys/fs/bpf/hello                            ```Remove the program from the kernel```
+
+
 
 
 
