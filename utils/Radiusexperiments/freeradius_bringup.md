@@ -13,6 +13,7 @@ make
 sudo make install
 ```
 ## Testing freeradius
+```
 1.
 /usr/local/etc/raddb/clients.conf
 
@@ -24,3 +25,4 @@ client localhost {
 2.
 /usr/local/etc/raddb/users
 testing Cleartext-Password := "password"  <<<<<< Add this line
+```
