@@ -26,3 +26,10 @@ client localhost {
 /usr/local/etc/raddb/users
 testing Cleartext-Password := "password"  <<<<<< Add this line
 ```
+## Radtest config
+```
+radtest -x testing password localhost 0 testing123
+radtest -x -t mschap testing password localhost 0 testing123
+```
+
+
