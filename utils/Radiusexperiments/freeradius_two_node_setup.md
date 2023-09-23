@@ -1,5 +1,8 @@
 # Setting up free radius across two machines
 
+## References
+* https://linuxlasse.net/linux/howtos/Freeradius_EAP-PEAP_(TLS)
+
 ## Installation
 Refer to link for [my-freeradius](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/freeradius_bringup_basic_test.md)  installation.
 
