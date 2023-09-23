@@ -34,6 +34,8 @@ Refer to link for [my-freeradius](https://github.com/panyogesh/integration-magma
       ```radtest testuser1 "mysecretpassword" 10.1.1.10 1812 my_Sup4r_SeCret_Pa$```
 
   Output
+  ### Normal test
+  * radtest testuser1 "mysecretpassword" 10.1.1.10 1812 my_Sup4r_SeCret_Pa$
   ```
   root@distro-magma:/home/vagrant# radtest testuser1 "mysecretpassword" 10.1.1.10 1812 my_Sup4r_SeCret_Pa$
   Sent Access-Request Id 18 from 0.0.0.0:8016 to 10.1.1.10:1812 length 79
@@ -45,5 +47,22 @@ Refer to link for [my-freeradius](https://github.com/panyogesh/integration-magma
         Cleartext-Password = "mysecretpassword"
    Received Access-Accept Id 18 from 10.1.1.10:714 to 10.1.1.1:32790 length 20
    ```
-
   
+  ### mschap test
+   - radtest -t mschap testuser1 "mysecretpassword" 10.1.1.10 1812 my_Sup4r_SeCret_Pa$
+```
+   root@distro-magma:/home/vagrant# radtest -t mschap testuser1 "mysecretpassword" 10.1.1.10 1812 my_Sup4r_SeCret_Pa$
+Sent Access-Request Id 126 from 0.0.0.0:ae2e to 10.1.1.10:1812 length 135
+        User-Name = "testuser1"
+        MS-CHAP-Password = "mysecretpassword"
+        NAS-IP-Address = 127.0.2.1
+        NAS-Port = 1812
+        Message-Authenticator = 0x00
+        Cleartext-Password = "mysecretpassword"
+        MS-CHAP-Challenge = 0xcbbad6427525a92e
+        MS-CHAP-Response = 0x000100000000000000000000000000000000000000000000000096b120428883f40c34ac8d50b6d8832a9ade48bce9eb8cd3
+Received Access-Accept Id 126 from 10.1.1.10:714 to 10.1.1.1:44590 length 84
+        MS-CHAP-MPPE-Keys = 0x0000000000000000dd15c2ecc68a32fe9abbbc8a210320a4
+        MS-MPPE-Encryption-Policy = Encryption-Allowed
+        MS-MPPE-Encryption-Types = RC4-40or128-bit-Allowed
+```
