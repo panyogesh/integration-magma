@@ -1,7 +1,7 @@
 from github import Github
 import datetime
 
-g = Github('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')
+g = Github('-Your Token-')
 repo = g.get_repo("magma/magma")
 cutdate=datetime.datetime(2023, 1, 1)
 pulls = repo.get_pulls(state='closed', sort='created', direction='desc', base='master')
