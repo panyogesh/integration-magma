@@ -1,3 +1,4 @@
+# Install : pip install PyGithub
 # Script for fetching pull requests for open PRs 
 from github import Github
 g = Github('Your Token')
