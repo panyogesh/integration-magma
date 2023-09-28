@@ -18,6 +18,14 @@ Refer to link for [my-freeradius](https://github.com/panyogesh/integration-magma
 * sudo ip addr add 10.1.1.10/24 dev veth0
 * sudo ip link set dev veth0 up
 
+## Logging into namespace and launcing
+- [main-namespace] 
+    ```/usr/local/etc/raddb# radiusd -X```
+- [main-namespace] 
+    ```sudo ip netns exec WifiSys bash```
+- [WifiSys-namespace] 
+     ```radtest -t pap testuser1 "mysecretpassword" 10.1.1.10 1812 my_Sup4r_SeCret_Pa$```
+
 ## Configuration for setting up 
 - /usr/local/etc/raddb
 - file: users -> testuser1    Cleartext-Password := "mysecretpassword"
@@ -69,6 +77,17 @@ Received Access-Accept Id 126 from 10.1.1.10:714 to 10.1.1.1:44590 length 84
         MS-MPPE-Encryption-Policy = Encryption-Allowed
         MS-MPPE-Encryption-Types = RC4-40or128-bit-Allowed
 ```
-  ### eap test
-   - radtest -t eap testuser1 "mysecretpassword" 10.1.1.10 1812 my_Sup4r_SeCret_Pa$
+  ### pap test
+   - radtest -t pap testuser1 "mysecretpassword" 10.1.1.10 1812 my_Sup4r_SeCret_Pa$
+     ```
+     root@distro-magma:/home/vagrant# radtest -t pap testuser1 "mysecretpassword" 10.1.1.10 1812 my_Sup4r_SeCret_Pa$
+        Sent Access-Request Id 194 from 0.0.0.0:9d68 to 10.1.1.10:1812 length 79
+        User-Name = "testuser1"
+        User-Password = "mysecretpassword"
+        NAS-IP-Address = 127.0.2.1
+        NAS-Port = 1812
+        Message-Authenticator = 0x00
+        Cleartext-Password = "mysecretpassword"
+     Received Access-Accept Id 194 from 10.1.1.10:714 to 10.1.1.1:40296 length 20
+     ```
  
