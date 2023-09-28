@@ -69,3 +69,6 @@ Received Access-Accept Id 126 from 10.1.1.10:714 to 10.1.1.1:44590 length 84
         MS-MPPE-Encryption-Policy = Encryption-Allowed
         MS-MPPE-Encryption-Types = RC4-40or128-bit-Allowed
 ```
+  ### eap test
+   - radtest -t eap testuser1 "mysecretpassword" 10.1.1.10 1812 my_Sup4r_SeCret_Pa$
+ 
