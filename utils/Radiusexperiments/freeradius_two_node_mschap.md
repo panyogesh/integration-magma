@@ -1,5 +1,5 @@
 # Few other combinations
-
+*
 ## Specific message in response
 
 * Radius Server
