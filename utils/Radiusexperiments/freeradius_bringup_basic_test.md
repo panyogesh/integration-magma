@@ -24,6 +24,8 @@ sudo make install
  make
  sudo make install
 ```
+### Reference
+https://lists.freeradius.org/pipermail/freeradius-users/2013-January/064426.html
 
 ## Testing freeradius
 ```
