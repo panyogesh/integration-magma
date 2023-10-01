@@ -1,5 +1,6 @@
-# WPA Supplicant bring up
+# WPA Supplicant & eapol_test bring up
 
+## Common Configuration
 * wget https://w1.fi/releases/wpa_supplicant-2.10.tar.gz
 * tar -zxvf wpa_supplicant-2.10.tar.gz
 * cd wpa_supplicant-2.10/wpa_supplicant/
@@ -16,6 +17,14 @@
 * sudo apt install libnl-genl-3-dev libnl-3-dev
 * sudo apt install libnl-genl-3-dev libnl-route-3-dev
 
+## Compiling for wpa_supplicant
+* References: https://www.linuxtopic.com/2017/08/compile-wpasupplicant-ubuntu.html
+* cd wpa_supplcant
+* make
+* checkinstall
+* Press Enter
+* ./wpa_supplicant -v
+  
 ## Compling for eopl_test
 * CFLAGS=-Wno-deprecated-declarations make eapol_test
 
