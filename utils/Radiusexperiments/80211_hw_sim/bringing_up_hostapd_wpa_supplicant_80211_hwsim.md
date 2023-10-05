@@ -54,3 +54,8 @@
 
    In namespace-1
    * wpa_supplicant -Dnl80211 -iwlan1 -c [./wpa_supplicant.conf](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/80211_hw_sim/configuration_files/wpa_supplicant_running_config) -dd    
+
+ ## Refrences
+ * https://forums.gentoo.org/viewtopic-t-1094432-start-0.html
+ * https://github.com/sysprog21/vwifi
+ * https://www.linuxembedded.fr/2020/05/emulating-wlan-in-linux-part-i-the-80211-stack
