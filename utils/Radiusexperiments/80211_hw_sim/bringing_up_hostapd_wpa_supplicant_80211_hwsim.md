@@ -1,25 +1,25 @@
-# Procedure for bringing up hostapd and wpa_supplicant over 80211_hwsim
+  # Procedure for bringing up hostapd and wpa_supplicant over 80211_hwsim
 
-## Building hostapd and wpa_supplicant
-* [hostapd-compilation](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/hostpad_bringup.md)
-* [wpa_supplicant-compilation](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/wpa_supplicant_bringup.md)
+  ## Building hostapd and wpa_supplicant
+  * [hostapd-compilation](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/hostpad_bringup.md)
+  * [wpa_supplicant-compilation](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/wpa_supplicant_bringup.md)
 
-## Enable 80211-hwsim
-* 80211-hwsim is enabled by default in the kernel but loaded as module
+  ## Enable 80211-hwsim
+  * 80211-hwsim is enabled by default in the kernel but loaded as module
   ```
   grep HWSIM /boot/config-*
   /boot/config-5.4.0-155-generic:CONFIG_MAC80211_HWSIM=m
   ```
-* sudo apt install linux-generic
-* sudo modprobe mac80211_hwsim
-```
+  * sudo apt install linux-generic
+  * sudo modprobe mac80211_hwsim
+   ```
      vagrant@exp-2004-ubuntu:/lib/modules/5.4.0-163-generic$ lsmod | grep mac
      mac80211_hwsim         61440  0
      mac80211              847872  1 mac80211_hwsim
      cfg80211              708608  2 mac80211_hwsim,mac80211
      libarc4                16384  1 mac80211
     vagrant@exp-2004-ubuntu:/lib/modules/5.4.0-163-generic$
-```
+   ```
 
   ## Topology
   ```namespace-ns0 phy0 --------- phy1 namespace-ns1```
@@ -50,7 +50,7 @@
 
   ## Launching hostpad and wpa_supplicant
    In namespace-0
-  * sudo  hostapd -B -f hostapd.log -i wlan0 [hostapd.conf](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/80211_hw_sim/configuration_files/hostpad_running_config)
+   * sudo  hostapd -B -f hostapd.log -i wlan0 [hostapd.conf](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/80211_hw_sim/configuration_files/hostpad_running_config)
 
    In namespace-1
-*  wpa_supplicant -Dnl80211 -iwlan1 -c [./wpa_supplicant.conf](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/80211_hw_sim/configuration_files/wpa_supplicant_running_config) -dd    
+   * wpa_supplicant -Dnl80211 -iwlan1 -c [./wpa_supplicant.conf](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/80211_hw_sim/configuration_files/wpa_supplicant_running_config) -dd    
