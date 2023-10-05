@@ -29,7 +29,7 @@
 * CFLAGS=-Wno-deprecated-declarations make eapol_test
 
 ## Reference
-https://www.linuxtopic.com/2017/08/compile-wpasupplicant-ubuntu.html
-
+* https://www.linuxtopic.com/2017/08/compile-wpasupplicant-ubuntu.html
+* https://hackmd.io/@akiranet/ByhNQ7aGv
 
     
