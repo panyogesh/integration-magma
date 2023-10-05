@@ -1,0 +1,14 @@
+Command to execute: wpa_supplicant -Dnl80211 -iwlan1 -c ./wpa_supplicant.conf -dd
+
+root@exp-2004-ubuntu:/home/vagrant/TMP/wpa_supplicant-2.10/wpa_supplicant/EXP# cat wpa_supplicant.conf
+-----------------------------------------------------------------------------------------------------------------------
+ctrl_interface=/var/run/wpa_supplicant
+ctrl_interface_group=0
+ap_scan=1
+
+network={
+    ssid="test"
+    psk="12345678"
+}
+root@exp-2004-ubuntu:/home/vagrant/TMP/wpa_supplicant-2.10/wpa_supplicant/EXP#
+
