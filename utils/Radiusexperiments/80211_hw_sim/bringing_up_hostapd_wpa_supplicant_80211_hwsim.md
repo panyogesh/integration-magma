@@ -1,5 +1,9 @@
 # Procedure for bringing up hostapd and wpa_supplicant over 80211_hwsim
 
+## Building hostapd and wpa_supplicant
+* [hostapd-compilation](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/hostpad_bringup.md)
+* [wpa_supplicant-compilation](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/wpa_supplicant_bringup.md)
+
 ## Enable 80211-hwsim
 * 80211-hwsim is enabled by default in the kernel but loaded as module
   ```
