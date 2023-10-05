@@ -1,0 +1,19 @@
+Command to Run:  hostapd -i wlan0 -B wlan0_hostapd.conf
+root@exp-2004-ubuntu:/home/vagrant/TMP/hostapd-2.10/hostapd/EXP# cat hostapd.conf
+------------------------------------------------------------------------------------------------------------------------------
+interface=wlan0
+ssid=testnetwork
+
+hw_mode=g
+channel=1
+
+# For both WPA2 and WPA3 we must specify wpa=2
+wpa=2
+# Use wpa_key_mgmt=SAE for WPA3
+wpa_key_mgmt=WPA-PSK
+rsn_pairwise=CCMP
+wpa_passphrase=abcdefgh
+
+# Optionally you can enable management frame protection
+#ieee80211w=1
+root@exp-2004-ubuntu:/home/vagrant/TMP/hostapd-2.10/hostapd/EXP#
