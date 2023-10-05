@@ -16,4 +16,3 @@ wpa_passphrase=abcdefgh
 
 # Optionally you can enable management frame protection
 #ieee80211w=1
-root@exp-2004-ubuntu:/home/vagrant/TMP/hostapd-2.10/hostapd/EXP#
