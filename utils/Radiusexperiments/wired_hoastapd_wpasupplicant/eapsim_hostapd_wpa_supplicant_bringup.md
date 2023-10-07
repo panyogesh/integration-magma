@@ -13,3 +13,6 @@ Same as that of [link](https://raw.githubusercontent.com/panyogesh/integration-m
 
 ## Test Logs
 ![image](https://github.com/panyogesh/integration-magma/assets/69527565/65b824e9-7206-45ad-a8a0-95f50f48d8e4)
+
+## Reference
+https://stackoverflow.com/questions/41639359/test-eap-sim-with-hostapd-and-wpa-supplicant
