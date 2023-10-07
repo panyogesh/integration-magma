@@ -96,6 +96,9 @@ EAPOL authentication completed - result=SUCCESS
 EAPOL: authWhile --> 0
 ```
 
+## Pcap Trace
+![image](https://github.com/panyogesh/integration-magma/assets/69527565/1e5a8d07-3abf-47f4-9134-b97a017068ec)
+
 ## Refrences
 * https://inl.info.ucl.ac.be/blogs/08-10-01-sample-configurations-hostapd-and-wpa-supplicant-make-it-work-wired-connection.html
 * http://www.netprojnetworks.com/creating-fake-certificates-hostapd-mana-hostapd/ (for certs)
