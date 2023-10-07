@@ -95,3 +95,11 @@ EAPOL: SUPP_BE entering state IDLE
 EAPOL authentication completed - result=SUCCESS
 EAPOL: authWhile --> 0
 ```
+
+## Refrences
+* https://inl.info.ucl.ac.be/blogs/08-10-01-sample-configurations-hostapd-and-wpa-supplicant-make-it-work-wired-connection.html
+* http://www.netprojnetworks.com/creating-fake-certificates-hostapd-mana-hostapd/ (for certs)
+* https://medium.com/@venkataharishb/the-best-way-to-attack-wpa-enterprise-wireless-network-78db453ce1c9
+* https://onlinedocs.microchip.com/pr/GUID-3475A0DC-0448-48FB-9AAE-319A834637DE-en-US-3/index.html?GUID-6CCF008D-8580-46EF-8826-CBE62C3DDD8A
+* [red-hat-link](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/assembly_setting-up-an-802-1x-network-authentication-service-for-lan-clients-using-hostapd-with-freeradius-backend_configuring-and-managing-networking#con_certificate-requirements-by-freeradius_assembly_setting-up-an-802-1x-network-authentication-service-for-lan-clients-using-hostapd-with-freeradius-backend)
+* https://blog.scottlowe.org/2013/09/04/introducing-linux-network-namespaces/
