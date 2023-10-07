@@ -1,5 +1,4 @@
 # Setup for hostapd & wpa_supplicant connection for wired connection
-
 ## Machine
 ubuntu:20.04
 
