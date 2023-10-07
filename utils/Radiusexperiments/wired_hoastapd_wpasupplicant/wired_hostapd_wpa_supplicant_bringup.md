@@ -41,7 +41,7 @@ sudo ip netns exec wiredns1 ifconfig veth1 up
 * ln -s server.pem ca.pem
 
 ## Launching hostapd
-* sudo ../hostapd wired_hostapd.conf -dd
+* sudo ../hostapd [wired_hostapd.conf](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/wired_hoastapd_wpasupplicant/conf_files/wired_hostapd/wired_hostapd.conf) -dd
 ```
 EAP-PEAP: SUCCESS_REQ -> SUCCESS
 EAP-PEAP: Derived key - hexdump(len=64): 56 c7 27 ab ce 82 10 96 67 98 7c c4 4c 3e 15 e7 ea aa df f3 d8 d5 5e 6e 16 49 02 e1 f5 44 bb b0 62 c5 1e 68 6d d9 95 36 2f 26 86 f6 9d cd 8c 02 04 7a fc b5 18 1f 23 35 7c 33 24 85 d0 85 e3 28
@@ -63,7 +63,7 @@ IEEE 802.1X: 6a:04:fd:3e:7c:91 - (EAP) retransWhile --> 0
 IEEE 802.1X: 6a:04:fd:3e:7c:91 - aWhile --> 0
 ```
 
-*  ../wpa_supplicant -i veth1 -c ./wired_wpa_supplicant.conf -Dwired -dd -K
+*  ../wpa_supplicant -i veth1 -c ./[wired_wpa_supplicant.conf](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/wired_hoastapd_wpasupplicant/conf_files/wired_wpa_supplicant/wired_wpa_supplicant.conf)  -Dwired -dd -K
 ```
 EAP: EAP entering state IDLE
 EAPOL: SUPP_BE entering state RESPONSE
