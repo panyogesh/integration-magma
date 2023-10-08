@@ -20,8 +20,8 @@
 
 ## Run thes tests
 * cd ~/hostap/tests
-* sudo ./start.sh
 * cd ~/hostap/tests/hwsim
+* sudo ./start.sh
 * sudo ./run-tests.py eap_proto
 * sudo ./run-tests.py ap_wpa2_eap_aka
 
