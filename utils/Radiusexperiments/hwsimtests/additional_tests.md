@@ -10,11 +10,11 @@
 ## Steps to bring the repository
 * git  clone git://w1.fi/hostap.git
 * cd ~/hostap/hostapd
-* cp ~/hostap/tests/hwsim/example-hostapd.config .config
+* cp ../tests/hwsim/example-hostapd.config .config
 * make clean
 * make
-* cd ~/hostap/wpa_supplicant/
-* cp ~/hostap/tests/hwsim/example-wpa_supplicant.config .config
+* cd ../wpa_supplicant/
+* cp ../hostap/tests/hwsim/example-wpa_supplicant.config .config
 * make clean
 * make hostapd hostapd_cli hlr_auc_gw
 
