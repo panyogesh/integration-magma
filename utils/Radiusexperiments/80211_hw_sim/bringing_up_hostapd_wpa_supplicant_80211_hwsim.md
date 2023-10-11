@@ -11,7 +11,7 @@
   /boot/config-5.4.0-155-generic:CONFIG_MAC80211_HWSIM=m
   ```
   * sudo apt install linux-generic
-  * sudo modprobe mac80211_hwsim
+  * sudo modprobe mac80211_hwsim  <<< If it fails..Reboot it.
    ```
      vagrant@exp-2004-ubuntu:/lib/modules/5.4.0-163-generic$ lsmod | grep mac
      mac80211_hwsim         61440  0
