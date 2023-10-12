@@ -10,7 +10,7 @@
 - sudo apt-get install libtalloc-dev
 
 ## Apply the changes
-- wget eap-tls-experiment-freeradius.diff
+- wget [eap-tls-experiment-freeradius.diff](https://raw.githubusercontent.com/panyogesh/integration-magma/main/utils/Radiusexperiments/freeradius/eap-tls-bringup/eap-tls-experiment-freeradius.diff)
 - patch -p1 < eap-tls-experiment-freeradius.diff
 
 ## Compile the code for radius server
