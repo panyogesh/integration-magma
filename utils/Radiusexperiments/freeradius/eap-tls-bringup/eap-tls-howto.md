@@ -90,6 +90,10 @@ MPPE keys OK: 1  mismatch: 0
 SUCCESS
 ```
 
+## Issues
+Freeradius 3.0.15 failing to read server.pem file 
+    - https://lists.freeradius.org/pipermail/freeradius-users/2019-May/095470.html
+
 ## Reference
 * https://wiki.freeradius.org/guide/eduroam
 * https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/configuring_and_managing_networking/assembly_setting-up-an-802-1x-network-authentication-service-for-lan-clients-using-hostapd-with-freeradius-backend_configuring-and-managing-networking#proc_testing-eap-tls-authentication-against-a-freeradius-server-or-authenticator_assembly_setting-up-an-802-1x-network-authentication-service-for-lan-clients-using-hostapd-with-freeradius-backend
