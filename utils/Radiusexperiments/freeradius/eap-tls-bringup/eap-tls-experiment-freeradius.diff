@@ -1,0 +1,176 @@
+diff --git a/raddb/certs/ca.cnf b/raddb/certs/ca.cnf
+index d49991bbc7..3b10d2f48d 100644
+--- a/raddb/certs/ca.cnf
++++ b/raddb/certs/ca.cnf
+@@ -42,21 +42,21 @@ emailAddress		= optional
+ prompt			= no
+ distinguished_name	= certificate_authority
+ default_bits		= 2048
+-input_password		= whatever
+-output_password		= whatever
++input_password		= camypassword
++output_password		= camypassword
+ x509_extensions		= v3_ca
+ 
+ [certificate_authority]
+-countryName		= FR
+-stateOrProvinceName	= Radius
+-localityName		= Somewhere
+-organizationName	= Example Inc.
+-emailAddress		= admin@example.org
+-commonName		= "Example Certificate Authority"
++countryName		= IN
++stateOrProvinceName	= Telengana
++localityName		= Madhapur
++organizationName	= MyCompany
++emailAddress		= admin@mycompany.org
++commonName		= "Mycompany Certificate Authority"
+ 
+ [v3_ca]
+ subjectKeyIdentifier	= hash
+ authorityKeyIdentifier	= keyid:always,issuer:always
+ basicConstraints	= critical,CA:true
+-crlDistributionPoints	= URI:http://www.example.org/example_ca.crl
++crlDistributionPoints	= URI:http://www.mycompany.org/example_ca.crl
+ 
+diff --git a/raddb/certs/client.cnf b/raddb/certs/client.cnf
+index 2650e477bc..aa65e9a081 100644
+--- a/raddb/certs/client.cnf
++++ b/raddb/certs/client.cnf
+@@ -41,13 +41,13 @@ emailAddress		= optional
+ prompt			= no
+ distinguished_name	= client
+ default_bits		= 2048
+-input_password		= whatever
+-output_password		= whatever
++input_password		= clientmypassword
++output_password		= clientmypassword
+ 
+ [client]
+-countryName		= FR
+-stateOrProvinceName	= Radius
+-localityName		= Somewhere
+-organizationName	= Example Inc.
+-emailAddress		= user@example.org
+-commonName		= user@example.org
++countryName		= IN
++stateOrProvinceName	= Telengana
++localityName		= Madhapur
++organizationName	= MyCompany
++emailAddress		= client@mycompany.org
++commonName		= client@mycompany.org
+diff --git a/raddb/certs/server.cnf b/raddb/certs/server.cnf
+index daca18d39f..317e178e43 100644
+--- a/raddb/certs/server.cnf
++++ b/raddb/certs/server.cnf
+@@ -42,17 +42,17 @@ emailAddress		= optional
+ prompt			= no
+ distinguished_name	= server
+ default_bits		= 2048
+-input_password		= whatever
+-output_password		= whatever
++input_password		= servermypassword
++output_password		= servermypassword
+ #req_extensions		= v3_req
+ 
+ [server]
+-countryName		= FR
+-stateOrProvinceName	= Radius
+-localityName		= Somewhere
+-organizationName	= Example Inc.
+-emailAddress		= admin@example.org
+-commonName		= "Example Server Certificate"
++countryName		= IN
++stateOrProvinceName	= Telengana
++localityName		= Madhapur
++organizationName	= MyCompany
++emailAddress		= admin@mycompany.org
++commonName		= "Mycompany Certificate Authority"
+ 
+ [ v3_req ]
+ basicConstraints = CA:FALSE
+diff --git a/raddb/mods-available/eap b/raddb/mods-available/eap
+index 52dc29433d..3a77b9a940 100644
+--- a/raddb/mods-available/eap
++++ b/raddb/mods-available/eap
+@@ -24,7 +24,7 @@ eap {
+ 	#  then that EAP type takes precedence over the
+ 	#  default type configured here.
+ 	#
+-	default_eap_type = md5
++	default_eap_type = tls
+ 
+ 	#  A list is maintained to correlate EAP-Response
+ 	#  packets with EAP-Request packets.  After a
+@@ -77,8 +77,8 @@ eap {
+ 	#  for wireless connections.  It is insecure, and does
+ 	#  not provide for dynamic WEP keys.
+ 	#
+-	md5 {
+-	}
++	#md5 {
++	#}
+ 
+ 
+ 	#  EAP-pwd -- secure password-based authentication
+@@ -175,7 +175,7 @@ eap {
+ 	#  authenticate via EAP-TLS!  This is likely not what you want.
+ 	#
+ 	tls-config tls-common {
+-		private_key_password = whatever
++		private_key_password = servermypassword 
+ 		private_key_file = ${certdir}/server.pem
+ 
+ 		#  If Private key & Certificate are located in
+diff --git a/raddb/sites-available/default b/raddb/sites-available/default
+index b4339bde9e..06bde2da2b 100644
+--- a/raddb/sites-available/default
++++ b/raddb/sites-available/default
+@@ -544,9 +544,9 @@ authenticate {
+ 	#  PAP authentication, when a back-end database listed
+ 	#  in the 'authorize' section supplies a password.  The
+ 	#  password can be clear-text, or encrypted.
+-	Auth-Type PAP {
+-		pap
+-	}
++	#Auth-Type PAP {
++	#	pap
++	#}
+ 
+ #	dpsk
+ 
+@@ -555,26 +555,26 @@ authenticate {
+ 	#  A back-end database listed in the 'authorize' section
+ 	#  MUST supply a CLEAR TEXT password.  Encrypted passwords
+ 	#  won't work.
+-	Auth-Type CHAP {
+-		chap
+-	}
++	#Auth-Type CHAP {
++	#	chap
++	#}
+ 
+ 	#
+ 	#  MSCHAP authentication.
+-	Auth-Type MS-CHAP {
+-		mschap
+-	}
++	#Auth-Type MS-CHAP {
++	#	mschap
++	#}
+ 
+ 	#
+ 	#  For old names, too.
+ 	#
+-	mschap
++	#mschap
+ 
+ 	#
+ 	#  If you have a Cisco SIP server authenticating against
+ 	#  FreeRADIUS, uncomment the following line, and the 'digest'
+ 	#  line in the 'authorize' section.
+-	digest
++	#digest
+ 
+ 	#
+ 	#  Pluggable Authentication Modules.
