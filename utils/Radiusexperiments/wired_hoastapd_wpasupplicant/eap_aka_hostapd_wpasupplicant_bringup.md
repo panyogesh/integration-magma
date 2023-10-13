@@ -9,7 +9,7 @@ Same as that of [link](https://raw.githubusercontent.com/panyogesh/integration-m
 ## Launching hostapd
 * sudo ./hlr_auc_gw -u -m ../[hlr_auc_gw.milenage_db](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/wired_hoastapd_wpasupplicant/eapaka_conf/hlr_auc_gw.milenage_db)
 * sudo ../hostapd [eap_aka_hostapd.conf](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/wired_hoastapd_wpasupplicant/eapaka_conf/eap_sim_hostapd.conf) -dd
-* ../wpa_supplicant -i veth1 -c ./[eap_aka_wpa_supplicant.conf](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/wired_hoastapd_wpasupplicant/eapaka_conf/eap_aka_wpa_supplicant.conf) -Dwired -dd -K
+* ./eapol_test -i veth1 -a30.0.0.1 -c ./ExP/eap_aka_wpa_supplicant.conf
 
 ## Test Logs
 ![image](https://github.com/panyogesh/integration-magma/assets/69527565/8c141e87-8495-41f9-bae9-3e252b446ab9)
