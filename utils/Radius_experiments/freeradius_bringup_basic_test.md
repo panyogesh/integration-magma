@@ -47,4 +47,7 @@ radtest -x testing password localhost 0 testing123
 radtest -x -t mschap testing password localhost 0 testing123
 ```
 
-
+## General issues
+1. make: *** No rule to make target 'src/modules/rlm_lua/example.lua',
+Need to clean up all temporary git files and do 'make clean; make ; sudo make install'
+Reference : https://lists.freeradius.org/pipermail/freeradius-users/2017-July/088260.html
