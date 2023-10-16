@@ -1,3 +1,4 @@
+```
 sudo ps
 ps -eaf
 git clone git://w1.fi/hostap.git
@@ -114,3 +115,4 @@ vim wpaspy.c
 sudo make install
 cd ../tests/hwsim/
 sudo ./start.sh
+```
