@@ -19,7 +19,9 @@ radsec-server
 
 radsec-client
  - apply RadSecProxy.diff
-
+ - Create [radsec-homeserver](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/RadSec/radsec-homeserver) in
+   raddb/sites-enabled/radsec-homeserver
+   
 ## Testing (3 terminals)
 * Terminal-1
 ```
@@ -38,6 +40,9 @@ echo "User-Name = bob" | radclient 127.0.0.1 auth testing123
 
 ## Logs attached
 
+
+## Reference 
+https://freeradius.org/documentation/freeradius-server/3.2.4/howto/protocols/proxy/enable_radsec.html
 
 
 
