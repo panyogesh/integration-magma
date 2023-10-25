@@ -1,0 +1,21 @@
+#Place the file in: vagrant@radius-exp:~/freeradius-server$ cat  raddb/sites-enabled/radsec-homeserver
+home_server tls {
+        ipaddr = 192.168.60.176    # IP address of our RadSec server
+        port = 2083
+        type = auth+acct
+        proto = tcp
+        tls {
+            private_key_password = whatever
+            private_key_file = /home/vagrant/freeradius-server/raddb/certs/client.pem
+            certificate_file = /home/vagrant/freeradius-server/raddb/certs/client.pem
+            ca_file = /home/vagrant/freeradius-server/raddb/certs/ca.pem
+         }
+}
+home_server_pool tls {
+        type = fail-over
+        home_server = tls
+}
+realm tls {
+        auth_pool = tls
+        acct_pool = tls
+}
