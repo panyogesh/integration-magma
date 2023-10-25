@@ -1,0 +1,38 @@
+diff --git a/raddb/sites-available/default b/raddb/sites-available/default
+index b4339bde9e..52f4719784 100644
+--- a/raddb/sites-available/default
++++ b/raddb/sites-available/default
+@@ -283,6 +283,7 @@ listen {
+ #  Make *sure* that 'preprocess' comes before any realm if you
+ #  need to setup hints for the remote radius server
+ authorize {
++        accept
+ 	#
+ 	#  Take a User-Name, and perform some checks on it, for spaces and other
+ 	#  invalid characters.  If the User-Name appears invalid, reject the
+@@ -624,6 +625,8 @@ authenticate {
+ #  Pre-accounting.  Decide which accounting type to use.
+ #
+ preacct {
++        handled
++  
+ 	preprocess
+ 
+ 	#
+diff --git a/raddb/sites-available/tls b/raddb/sites-available/tls
+index 65738e5d27..999f16811c 100644
+--- a/raddb/sites-available/tls
++++ b/raddb/sites-available/tls
+@@ -729,3 +729,12 @@ home_server_pool tls {
+ realm tls {
+       auth_pool = tls
+ }
++
++clients radsec {
++       # Direct connections from the test client
++       client radseccli {
++               ipaddr = 192.168.60.177
++               proto = tls
++               virtual_server = default
++       }
++}

@@ -1,0 +1,28 @@
+diff --git a/raddb/sites-available/default b/raddb/sites-available/default
+index b4339bde9e..b6c5295f1e 100644
+--- a/raddb/sites-available/default
++++ b/raddb/sites-available/default
+@@ -283,6 +283,11 @@ listen {
+ #  Make *sure* that 'preprocess' comes before any realm if you
+ #  need to setup hints for the remote radius server
+ authorize {
++        update control {
++            &Proxy-To-Realm := tls
++        }
++        handled
++
+ 	#
+ 	#  Take a User-Name, and perform some checks on it, for spaces and other
+ 	#  invalid characters.  If the User-Name appears invalid, reject the
+@@ -624,6 +629,11 @@ authenticate {
+ #  Pre-accounting.  Decide which accounting type to use.
+ #
+ preacct {
++        update control {
++            &Proxy-To-Realm := tls
++        }
++        handled
++
+ 	preprocess
+ 
+ 	#
