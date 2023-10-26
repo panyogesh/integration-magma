@@ -15,7 +15,7 @@ tar -xf "go${VERSION}.linux-${ARCH}.tar.gz"
 sudo mv -v go /usr/local
 ```
 
-* Update .profile
+* Create Directories and update profiles
 ```
 export GOPATH=$HOME/go
 export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
@@ -23,7 +23,11 @@ mkdir -p $GOPATH/src
 mkdir -p $GOPATH/bin
 mkdir -p $GOPATH/pkg
 mkdir -p $GOPATH/src/github.com
- source .profile
+
+Add line in ~/.profile
+export GOPATH=$HOME/go
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+source .profile
 ```
 
 * Set the build directory
