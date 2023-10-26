@@ -25,6 +25,7 @@ mkdir -p $GOPATH/pkg
 mkdir -p $GOPATH/src/github.com
 
 Add line in ~/.profile
+----------------------
 export GOPATH=$HOME/go
 export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 source .profile
