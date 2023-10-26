@@ -28,7 +28,7 @@ Add line in ~/.profile
 ----------------------
 export GOPATH=$HOME/go
 export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
-source .profile
+source ~/.profile
 ```
 
 * Set the build directory
