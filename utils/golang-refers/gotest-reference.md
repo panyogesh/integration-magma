@@ -2,7 +2,7 @@
 
 ## Run go test
 * go test .  (running tests)
-* go  test -v ./TestGenerateEutranVector  (prints logs on stdin and run single testcase)
+* go  test -v -run TestGenerateEutranVector ./ (prints logs on stdin and run single testcase)
 
 ## Running testcase in gdb mode
 * go test -c  services/uesim/servicers/eap_aka_test.go services/uesim/servicers/eap_test.go (compile with debug symbols)
