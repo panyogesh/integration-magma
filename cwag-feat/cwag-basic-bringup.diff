@@ -1,0 +1,403 @@
+diff --git a/cwf/gateway/docker/docker-compose.integ-test.yml b/cwf/gateway/docker/docker-compose.integ-test.yml
+index 2dd3bb9410..1dc30a8ec4 100644
+--- a/cwf/gateway/docker/docker-compose.integ-test.yml
++++ b/cwf/gateway/docker/docker-compose.integ-test.yml
+@@ -23,76 +23,11 @@ x-generic-service: &service
+   restart: always
+   network_mode: host
+
+-# Generic python anchor to avoid repetition for orc8r python services
+-x-orc8r-service: &pyservice
+-  <<: *service
+-  image: ${DOCKER_REGISTRY}gateway_python:${IMAGE_VERSION}
+-
+ x-feg-goservice: &feggoservice
+   <<: *service
+   image: ${DOCKER_REGISTRY}gateway_go:${IMAGE_VERSION}
+
+ services:
+-  eap_aka:
+-    environment:
+-      USE_REMOTE_SWX_PROXY: 0
+-
+-  pipelined:
+-    privileged: true
+-    volumes:
+-      - ${ROOTCA_PATH}:/var/opt/magma/certs/rootCA.pem
+-      - ${CERTS_VOLUME}:/var/opt/magma/certs
+-      - ${CONFIGS_OVERRIDE_VOLUME}:/var/opt/magma/configs
+-      - ${CONFIGS_DEFAULT_VOLUME}:/etc/magma
+-      - ${CONFIGS_TEMPLATES_PATH}:/etc/magma/templates
+-      - ${CONTROL_PROXY_PATH}:/etc/magma/control_proxy.yml
+-      - /etc/snowflake:/etc/snowflake
+-      - ../integ_tests/pipelined.yml:/etc/magma/pipelined.yml
+-      - /var/run/openvswitch:/var/run/openvswitch
+-    command: >
+-      sh -c "/usr/bin/ovs-vsctl --if-exists del-port cwag_br0 gre0 &&
+-        /usr/bin/ovs-vsctl --if-exists del-br uplink_br0 &&
+-        /usr/bin/ovs-vsctl --if-exists del-port cwag_br0 cwag_patch &&
+-        /usr/bin/ovs-vsctl --if-exists del-port cwag_br0 eth2 &&
+-        /usr/bin/ovs-vsctl --may-exist add-port cwag_br0 gre0 -- set interface gre0 ofport_request=32768 type=gre options:remote_ip=flow &&
+-        /usr/bin/ovs-vsctl set-controller cwag_br0 tcp:127.0.0.1:6633 &&
+-        python3.8 -m magma.pipelined.main"
+-
+-  sessiond:
+-    volumes:
+-      - ../integ_tests/sessiond.yml:/etc/magma/sessiond.yml
+-      - /var/opt/magma/cores:/var/opt/magma/cores
+-    ulimits:
+-      core: -1
+-    security_opt:
+-      - seccomp:unconfined
+-    privileged: true
+-    environment:
+-      MAGMA_PRINT_GRPC_PAYLOAD: 1
+-    command: >
+-      sh -c "mkdir -p /var/opt/magma/cores &&
+-        sysctl -w kernel.core_pattern=/var/opt/magma/cores/core.%e.%t &&
+-        /usr/local/bin/sessiond"
+-
+-  swx_proxy:
+-    <<: *feggoservice
+-    container_name: swx_proxy
+-    depends_on:
+-      - hss
+-    command: envdir /var/opt/magma/envdir /var/opt/magma/bin/swx_proxy -logtostderr=true -v=0
+-
+-  session_proxy:
+-    <<: *feggoservice
+-    container_name: session_proxy
+-    depends_on:
+-      - pcrf
+-      - ocs
+-      - pcrf2
+-      - ocs2
+-    environment:
+-      MAGMA_PRINT_GRPC_PAYLOAD: 1
+-    command: envdir /var/opt/magma/envdir /var/opt/magma/bin/session_proxy -logtostderr=true -v=2
+-
+   hss:
+     <<: *feggoservice
+     container_name: hss
+@@ -122,45 +57,8 @@ services:
+     container_name: ocs2
+     command: envdir /var/opt/magma/envdir /var/opt/magma/bin/ocs -logtostderr=true -v=0 -servernumber=2
+
+-  redis:
+-    <<: *pyservice
+-    container_name: redis
+-    volumes:
+-      - ../integ_tests/redis.conf:/var/opt/magma/redis.conf
+-    command: >
+-      /bin/bash -c "/usr/bin/redis-server /var/opt/magma/redis.conf --daemonize no &&
+-             /usr/bin/redis-cli shutdown"
+-
+-  control_proxy:
+-    extra_hosts:
+-      - controller.magma.test:127.0.0.1
+-      - bootstrapper-controller.magma.test:127.0.0.1
+-    command: >
+-      sh -c "/usr/local/bin/generate_nghttpx_config.py &&
+-             /usr/bin/env nghttpx --insecure --conf /var/opt/magma/tmp/nghttpx.conf"
+-
+-  magmad:
+-    extra_hosts:
+-      - controller.magma.test:127.0.0.1
+-      - bootstrapper-controller.magma.test:127.0.0.1
+-
+   uesim:
+     <<: *service
+     container_name: uesim
+     image: ${DOCKER_REGISTRY}cwag_go:${IMAGE_VERSION}
+     command: envdir /var/opt/magma/envdir /var/opt/magma/bin/uesim -logtostderr=true -v=0
+-
+-  ingress:
+-    <<: *service
+-    container_name: ingress
+-    image: ${DOCKER_REGISTRY}nginx:${IMAGE_VERSION}
+-    extra_hosts:
+-      - controller.magma.test:127.0.0.1
+-      - bootstrapper-controller.magma.test:127.0.0.1
+-      - session-proxy.magma.test:127.0.0.1
+-      - sessiond.magma.test:127.0.0.1
+-      - aaa-server.magma.test:127.0.0.1
+-      - directoryd.magma.test:127.0.0.1
+-    volumes:
+-      - ../integ_tests/nginx.conf:/etc/nginx/nginx.conf:ro
+-    command: /usr/sbin/nginx -g "daemon off;"
+diff --git a/cwf/gateway/docker/docker-compose.override.yml b/cwf/gateway/docker/docker-compose.override.yml
+index 903f1fed31..cadbce0b6d 100644
+--- a/cwf/gateway/docker/docker-compose.override.yml
++++ b/cwf/gateway/docker/docker-compose.override.yml
+@@ -6,34 +6,7 @@ services:
+       context: ${BUILD_CONTEXT}
+       dockerfile: feg/gateway/docker/go/Dockerfile
+
+-  control_proxy:
+-    environment:
+-      DOCKER_NETWORK_MODE: 1
+-    extra_hosts:
+-      - controller.magma.test:10.0.2.2
+-      - bootstrapper-controller.magma.test:10.0.2.2
+-
+   health:
+     build:
+       context: ${BUILD_CONTEXT}
+       dockerfile: cwf/gateway/docker/go/Dockerfile
+-
+-  magmad:
+-    build:
+-      context: ${BUILD_CONTEXT}
+-      dockerfile: feg/gateway/docker/python/Dockerfile
+-    extra_hosts:
+-      - controller.magma.test:10.0.2.2
+-      - bootstrapper-controller.magma.test:10.0.2.2
+-
+-  pipelined:
+-    build:
+-      context: ${BUILD_CONTEXT}
+-      dockerfile: cwf/gateway/docker/python/Dockerfile
+-
+-  sessiond:
+-    environment:
+-      MAGMA_PRINT_GRPC_PAYLOAD: 0
+-    build:
+-      context: ${BUILD_CONTEXT}
+-      dockerfile: cwf/gateway/docker/c/Dockerfile
+diff --git a/cwf/gateway/docker/docker-compose.yml b/cwf/gateway/docker/docker-compose.yml
+index 3570866899..6aff28818f 100644
+--- a/cwf/gateway/docker/docker-compose.yml
++++ b/cwf/gateway/docker/docker-compose.yml
+@@ -4,37 +4,11 @@ version: "3.7"
+ x-logging: &logging_anchor
+   driver: ${LOG_DRIVER}
+
+-# Standard volumes mounted
+-x-standard-volumes: &volumes_anchor
+-  - ${ROOTCA_PATH}:/var/opt/magma/certs/rootCA.pem
+-  - ${CERTS_VOLUME}:/var/opt/magma/certs
+-  - ${CONFIGS_OVERRIDE_VOLUME}:/var/opt/magma/configs
+-  - ${CONFIGS_DEFAULT_VOLUME}:/etc/magma
+-  - ${CONFIGS_TEMPLATES_PATH}:/etc/magma/templates
+-  - ${CONTROL_PROXY_PATH}:/etc/magma/control_proxy.yml
+-  - /etc/snowflake:/etc/snowflake
+-
+ x-generic-service: &service
+-  volumes: *volumes_anchor
+   logging: *logging_anchor
+   restart: always
+   network_mode: host
+
+-# Generic python anchor to avoid repetition for orc8r python services
+-x-orc8r-service: &pyservice
+-  <<: *service
+-  image: ${DOCKER_REGISTRY}gateway_python:${IMAGE_VERSION}
+-
+-# Generic python anchor to avoid repetition for lte python services
+-x-lte-pyservice: &ltepyservice
+-  <<: *service
+-  image: ${DOCKER_REGISTRY}gateway_pipelined:${IMAGE_VERSION}
+-
+-# Generic python anchor to avoid repetition for lte c services
+-x-lte-cservice: &ltecservice
+-  <<: *service
+-  image: ${DOCKER_REGISTRY}gateway_sessiond:${IMAGE_VERSION}
+-
+ x-feg-goservice: &feggoservice
+   <<: *service
+   image: ${DOCKER_REGISTRY}gateway_go:${IMAGE_VERSION}
+@@ -51,24 +25,6 @@ services:
+       retries: 3
+     command: envdir /var/opt/magma/envdir /var/opt/magma/bin/aaa_server -logtostderr=true -v=0
+
+-  control_proxy:
+-    <<: *pyservice
+-    container_name: control_proxy
+-    command: >
+-      sh -c "/usr/local/bin/generate_nghttpx_config.py &&
+-             /usr/bin/env nghttpx --conf /var/opt/magma/tmp/nghttpx.conf /var/opt/magma/certs/controller.key /var/opt/magma/certs/controller.crt"
+-
+-  directoryd:
+-    <<: *pyservice
+-    container_name: directoryd
+-    depends_on:
+-      - redis
+-    healthcheck:
+-      test: ["CMD", "nc", "-zv", "localhost","50067"]
+-      timeout: "4s"
+-      retries: 3
+-    command: python3.8 -m magma.directoryd.main
+-
+   eap_sim:
+     <<: *feggoservice
+     container_name: eap_sim
+@@ -91,11 +47,6 @@ services:
+       retries: 3
+     command: envdir /var/opt/magma/envdir /var/opt/magma/bin/eap_aka -logtostderr=true -v=0
+
+-  eventd:
+-    <<: *pyservice
+-    container_name: eventd
+-    command: python3.8 -m magma.eventd.main
+-
+   health:
+     <<: *feggoservice
+     image: ${DOCKER_REGISTRY}cwag_go:${IMAGE_VERSION}
+@@ -113,70 +64,6 @@ services:
+       - /var/run/docker.sock:/var/run/docker.sock
+     command: envdir /var/opt/magma/envdir /var/opt/magma/bin/gateway_health -logtostderr=true -v=0
+
+-  magmad:
+-    <<: *pyservice
+-    container_name: magmad
+-    volumes:
+-      - ${ROOTCA_PATH}:/var/opt/magma/certs/rootCA.pem
+-      - ${CERTS_VOLUME}:/var/opt/magma/certs
+-      - ${CONFIGS_OVERRIDE_VOLUME}:/var/opt/magma/configs
+-      - ${CONFIGS_DEFAULT_VOLUME}:/etc/magma
+-      - ${CONFIGS_TEMPLATES_PATH}:/etc/magma/templates
+-      - ${CONTROL_PROXY_PATH}:/etc/magma/control_proxy.yml
+-      - /etc/snowflake:/etc/snowflake
+-      - /var/run/docker.sock:/var/run/docker.sock
+-      - ./:/var/opt/magma/docker
+-    environment:
+-      DOCKER_REGISTRY: ${DOCKER_REGISTRY}
+-      DOCKER_USERNAME: ${DOCKER_USERNAME}
+-      DOCKER_PASSWORD: ${DOCKER_PASSWORD}
+-    command: python3.8 -m magma.magmad.main
+-
+-  pipelined:
+-    <<: *ltepyservice
+-    container_name: pipelined
+-    volumes:
+-      - ${ROOTCA_PATH}:/var/opt/magma/certs/rootCA.pem
+-      - ${CERTS_VOLUME}:/var/opt/magma/certs
+-      - ${CONFIGS_OVERRIDE_VOLUME}:/var/opt/magma/configs
+-      - ${CONFIGS_DEFAULT_VOLUME}:/etc/magma
+-      - ${CONFIGS_TEMPLATES_PATH}:/etc/magma/templates
+-      - ${CONTROL_PROXY_PATH}:/etc/magma/control_proxy.yml
+-      - /etc/snowflake:/etc/snowflake
+-      - /var/run/openvswitch:/var/run/openvswitch
+-    healthcheck:
+-      test: ["CMD", "nc", "-zv", "localhost","50063"]
+-      timeout: "4s"
+-      retries: 3
+-    command: >
+-      sh -c "set bridge cwag_br0 protocols=protocols=OpenFlow10,OpenFlow13,OpenFlow14 other-config:disable-in-band=true &&
+-        /usr/bin/ovs-vsctl set-controller cwag_br0 tcp:127.0.0.1:6633 &&
+-        /usr/bin/ovs-vsctl set-fail-mode cwag_br0 secure &&
+-        /usr/bin/ovs-vsctl set bridge cwag_br0 other-config:disable-in-band=true &&
+-        /var/opt/magma/scripts/add_uplink_bridge_flows.sh ${UPLINK_PORTS:-eth2 eth3} &&
+-        python3.8 -m magma.pipelined.main"
+-
+-  monitord:
+-    <<: *ltepyservice
+-    container_name: monitord
+-    command: python3.8 -m magma.monitord.main
+-
+-  policydb:
+-    <<: *ltepyservice
+-    container_name: policydb
+-    healthcheck:
+-      test: ["CMD", "nc", "-zv", "localhost","50068"]
+-      timeout: "4s"
+-      retries: 3
+-    depends_on:
+-      - redis
+-    command: python3.8 -m magma.policydb.main
+-
+-  redirectd:
+-    <<: *ltepyservice
+-    container_name: redirectd
+-    command: python3.8 -m magma.redirectd.main
+-
+   radius:
+     image: ${DOCKER_REGISTRY}gateway_go:${IMAGE_VERSION}
+     container_name: radius
+@@ -207,38 +94,3 @@ services:
+     <<: *feggoservice
+     container_name: radiusd
+     command: envdir /var/opt/magma/envdir /var/opt/magma/bin/radiusd -logtostderr=true -v=0
+-
+-  redis:
+-    <<: *pyservice
+-    container_name: redis
+-    command: >
+-      /bin/bash -c "/usr/local/bin/generate_service_config.py --service=redis --template=redis &&
+-             /usr/bin/redis-server /var/opt/magma/tmp/redis.conf --daemonize no &&
+-             /usr/bin/redis-cli shutdown"
+-
+-  sessiond:
+-    <<: *ltecservice
+-    container_name: sessiond
+-    healthcheck:
+-      test: ["CMD", "nc", "-zv", "localhost","50065"]
+-      timeout: "4s"
+-      retries: 3
+-    depends_on:
+-      - directoryd
+-    command: /usr/local/bin/sessiond
+-
+-  state:
+-    <<: *pyservice
+-    container_name: state
+-    depends_on:
+-      - redis
+-    command: python3.8 -m magma.state.main
+-
+-  td-agent-bit:
+-    <<: *pyservice
+-    container_name: td-agent-bit
+-    logging:
+-      driver: "json-file"
+-    command: >
+-        /bin/bash -c "/usr/local/bin/generate_fluent_bit_config.py &&
+-        /opt/td-agent-bit/bin/td-agent-bit -c /var/opt/magma/tmp/td-agent-bit.conf"
+diff --git a/cwf/gateway/docker/go/Dockerfile b/cwf/gateway/docker/go/Dockerfile
+index 9a3dc80ae8..1224fd085f 100644
+--- a/cwf/gateway/docker/go/Dockerfile
++++ b/cwf/gateway/docker/go/Dockerfile
+@@ -17,8 +17,8 @@ RUN apt-get update && \
+     apt-get install -y apt-utils software-properties-common apt-transport-https
+
+ # Add the magma apt repo
+-COPY keys/linux_foundation_registry_key.asc /etc/apt/trusted.gpg.d/magma.asc
+-RUN add-apt-repository "deb https://linuxfoundation.jfrog.io/artifactory/magma-packages-test focal-ci main"
++#COPY keys/linux_foundation_registry_key.asc /etc/apt/trusted.gpg.d/magma.asc
++#RUN add-apt-repository "deb https://linuxfoundation.jfrog.io/artifactory/magma-packages-test focal-ci main"
+
+ # Install the runtime deps.
+ RUN apt-get update && apt-get install -y \
+@@ -35,7 +35,6 @@ RUN apt-get update && apt-get install -y \
+     libjemalloc-dev \
+     libssl-dev \
+     libsystemd-dev \
+-    magma-nghttpx=1.31.1-1 \
+     make \
+     net-tools \
+     pkg-config \
+diff --git a/cwf/gateway/go.mod b/cwf/gateway/go.mod
+index ef04a2d9e7..6bd4b4e4d5 100644
+--- a/cwf/gateway/go.mod
++++ b/cwf/gateway/go.mod
+@@ -84,6 +84,7 @@ require (
+        github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+        github.com/google/go-cmp v0.5.8 // indirect
+        github.com/google/uuid v1.1.2 // indirect
++       github.com/grosser/go-testcov v1.7.0 // indirect
+        github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
+        github.com/hashicorp/errwrap v1.0.0 // indirect
+        github.com/ishidawataru/sctp v0.0.0-20191218070446-00ab2ac2db07 // indirect
+diff --git a/cwf/gateway/go.sum b/cwf/gateway/go.sum
+index 43569be564..1e254562d6 100644
+--- a/cwf/gateway/go.sum
++++ b/cwf/gateway/go.sum
+@@ -338,6 +338,8 @@ github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+
+ github.com/googleapis/gax-go/v2 v2.0.5/go.mod h1:DWXyrwAJ9X0FpwwEdw+IPEYBICEFu5mhpdKc/us6bOk=
+ github.com/gorilla/context v1.1.1/go.mod h1:kBGZzfjB9CEq2AlWe17Uuf7NDRt0dE0s8S51q0aT7Yg=
+ github.com/gorilla/mux v1.6.2/go.mod h1:1lud6UwP+6orDFRuTfBEV8e9/aOM/c4fVVCaMa2zaAs=
++github.com/grosser/go-testcov v1.7.0 h1:VpF+AWn9BtNZFc6j7ZwXOUdkhmfoqZJWVLVPRfGtH0w=
++github.com/grosser/go-testcov v1.7.0/go.mod h1:DTjIHD69BN1AYLdU+iotHeGXFx/bL5RXZzfRsp4s5uA=
+ github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 h1:Ovs26xHkKqVztRpIrF/92BcuyuQ/YW4NSIpoGtfXNho=
+ github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0/go.mod h1:8NvIoxWQoOIhqOTXgfV/d3M/q6VIi02HzZEHgUlZvzk=
+ github.com/grpc-ecosystem/grpc-gateway v1.16.0/go.mod h1:BDjrQk3hbvj6Nolgz8mAMFbcEtjT1g+wF4CSlocrBnw=
