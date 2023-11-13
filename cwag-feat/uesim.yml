@@ -1,0 +1,8 @@
+radius_auth_address: "192.168.70.101:1812"
+radius_acct_address: "192.168.70.101:1813"
+radius_secret: "123456"
+amf: "0000"
+subscribers:
+    "001011234567890":
+        auth_key: "465B5CE8B199B49FAA5F0A2EE238A6BC"
+
