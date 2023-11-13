@@ -17,19 +17,23 @@
   sudo docker-compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.integ-test.yml build
   sudo docker-compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.integ-test.yml up -d
   ```
+
+## gateway.mconfig for generic params
+[gateway.mconfig](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/gateway.mconfig)
+
 ## Execute uesim testcase
+### Create a subscriber in hss using yml [sample-hss.yml](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/hss.yml)
+* Folder :/etc/magma/feg/hss.yml
+* Add subscriber
+```
+cd /home/vagrant/magma/feg/gateway/tools/hss_cli
+go run main.go add -subscriber_id 001011234567890
+go run main.go get -subscriber_id 001011234567890
+```
 
-* Folder :magma/cwf/gateway/docker
-
-  ```
-  vagrant@radius-exp:~/magma/cwf/gateway/docker$ cat /etc/magma/uesim.yml
-  radius_auth_address: "192.168.70.101:1812"
-  radius_acct_address: "192.168.70.101:1813"
-  radius_secret: "123456"
-  amf: "0000"
-  subscribers:
-      "001011234567890":
-          auth_key: "465B5CE8B199B49FAA5F0A2EE238A6BC"
-  ```
-* go run main.go  add_ue 001011234567890
+### Uesim simulator
+* Create config file for uesim 
+* Folder : /etc/magma/uesim.yml ([sample-uesim.yml](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/uesim.yml))
+* Add Subscriber in uesim: go run main.go  add_ue 001011234567890
+* Authenticate Subscriber in uesim: go run main.go auth 001011234567890
 
