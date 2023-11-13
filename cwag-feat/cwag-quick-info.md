@@ -22,7 +22,8 @@
 [gateway.mconfig](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/gateway.mconfig)
 
 ## Execute uesim testcase
-### Create a subscriber in hss using yml [sample-hss.yml](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/hss.yml)
+### Subscriber creation using hss
+* [sample-hss.yml](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/hss.yml)
 * Folder :/etc/magma/feg/hss.yml
 * Add subscriber
 ```
@@ -31,9 +32,9 @@ go run main.go add -subscriber_id 001011234567890
 go run main.go get -subscriber_id 001011234567890
 ```
 
-### Uesim simulator
-* Create config file for uesim 
-* Folder : /etc/magma/uesim.yml ([sample-uesim.yml](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/uesim.yml))
+### Testing using uesim
+* [sample-uesim.yml](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/uesim.yml)
+* Folder : /etc/magma/
 * Add Subscriber in uesim: go run main.go  add_ue 001011234567890
 * Authenticate Subscriber in uesim: go run main.go auth 001011234567890
 
