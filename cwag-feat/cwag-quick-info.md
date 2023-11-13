@@ -35,6 +35,7 @@ go run main.go get -subscriber_id 001011234567890
 ### Testing using uesim
 * [sample-uesim.yml](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/uesim.yml)
 * Folder : /etc/magma/
+* Path: ``` /home/vagrant/magma/cwf/gateway/tools/uesim_cli/ ```
 * Add Subscriber in uesim: ``` go run main.go  add_ue 001011234567890 ```
 * Authenticate Subscriber in uesim: ``` go run main.go auth 001011234567890 ```
 
