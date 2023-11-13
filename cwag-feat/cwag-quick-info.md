@@ -17,3 +17,19 @@
   sudo docker-compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.integ-test.yml build
   sudo docker-compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.integ-test.yml up -d
   ```
+## Execute uesim testcase
+
+* Folder :magma/cwf/gateway/docker
+
+  ```
+  vagrant@radius-exp:~/magma/cwf/gateway/docker$ cat /etc/magma/uesim.yml
+  radius_auth_address: "192.168.70.101:1812"
+  radius_acct_address: "192.168.70.101:1813"
+  radius_secret: "123456"
+  amf: "0000"
+  subscribers:
+      "001011234567890":
+          auth_key: "465B5CE8B199B49FAA5F0A2EE238A6BC"
+  ```
+* go run main.go  add_ue 001011234567890
+
