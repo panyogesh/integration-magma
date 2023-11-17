@@ -39,3 +39,6 @@ go run main.go get -subscriber_id 001011234567890
 * Add Subscriber in uesim: ``` go run main.go  add_ue 001011234567890 ```
 * Authenticate Subscriber in uesim: ``` go run main.go auth 001011234567890 ```
 
+### Verification using swx_proxy
+* go run main.go sar 001011234567890
+* go run main.go mar 001011234567890
