@@ -28,7 +28,7 @@
 * Add subscriber
 ```
 cd /home/vagrant/magma/feg/gateway/tools/hss_cli
-go run main.go add -subscriber_id 001011234567890
+go run main.go add -subscriber_id 001011234567890 -lte_subscription_active true
 go run main.go get -subscriber_id 001011234567890
 ```
 
