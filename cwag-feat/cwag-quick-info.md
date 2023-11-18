@@ -46,6 +46,8 @@ go run main.go get -subscriber_id 001011234567890
 ```
 cd /home/vagrant/magma/feg/gateway/tools/hss_cli        
 go run main.go add -subscriber_id 001011234567890 -lte_subscription_active true
+go run main.go add -subscriber_id 001011234567890 -lte_subscription_active true -auth_opc C4D5E43991B0C551AFF8B9253C1331AB
+
 
 cd ~/magma/feg/gateway/tools/swx_cli
 go run main.go mar 001011234567890
