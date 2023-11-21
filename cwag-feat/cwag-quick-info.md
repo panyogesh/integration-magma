@@ -10,7 +10,7 @@
 * go test ./...
 
 ## Brining up cwag
-* Apply the patch [link](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/cwag-basic-bringup.diff)
+* Apply the patch [link](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/cwag-only-components.diff)
 * Run the following commands
   ```
   sudo docker-compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.integ-test.yml down
