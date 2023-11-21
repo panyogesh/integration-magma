@@ -1,0 +1,1927 @@
+
+vagrant@mag-rad:~/magma$
+vagrant@mag-rad:~/magma$
+vagrant@mag-rad:~/magma$ cat Simplifier-2.diff
+diff --git a/cwf/gateway/docker/docker-compose.integ-test.yml b/cwf/gateway/docker/docker-compose.integ-test.yml
+index 2dd3bb9410..a405ca8472 100644
+--- a/cwf/gateway/docker/docker-compose.integ-test.yml
++++ b/cwf/gateway/docker/docker-compose.integ-test.yml
+@@ -23,80 +23,15 @@ x-generic-service: &service
+   restart: always
+   network_mode: host
+
+-# Generic python anchor to avoid repetition for orc8r python services
+-x-orc8r-service: &pyservice
+-  <<: *service
+-  image: ${DOCKER_REGISTRY}gateway_python:${IMAGE_VERSION}
+-
+ x-feg-goservice: &feggoservice
+   <<: *service
+   image: ${DOCKER_REGISTRY}gateway_go:${IMAGE_VERSION}
+
+ services:
+-  eap_aka:
+-    environment:
+-      USE_REMOTE_SWX_PROXY: 0
+-
+-  pipelined:
+-    privileged: true
+-    volumes:
+-      - ${ROOTCA_PATH}:/var/opt/magma/certs/rootCA.pem
+-      - ${CERTS_VOLUME}:/var/opt/magma/certs
+-      - ${CONFIGS_OVERRIDE_VOLUME}:/var/opt/magma/configs
+-      - ${CONFIGS_DEFAULT_VOLUME}:/etc/magma
+-      - ${CONFIGS_TEMPLATES_PATH}:/etc/magma/templates
+-      - ${CONTROL_PROXY_PATH}:/etc/magma/control_proxy.yml
+-      - /etc/snowflake:/etc/snowflake
+-      - ../integ_tests/pipelined.yml:/etc/magma/pipelined.yml
+-      - /var/run/openvswitch:/var/run/openvswitch
+-    command: >
+-      sh -c "/usr/bin/ovs-vsctl --if-exists del-port cwag_br0 gre0 &&
+-        /usr/bin/ovs-vsctl --if-exists del-br uplink_br0 &&
+-        /usr/bin/ovs-vsctl --if-exists del-port cwag_br0 cwag_patch &&
+-        /usr/bin/ovs-vsctl --if-exists del-port cwag_br0 eth2 &&
+-        /usr/bin/ovs-vsctl --may-exist add-port cwag_br0 gre0 -- set interface gre0 ofport_request=32768 type=gre options:remote_ip=flow &&
+-        /usr/bin/ovs-vsctl set-controller cwag_br0 tcp:127.0.0.1:6633 &&
+-        python3.8 -m magma.pipelined.main"
+-
+-  sessiond:
+-    volumes:
+-      - ../integ_tests/sessiond.yml:/etc/magma/sessiond.yml
+-      - /var/opt/magma/cores:/var/opt/magma/cores
+-    ulimits:
+-      core: -1
+-    security_opt:
+-      - seccomp:unconfined
+-    privileged: true
+-    environment:
+-      MAGMA_PRINT_GRPC_PAYLOAD: 1
+-    command: >
+-      sh -c "mkdir -p /var/opt/magma/cores &&
+-        sysctl -w kernel.core_pattern=/var/opt/magma/cores/core.%e.%t &&
+-        /usr/local/bin/sessiond"
+-
+-  swx_proxy:
+-    <<: *feggoservice
+-    container_name: swx_proxy
+-    depends_on:
+-      - hss
+-    command: envdir /var/opt/magma/envdir /var/opt/magma/bin/swx_proxy -logtostderr=true -v=0
+-
+-  session_proxy:
+-    <<: *feggoservice
+-    container_name: session_proxy
+-    depends_on:
+-      - pcrf
+-      - ocs
+-      - pcrf2
+-      - ocs2
+-    environment:
+-      MAGMA_PRINT_GRPC_PAYLOAD: 1
+-    command: envdir /var/opt/magma/envdir /var/opt/magma/bin/session_proxy -logtostderr=true -v=2
+-
+   hss:
+     <<: *feggoservice
+     container_name: hss
+-    command: envdir /var/opt/magma/envdir /var/opt/magma/bin/hss -logtostderr=true -v=0
++    command: envdir /var/opt/magma/envdir /var/opt/magma/bin/hss -logtostderr=true -v=2
+
+   pcrf:
+     <<: *feggoservice
+@@ -122,45 +57,20 @@ services:
+     container_name: ocs2
+     command: envdir /var/opt/magma/envdir /var/opt/magma/bin/ocs -logtostderr=true -v=0 -servernumber=2
+
+-  redis:
+-    <<: *pyservice
+-    container_name: redis
+-    volumes:
+-      - ../integ_tests/redis.conf:/var/opt/magma/redis.conf
+-    command: >
+-      /bin/bash -c "/usr/bin/redis-server /var/opt/magma/redis.conf --daemonize no &&
+-             /usr/bin/redis-cli shutdown"
+-
+-  control_proxy:
+-    extra_hosts:
+-      - controller.magma.test:127.0.0.1
+-      - bootstrapper-controller.magma.test:127.0.0.1
+-    command: >
+-      sh -c "/usr/local/bin/generate_nghttpx_config.py &&
+-             /usr/bin/env nghttpx --insecure --conf /var/opt/magma/tmp/nghttpx.conf"
+-
+-  magmad:
+-    extra_hosts:
+-      - controller.magma.test:127.0.0.1
+-      - bootstrapper-controller.magma.test:127.0.0.1
+-
+   uesim:
+     <<: *service
+     container_name: uesim
+     image: ${DOCKER_REGISTRY}cwag_go:${IMAGE_VERSION}
+     command: envdir /var/opt/magma/envdir /var/opt/magma/bin/uesim -logtostderr=true -v=0
+
+-  ingress:
+-    <<: *service
+-    container_name: ingress
+-    image: ${DOCKER_REGISTRY}nginx:${IMAGE_VERSION}
+-    extra_hosts:
+-      - controller.magma.test:127.0.0.1
+-      - bootstrapper-controller.magma.test:127.0.0.1
+-      - session-proxy.magma.test:127.0.0.1
+-      - sessiond.magma.test:127.0.0.1
+-      - aaa-server.magma.test:127.0.0.1
+-      - directoryd.magma.test:127.0.0.1
+-    volumes:
+-      - ../integ_tests/nginx.conf:/etc/nginx/nginx.conf:ro
+-    command: /usr/sbin/nginx -g "daemon off;"
++  swx_proxy:
++    <<: *feggoservice
++    container_name: swx_proxy
++    depends_on:
++      - hss
++    command: envdir /var/opt/magma/envdir /var/opt/magma/bin/swx_proxy -logtostderr=true -v=2
++
++  s6a_proxy:
++    <<: *feggoservice
++    container_name: s6a_proxy
++    command: envdir /var/opt/magma/envdir /var/opt/magma/bin/s6a_proxy -logtostderr=true -v=0
+diff --git a/cwf/gateway/docker/docker-compose.override.yml b/cwf/gateway/docker/docker-compose.override.yml
+index 903f1fed31..f028a8f7cd 100644
+--- a/cwf/gateway/docker/docker-compose.override.yml
++++ b/cwf/gateway/docker/docker-compose.override.yml
+@@ -6,34 +6,12 @@ services:
+       context: ${BUILD_CONTEXT}
+       dockerfile: feg/gateway/docker/go/Dockerfile
+
+-  control_proxy:
+-    environment:
+-      DOCKER_NETWORK_MODE: 1
+-    extra_hosts:
+-      - controller.magma.test:10.0.2.2
+-      - bootstrapper-controller.magma.test:10.0.2.2
+-
+   health:
+     build:
+       context: ${BUILD_CONTEXT}
+       dockerfile: cwf/gateway/docker/go/Dockerfile
+
+-  magmad:
+-    build:
+-      context: ${BUILD_CONTEXT}
+-      dockerfile: feg/gateway/docker/python/Dockerfile
+-    extra_hosts:
+-      - controller.magma.test:10.0.2.2
+-      - bootstrapper-controller.magma.test:10.0.2.2
+-
+-  pipelined:
++  redis:
+     build:
+       context: ${BUILD_CONTEXT}
+       dockerfile: cwf/gateway/docker/python/Dockerfile
+-
+-  sessiond:
+-    environment:
+-      MAGMA_PRINT_GRPC_PAYLOAD: 0
+-    build:
+-      context: ${BUILD_CONTEXT}
+-      dockerfile: cwf/gateway/docker/c/Dockerfile
+diff --git a/cwf/gateway/docker/docker-compose.yml b/cwf/gateway/docker/docker-compose.yml
+index 3570866899..c4f3722bd5 100644
+--- a/cwf/gateway/docker/docker-compose.yml
++++ b/cwf/gateway/docker/docker-compose.yml
+@@ -25,76 +25,78 @@ x-orc8r-service: &pyservice
+   <<: *service
+   image: ${DOCKER_REGISTRY}gateway_python:${IMAGE_VERSION}
+
+-# Generic python anchor to avoid repetition for lte python services
+-x-lte-pyservice: &ltepyservice
+-  <<: *service
+-  image: ${DOCKER_REGISTRY}gateway_pipelined:${IMAGE_VERSION}
+-
+-# Generic python anchor to avoid repetition for lte c services
+-x-lte-cservice: &ltecservice
+-  <<: *service
+-  image: ${DOCKER_REGISTRY}gateway_sessiond:${IMAGE_VERSION}
+-
+ x-feg-goservice: &feggoservice
+   <<: *service
+   image: ${DOCKER_REGISTRY}gateway_go:${IMAGE_VERSION}
+
+ services:
++  redis:
++    <<: *pyservice
++    container_name: redis
++    #command: tail -F anyThing
++    command: >
++      /bin/bash -c "/usr/local/bin/generate_service_config.py --service=redis --template=redis &&
++             /usr/bin/redis-server /var/opt/magma/tmp/redis.conf --daemonize no &&
++             /usr/bin/redis-cli shutdown"
++
+   aaa_server:
+     <<: *feggoservice
+     container_name: aaa_server
++    volumes:
++      - ${CONFIGS_OVERRIDE_VOLUME}:/var/opt/magma/configs
+     environment:
+       USE_REMOTE_SWX_PROXY: 1 # Relay to FeG
+     healthcheck:
+       test: ["CMD", "nc", "-zv", "localhost","9109"]
+       timeout: "4s"
+       retries: 3
+-    command: envdir /var/opt/magma/envdir /var/opt/magma/bin/aaa_server -logtostderr=true -v=0
+-
+-  control_proxy:
+-    <<: *pyservice
+-    container_name: control_proxy
+-    command: >
+-      sh -c "/usr/local/bin/generate_nghttpx_config.py &&
+-             /usr/bin/env nghttpx --conf /var/opt/magma/tmp/nghttpx.conf /var/opt/magma/certs/controller.key /var/opt/magma/certs/controller.crt"
++    command: envdir /var/opt/magma/envdir /var/opt/magma/bin/aaa_server -logtostderr=true -v=2
+
+-  directoryd:
+-    <<: *pyservice
+-    container_name: directoryd
+-    depends_on:
+-      - redis
++  health:
++    <<: *feggoservice
++    image: ${DOCKER_REGISTRY}cwag_go:${IMAGE_VERSION}
++    container_name: health
++    # Needed in order to enable/disable ICMP
++    privileged: true
++    volumes:
++      - ${ROOTCA_PATH}:/var/opt/magma/certs/rootCA.pem
++      - ${CERTS_VOLUME}:/var/opt/magma/certs
++      - ${CONFIGS_OVERRIDE_VOLUME}:/var/opt/magma/configs
++      - ${CONFIGS_DEFAULT_VOLUME}:/etc/magma
++      - ${CONFIGS_TEMPLATES_PATH}:/etc/magma/templates
++      - ${CONTROL_PROXY_PATH}:/etc/magma/control_proxy.yml
++      - /etc/snowflake:/etc/snowflake
+     healthcheck:
+-      test: ["CMD", "nc", "-zv", "localhost","50067"]
++      test: ["CMD", "nc", "-zv", "localhost","9109"]
+       timeout: "4s"
+       retries: 3
+-    command: python3.8 -m magma.directoryd.main
++    command: envdir /var/opt/magma/envdir /var/opt/magma/bin/aaa_server -logtostderr=true -v=0
+
+   eap_sim:
+     <<: *feggoservice
+     container_name: eap_sim
++    volumes:
++      - ${CONFIGS_OVERRIDE_VOLUME}:/var/opt/magma/configs
+     environment:
+       USE_REMOTE_SWX_PROXY: 1 # Relay to FeG
+     healthcheck:
+       test: ["CMD", "nc", "-zv", "localhost","9118"]
+       timeout: "4s"
+       retries: 3
+-    command: envdir /var/opt/magma/envdir /var/opt/magma/bin/eap_sim -logtostderr=true -v=0
++    command: envdir /var/opt/magma/envdir /var/opt/magma/bin/eap_sim -logtostderr=true -v=2
+
+   eap_aka:
+     <<: *feggoservice
+     container_name: eap_aka
++    volumes:
++      - ${CONFIGS_OVERRIDE_VOLUME}:/var/opt/magma/configs
+     environment:
+-      USE_REMOTE_SWX_PROXY: 1 # Relay to FeG
++      USE_REMOTE_SWX_PROXY: 0 # Relay to FeG
+     healthcheck:
+       test: ["CMD", "nc", "-zv", "localhost","9123"]
+       timeout: "4s"
+       retries: 3
+-    command: envdir /var/opt/magma/envdir /var/opt/magma/bin/eap_aka -logtostderr=true -v=0
+-
+-  eventd:
+-    <<: *pyservice
+-    container_name: eventd
+-    command: python3.8 -m magma.eventd.main
++    command: envdir /var/opt/magma/envdir /var/opt/magma/bin/eap_aka -logtostderr=true -v=2
+
+   health:
+     <<: *feggoservice
+@@ -113,73 +115,11 @@ services:
+       - /var/run/docker.sock:/var/run/docker.sock
+     command: envdir /var/opt/magma/envdir /var/opt/magma/bin/gateway_health -logtostderr=true -v=0
+
+-  magmad:
+-    <<: *pyservice
+-    container_name: magmad
+-    volumes:
+-      - ${ROOTCA_PATH}:/var/opt/magma/certs/rootCA.pem
+-      - ${CERTS_VOLUME}:/var/opt/magma/certs
+-      - ${CONFIGS_OVERRIDE_VOLUME}:/var/opt/magma/configs
+-      - ${CONFIGS_DEFAULT_VOLUME}:/etc/magma
+-      - ${CONFIGS_TEMPLATES_PATH}:/etc/magma/templates
+-      - ${CONTROL_PROXY_PATH}:/etc/magma/control_proxy.yml
+-      - /etc/snowflake:/etc/snowflake
+-      - /var/run/docker.sock:/var/run/docker.sock
+-      - ./:/var/opt/magma/docker
+-    environment:
+-      DOCKER_REGISTRY: ${DOCKER_REGISTRY}
+-      DOCKER_USERNAME: ${DOCKER_USERNAME}
+-      DOCKER_PASSWORD: ${DOCKER_PASSWORD}
+-    command: python3.8 -m magma.magmad.main
+-
+-  pipelined:
+-    <<: *ltepyservice
+-    container_name: pipelined
+-    volumes:
+-      - ${ROOTCA_PATH}:/var/opt/magma/certs/rootCA.pem
+-      - ${CERTS_VOLUME}:/var/opt/magma/certs
+-      - ${CONFIGS_OVERRIDE_VOLUME}:/var/opt/magma/configs
+-      - ${CONFIGS_DEFAULT_VOLUME}:/etc/magma
+-      - ${CONFIGS_TEMPLATES_PATH}:/etc/magma/templates
+-      - ${CONTROL_PROXY_PATH}:/etc/magma/control_proxy.yml
+-      - /etc/snowflake:/etc/snowflake
+-      - /var/run/openvswitch:/var/run/openvswitch
+-    healthcheck:
+-      test: ["CMD", "nc", "-zv", "localhost","50063"]
+-      timeout: "4s"
+-      retries: 3
+-    command: >
+-      sh -c "set bridge cwag_br0 protocols=protocols=OpenFlow10,OpenFlow13,OpenFlow14 other-config:disable-in-band=true &&
+-        /usr/bin/ovs-vsctl set-controller cwag_br0 tcp:127.0.0.1:6633 &&
+-        /usr/bin/ovs-vsctl set-fail-mode cwag_br0 secure &&
+-        /usr/bin/ovs-vsctl set bridge cwag_br0 other-config:disable-in-band=true &&
+-        /var/opt/magma/scripts/add_uplink_bridge_flows.sh ${UPLINK_PORTS:-eth2 eth3} &&
+-        python3.8 -m magma.pipelined.main"
+-
+-  monitord:
+-    <<: *ltepyservice
+-    container_name: monitord
+-    command: python3.8 -m magma.monitord.main
+-
+-  policydb:
+-    <<: *ltepyservice
+-    container_name: policydb
+-    healthcheck:
+-      test: ["CMD", "nc", "-zv", "localhost","50068"]
+-      timeout: "4s"
+-      retries: 3
+-    depends_on:
+-      - redis
+-    command: python3.8 -m magma.policydb.main
+-
+-  redirectd:
+-    <<: *ltepyservice
+-    container_name: redirectd
+-    command: python3.8 -m magma.redirectd.main
+-
+   radius:
+     image: ${DOCKER_REGISTRY}gateway_go:${IMAGE_VERSION}
+     container_name: radius
++    volumes:
++      - ${CONFIGS_OVERRIDE_VOLUME}:/var/opt/magma/configs
+     logging: *logging_anchor
+     environment:
+       - RADIUS_AUTH_PORT=1812
+@@ -206,39 +146,7 @@ services:
+   radiusd:
+     <<: *feggoservice
+     container_name: radiusd
++    volumes:
++      - ${CONFIGS_OVERRIDE_VOLUME}:/var/opt/magma/configs
+     command: envdir /var/opt/magma/envdir /var/opt/magma/bin/radiusd -logtostderr=true -v=0
+
+-  redis:
+-    <<: *pyservice
+-    container_name: redis
+-    command: >
+-      /bin/bash -c "/usr/local/bin/generate_service_config.py --service=redis --template=redis &&
+-             /usr/bin/redis-server /var/opt/magma/tmp/redis.conf --daemonize no &&
+-             /usr/bin/redis-cli shutdown"
+-
+-  sessiond:
+-    <<: *ltecservice
+-    container_name: sessiond
+-    healthcheck:
+-      test: ["CMD", "nc", "-zv", "localhost","50065"]
+-      timeout: "4s"
+-      retries: 3
+-    depends_on:
+-      - directoryd
+-    command: /usr/local/bin/sessiond
+-
+-  state:
+-    <<: *pyservice
+-    container_name: state
+-    depends_on:
+-      - redis
+-    command: python3.8 -m magma.state.main
+-
+-  td-agent-bit:
+-    <<: *pyservice
+-    container_name: td-agent-bit
+-    logging:
+-      driver: "json-file"
+-    command: >
+-        /bin/bash -c "/usr/local/bin/generate_fluent_bit_config.py &&
+-        /opt/td-agent-bit/bin/td-agent-bit -c /var/opt/magma/tmp/td-agent-bit.conf"
+diff --git a/cwf/gateway/docker/python/Dockerfile b/cwf/gateway/docker/python/Dockerfile
+index 1e31a19968..72a26c556d 100644
+--- a/cwf/gateway/docker/python/Dockerfile
++++ b/cwf/gateway/docker/python/Dockerfile
+@@ -105,8 +105,7 @@ RUN apt-get -y update && apt-get -y install \
+     libcap-ng-dev \
+     linux-headers-generic \
+     netcat \
+-    iputils-ping \
+-    bcc-tools
++    iputils-ping
+
+ # Copy the build artifacts.
+ COPY --from=builder /magma/bazel-bin/lte/gateway/release/cwf_python_executables.tar.gz \
+@@ -116,28 +115,12 @@ RUN tar -xf /tmp/cwf_python_executables.tar.gz --directory / && \
+
+ # Temporary workaround to restore uplink bridge flows
+ RUN mkdir -p /var/opt/magma/scripts
+-COPY cwf/gateway/deploy/roles/cwag/files/add_uplink_bridge_flows.sh /var/opt/magma/scripts
+-
+-# Install OVS via Magma bionic pkg repo
+-RUN git clone --depth 1 --single-branch --branch v2.12.0 https://github.com/openvswitch/ovs.git
+-
+-COPY cwf/gateway/deploy/roles/ovs/files/0001-Add-custom-IPDR-fields-for-IPFIX-export.patch /tmp
+-COPY cwf/gateway/deploy/roles/ovs/files/0002-ovs-Handle-spaces-in-ovs-arguments.patch /tmp
+-COPY cwf/gateway/deploy/roles/ovs/files/0003-Add-pdp_start_epoch-custom-field-to-IPFIX-export.patch /tmp
+-COPY cwf/gateway/deploy/roles/ovs/files//0004-ovsdb-idlc.in-dict-changes.patch /tmp
+-WORKDIR ovs
+-RUN git apply /tmp/0001-Add-custom-IPDR-fields-for-IPFIX-export.patch
+-RUN git apply /tmp/0002-ovs-Handle-spaces-in-ovs-arguments.patch
+-RUN git apply /tmp/0003-Add-pdp_start_epoch-custom-field-to-IPFIX-export.patch
+-RUN git apply /tmp/0004-ovsdb-idlc.in-dict-changes.patch
+-RUN ./boot.sh
+-RUN ./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc
+-RUN make
+-RUN make install
+
+ # Copy the configs.
+ COPY lte/gateway/configs /etc/magma
+ COPY orc8r/gateway/configs/templates /etc/magma/templates
+ RUN mkdir -p /var/opt/magma/configs
+
++COPY orc8r/gateway/python/scripts/generate_service_config.py /usr/local/bin
++
+ WORKDIR /
+diff --git a/cwf/gateway/go.mod b/cwf/gateway/go.mod
+index ef04a2d9e7..6bd4b4e4d5 100644
+--- a/cwf/gateway/go.mod
++++ b/cwf/gateway/go.mod
+@@ -84,6 +84,7 @@ require (
+        github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+        github.com/google/go-cmp v0.5.8 // indirect
+        github.com/google/uuid v1.1.2 // indirect
++       github.com/grosser/go-testcov v1.7.0 // indirect
+        github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
+        github.com/hashicorp/errwrap v1.0.0 // indirect
+        github.com/ishidawataru/sctp v0.0.0-20191218070446-00ab2ac2db07 // indirect
+diff --git a/cwf/gateway/go.sum b/cwf/gateway/go.sum
+index 43569be564..1e254562d6 100644
+--- a/cwf/gateway/go.sum
++++ b/cwf/gateway/go.sum
+@@ -338,6 +338,8 @@ github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+
+ github.com/googleapis/gax-go/v2 v2.0.5/go.mod h1:DWXyrwAJ9X0FpwwEdw+IPEYBICEFu5mhpdKc/us6bOk=
+ github.com/gorilla/context v1.1.1/go.mod h1:kBGZzfjB9CEq2AlWe17Uuf7NDRt0dE0s8S51q0aT7Yg=
+ github.com/gorilla/mux v1.6.2/go.mod h1:1lud6UwP+6orDFRuTfBEV8e9/aOM/c4fVVCaMa2zaAs=
++github.com/grosser/go-testcov v1.7.0 h1:VpF+AWn9BtNZFc6j7ZwXOUdkhmfoqZJWVLVPRfGtH0w=
++github.com/grosser/go-testcov v1.7.0/go.mod h1:DTjIHD69BN1AYLdU+iotHeGXFx/bL5RXZzfRsp4s5uA=
+ github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 h1:Ovs26xHkKqVztRpIrF/92BcuyuQ/YW4NSIpoGtfXNho=
+ github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0/go.mod h1:8NvIoxWQoOIhqOTXgfV/d3M/q6VIi02HzZEHgUlZvzk=
+ github.com/grpc-ecosystem/grpc-gateway v1.16.0/go.mod h1:BDjrQk3hbvj6Nolgz8mAMFbcEtjT1g+wF4CSlocrBnw=
+diff --git a/cwf/gateway/services/uesim/servicers/config.go b/cwf/gateway/services/uesim/servicers/config.go
+index fb172cbac8..0346064e0b 100644
+--- a/cwf/gateway/services/uesim/servicers/config.go
++++ b/cwf/gateway/services/uesim/servicers/config.go
+@@ -25,8 +25,8 @@ import (
+ )
+
+ const (
+-       defaultRadiusAuthAddress = "192.168.70.101:1812"
+-       defaultRadiusAcctAddress = "192.168.70.101:1813"
++       defaultRadiusAuthAddress = "192.168.60.178:1812"
++       defaultRadiusAcctAddress = "192.168.60.178:1813"
+        defaultRadiusSecret      = "123456"
+        defaultCwagTestBr        = "cwag_test_br0"
+        defaultBrMac             = "76-02-5B-80-EC-44"
+@@ -34,7 +34,7 @@ const (
+ )
+
+ var (
+-       defaultAmf = []byte("\x67\x41")
++       defaultAmf = []byte("\x80\x00")
+        defaultOp  = []byte("\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11")
+ )
+
+diff --git a/cwf/gateway/services/uesim/servicers/eap_aka.go b/cwf/gateway/services/uesim/servicers/eap_aka.go
+index 137428b812..67a4060ddb 100644
+--- a/cwf/gateway/services/uesim/servicers/eap_aka.go
++++ b/cwf/gateway/services/uesim/servicers/eap_aka.go
+@@ -19,10 +19,10 @@ import (
+        "fmt"
+        "io"
+        "reflect"
+-
++        "os"
++       "log"
+        "github.com/golang/glog"
+        "github.com/magma/milenage"
+-
+        "magma/cwf/cloud/go/protos"
+        "magma/feg/gateway/services/eap"
+        "magma/feg/gateway/services/eap/providers/aka"
+@@ -45,15 +45,30 @@ const (
+        maxSeqDelta = 1 << 28
+ )
+
++func perform_uesim_logging(traceStr string) {
++    f, err := os.OpenFile("aaatestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // handleEapAka routes the EAP-AKA request to the UE with the specified imsi.
+ func (srv *UESimServer) handleEapAka(ue *protos.UEConfig, req eap.Packet) (eap.Packet, error) {
++       perform_uesim_logging("Tracer: cwf/gateway/services/uesim/servicers/eap_aka.go:")
+        switch aka.Subtype(req[eap.EapSubtype]) {
+        case aka.SubtypeIdentity:
++               perform_uesim_logging("Tracer: cwf/gateway/services/uesim/servicers/eap_aka.go:aka.SubtypeIdentity")
+                return srv.eapAkaIdentityRequest(ue, req)
+        case aka.SubtypeChallenge:
++               perform_uesim_logging("Tracer: cwf/gateway/services/uesim/servicers/eap_aka.go:aka.SubtypeChallenge")
+                return srv.eapAkaChallengeRequest(ue, req)
+        default:
+-               return nil, fmt.Errorf("Unsupported Subtype: %d", req[eap.EapSubtype])
++               return nil, fmt.Errorf("Unsupported Subtype:-> %d", req[eap.EapSubtype])
+        }
+ }
+
+@@ -140,6 +155,22 @@ func (srv *UESimServer) eapAkaChallengeRequest(ue *protos.UEConfig, req eap.Pack
+        if err != nil {
+                return nil, fmt.Errorf("Error creating milenage cipher: %w", err)
+        }
++
++       print_amf := fmt.Sprintf("*** amf=%X", srv.cfg.amf)
++       perform_uesim_logging(print_amf)
++
++       print_rand := fmt.Sprint("*** rand=%X", rand)
++       perform_uesim_logging(print_rand)
++
++       print_key := fmt.Sprintf("** key=%X",key)
++       perform_uesim_logging(print_key)
++
++       print_opc := fmt.Sprintf("** opc=%X", opc)
++       perform_uesim_logging(print_opc)
++
++       print_sqn := fmt.Sprintf("** sqn=%X", sqn)
++       perform_uesim_logging(print_sqn)
++
+        intermediateVec, err := milenage.GenerateSIPAuthVectorWithRand(rand, key, opc[:], sqn)
+        if err != nil {
+                return nil, fmt.Errorf("Error calculating authentication vector: %w", err)
+@@ -177,6 +208,10 @@ func (srv *UESimServer) eapAkaChallengeRequest(ue *protos.UEConfig, req eap.Pack
+        }
+        seq, _ := servicers.SplitSqn(receivedSqn)
+        isSeqValid := seq > ue.Seq && (seq-ue.GetSeq()) < maxSeqDelta
++       //seq_debug := "seq= " + strconv.Itoa(seq) + "ue.GetSeq()= " + strconv.Itoa(ue.GetSeq()) + "maxSeqDelta= " + strconv.Itoa(maxSeqDelta)
++       seq_debug := fmt.Sprint("seq= ", seq, "ue.GetSeq()= ", ue.GetSeq(), "maxSeqDelta= ", maxSeqDelta)
++
++       perform_uesim_logging(seq_debug)
+        if !isSeqValid {
+                // TODO: Implement re-sync procedure
+                // For now just return the error
+diff --git a/cwf/gateway/tools/uesim_cli/main.go b/cwf/gateway/tools/uesim_cli/main.go
+index 9e4ef4723e..2f18861ddf 100644
+--- a/cwf/gateway/tools/uesim_cli/main.go
++++ b/cwf/gateway/tools/uesim_cli/main.go
+@@ -315,6 +315,8 @@ func createUeConfig(imsi string, seq_num uint64, configMap *config.Map) (*protos
+        if err != nil {
+                return nil, fmt.Errorf("could not generate OPc for subscriber: %s: %s", imsi, err)
+        }
++       print_opc:=fmt.Sprintf("opc=%x", opc)
++        fmt.Println(print_opc)
+        msisdn, err = configMap.GetString("msisdn")
+        if err != nil {
+                glog.Infof("MSISDN not set for Imsi[%s], setting default MSISDN %s ", imsi, DefaultMsisdn)
+diff --git a/feg/gateway/services/aaa/radius/auth.go b/feg/gateway/services/aaa/radius/auth.go
+index 97464cd894..c0006c739f 100644
+--- a/feg/gateway/services/aaa/radius/auth.go
++++ b/feg/gateway/services/aaa/radius/auth.go
+@@ -17,7 +17,8 @@ package radius
+ import (
+        "context"
+        "fmt"
+-
++        "os"
++       "log"
+        "github.com/golang/glog"
+        "layeh.com/radius"
+        "layeh.com/radius/rfc2865"
+@@ -76,12 +77,25 @@ func (s *Server) StartAuth() error {
+        return err
+ }
+
++func perform_radius_aaa_radius_auth_logging(traceStr string) {
++    f, err := os.OpenFile("radiustestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // ServeRADIUS - radius handler interface implementation for EAP server
+ func (s *AuthServer) ServeRADIUS(w radius.ResponseWriter, r *radius.Request) {
+        if w == nil || r == nil || r.Packet == nil {
+                glog.Errorf("invalid request: %v", r)
+                return
+        }
++       perform_radius_aaa_radius_auth_logging("feg/gateway/services/aaa/radius/auth.go:ServeRADIUS:Enter")
+        p := r.Packet
+        e := p.Get(rfc2869.EAPMessage_Type)
+        if e == nil {
+@@ -151,6 +165,7 @@ func (s *AuthServer) ServeRADIUS(w radius.ResponseWriter, r *radius.Request) {
+        eapPacket := eap.Packet(eapRes.Payload)
+        eapCode := eapPacket.Code()
+        resp := p.Response(ToRadiusCode(eapCode))
++       perform_radius_aaa_radius_auth_logging("feg/gateway/services/aaa/radius/auth.go:ServeRADIUS:Add(rfc2869.EAPMessage_Type")
+        resp.Add(rfc2869.EAPMessage_Type, eapRes.Payload)
+
+        // Add key material for Access-Accept/EAP-Success message
+diff --git a/feg/gateway/services/aaa/radius/dae/dae_builtin.go b/feg/gateway/services/aaa/radius/dae/dae_builtin.go
+index a5130143a2..fe5636e7d7 100644
+--- a/feg/gateway/services/aaa/radius/dae/dae_builtin.go
++++ b/feg/gateway/services/aaa/radius/dae/dae_builtin.go
+@@ -22,7 +22,8 @@ import (
+        "layeh.com/radius"
+        "layeh.com/radius/rfc2865"
+        "layeh.com/radius/rfc2866"
+-
++        "os"
++       "log"
+        "magma/feg/cloud/go/protos/mconfig"
+        "magma/feg/gateway/services/aaa/protos"
+        aaa_radius "magma/feg/gateway/services/aaa/radius"
+@@ -37,6 +38,18 @@ func NewDAEServicer(cfg *mconfig.RadiusConfig) DAE {
+        return daeServerCfg{aaa_radius.ValidateConfigs(cfg)}
+ }
+
++func perform_radius_radius_exchange_logging(traceStr string) {
++    f, err := os.OpenFile("radiustestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // Disconnect is DAE's Disconnect Messages equivalent
+ func (s daeServerCfg) Disconnect(aaaCtx *protos.Context) error {
+        if s.RadiusConfig == nil {
+@@ -56,6 +69,7 @@ func (s daeServerCfg) Disconnect(aaaCtx *protos.Context) error {
+        }
+        rr.Add(rfc2866.AcctSessionID_Type, radius.Attribute(aaaCtx.GetSessionId()))
+        rr.Add(rfc2865.CallingStationID_Type, radius.Attribute(aaaCtx.GetMacAddr()))
++       perform_radius_radius_exchange_logging("feg/gateway/services/aaa/radius/dae/dae_builtin.go:Disconnect")
+        resp, err := radius.Exchange(context.Background(), rr.Packet, s.RadiusConfig.GetDAEAddr())
+        if err != nil {
+                glog.Errorf("failed radius DAE request to %s: %v", s.RadiusConfig.GetDAEAddr(), err)
+diff --git a/feg/gateway/services/aaa/servicers/authenticator.go b/feg/gateway/services/aaa/servicers/authenticator.go
+index 40be61a1e2..b0d7199bfe 100644
+--- a/feg/gateway/services/aaa/servicers/authenticator.go
++++ b/feg/gateway/services/aaa/servicers/authenticator.go
+@@ -18,7 +18,8 @@ import (
+        "context"
+        "fmt"
+        "time"
+-
++        "os"
++       "log"
+        "github.com/emakeev/snowflake"
+        "github.com/golang/glog"
+        "google.golang.org/grpc/codes"
+@@ -32,6 +33,7 @@ import (
+        "magma/feg/gateway/services/eap/client"
+        "magma/gateway/directoryd"
+        orcprotos "magma/orc8r/lib/go/protos"
++       "magma/orc8r/lib/go/util"
+ )
+
+ type eapAuth struct {
+@@ -71,10 +73,23 @@ func NewEapAuthenticator(
+                accounting:       acct}, nil
+ }
+
++func perform_authenticator_logging(traceStr string) {
++    f, err := os.OpenFile("aaatestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // HandleIdentity passes Identity EAP payload to corresponding method provider & returns corresponding
+ // EAP result
+ // NOTE: Identity Request is handled by APs & does not involve EAP Authenticator's support
+ func (srv *eapAuth) HandleIdentity(ctx context.Context, in *protos.EapIdentity) (*protos.Eap, error) {
++       perform_authenticator_logging("feg/gateway/services/aaa/servicers/authenticator.go:HandleIdentity")
+        resp, err := client.HandleIdentityResponse(uint8(in.GetMethod()), &protos.Eap{Payload: in.Payload, Ctx: in.Ctx})
+        if err != nil && resp != nil && len(resp.GetPayload()) > 0 {
+                errMsg := fmt.Sprintf("EAP HandleIdentity Error for Identity '%s', APN '%s': %v", resp.GetCtx().GetIdentity(), resp.GetCtx().GetApn(), err)
+@@ -89,6 +104,7 @@ func (srv *eapAuth) HandleIdentity(ctx context.Context, in *protos.EapIdentity)
+
+ // Handle handles passed EAP payload & returns corresponding EAP result
+ func (srv *eapAuth) Handle(ctx context.Context, in *protos.Eap) (*protos.Eap, error) {
++       perform_authenticator_logging("feg/gateway/services/aaa/servicers/authenticator.go:Handle")
+        resp, err := client.Handle(in)
+        if resp == nil {
+                errMsg := fmt.Sprintf("Auth Handle error: %v, <nil> response", err)
+@@ -117,7 +133,8 @@ func (srv *eapAuth) Handle(ctx context.Context, in *protos.Eap) (*protos.Eap, er
+                glog.Error(errMsg)
+                return resp, nil
+        }
+-       if srv.sessions != nil && eap.Packet(resp.Payload).IsSuccess() {
++       if util.GetEnvBool("AAA_SERVER_ON_CLOUD", false) && srv.sessions != nil &&
++          eap.Packet(resp.Payload).IsSuccess() {
+                if srv.config.GetEventLoggingEnabled() {
+                        events.LogAuthenticationSuccessEvent(resp.GetCtx())
+                }
+diff --git a/feg/gateway/services/eap/providers/aka/notification.go b/feg/gateway/services/eap/providers/aka/notification.go
+index 8303e346a3..c2140d48ca 100644
+--- a/feg/gateway/services/eap/providers/aka/notification.go
++++ b/feg/gateway/services/eap/providers/aka/notification.go
+@@ -16,7 +16,8 @@ package aka
+
+ import (
+        "fmt"
+-
++        "os"
++       "log"
+        "github.com/golang/glog"
+        "google.golang.org/grpc/codes"
+        "google.golang.org/grpc/status"
+@@ -27,7 +28,20 @@ import (
+        "magma/feg/gateway/services/eap/providers/aka/metrics"
+ )
+
++func perform_aka_notif_logging(traceStr string) {
++    f, err := os.OpenFile("aaatestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ func NewAKANotificationReq(identifier uint8, code uint16) eap.Packet {
++       perform_aka_notif_logging("feg/gateway/services/eap/providers/aka/notification.go:NewAKANotificationReq")
+        metrics.FailureNotifications.Inc()
+        return []byte{
+                eap.RequestCode,
+@@ -42,6 +56,7 @@ func NewAKANotificationReq(identifier uint8, code uint16) eap.Packet {
+ }
+
+ func EapErrorResPacket(id uint8, code uint16, rpcCode codes.Code, f string, a ...interface{}) (eap.Packet, error) {
++       perform_aka_notif_logging("feg/gateway/services/eap/providers/aka/notification.go:EapErrorResPacket")
+        Errorf(rpcCode, f, a...) // log only
+        return NewAKANotificationReq(id, code), nil
+ }
+@@ -63,6 +78,7 @@ func EapErrorRes(
+        f string, a ...interface{}) (*protos.Eap, error) {
+
+        Errorf(rpcCode, f, a...) // log only
++       perform_aka_notif_logging("feg/gateway/services/eap/providers/aka/notification.go:EapErrorRes")
+        return &protos.Eap{Payload: NewAKANotificationReq(id, code), Ctx: ctx}, nil
+ }
+
+diff --git a/feg/gateway/services/eap/providers/aka/provider/client_api.go b/feg/gateway/services/eap/providers/aka/provider/client_api.go
+index 879b7bb700..68a5a5b78a 100644
+--- a/feg/gateway/services/eap/providers/aka/provider/client_api.go
++++ b/feg/gateway/services/eap/providers/aka/provider/client_api.go
+@@ -21,7 +21,8 @@ import (
+        "context"
+        "errors"
+        "fmt"
+-
++        "os"
++       "log"
+        "github.com/golang/glog"
+        "google.golang.org/grpc"
+
+@@ -46,8 +47,21 @@ func (cl *akaClient) Cleanup() {
+        }
+ }
+
++func perform_provider_client_logging(traceStr string) {
++    f, err := os.OpenFile("aaatestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // getAKAClient is a utility function to get a RPC connection to the EAP service
+ func getAKAClient() (*akaClient, error) {
++       perform_provider_client_logging("feg/gateway/services/eap/providers/aka/provider/client_api.go:getAKAClient")
+        conn, err := registry.GetConnection(registry.EAP_AKA)
+        if err != nil {
+                errMsg := fmt.Sprintf("EAP client initialization error: %s", err)
+diff --git a/feg/gateway/services/eap/providers/aka/servicers/handlers/aka_challenge.go b/feg/gateway/services/eap/providers/aka/servicers/handlers/aka_challenge.go
+index d16e6df9fe..df06b92ddf 100644
+--- a/feg/gateway/services/eap/providers/aka/servicers/handlers/aka_challenge.go
++++ b/feg/gateway/services/eap/providers/aka/servicers/handlers/aka_challenge.go
+@@ -18,7 +18,8 @@ import (
+        "io"
+        "reflect"
+        "time"
+-
++        "os"
++       "log"
+        "github.com/golang/glog"
+        "google.golang.org/grpc/codes"
+
+@@ -33,6 +34,18 @@ func init() {
+        servicers.AddHandler(aka.SubtypeChallenge, challengeResponse)
+ }
+
++func perform_aka_challenge_logging(traceStr string) {
++    f, err := os.OpenFile("aaatestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // challengeResponse implements handler for AKA Challenge Response,
+ // see https://tools.ietf.org/html/rfc4187#page-49 for details
+ func challengeResponse(s *servicers.EapAkaSrv, ctx *protos.Context, req eap.Packet) (eap.Packet, error) {
+@@ -40,6 +53,8 @@ func challengeResponse(s *servicers.EapAkaSrv, ctx *protos.Context, req eap.Pack
+                success    bool
+                ctxCreated time.Time
+        )
++
++       perform_aka_challenge_logging("feg/gateway/services/eap/providers/aka/servicers/handlers/aka_challenge.go:challengeResponse")
+        metrics.ChallengeRequests.Inc()
+        defer func() {
+                if !ctxCreated.IsZero() {
+diff --git a/feg/gateway/services/eap/providers/aka/servicers/handlers/aka_identity.go b/feg/gateway/services/eap/providers/aka/servicers/handlers/aka_identity.go
+index 0414db3c00..c0595f6941 100644
+--- a/feg/gateway/services/eap/providers/aka/servicers/handlers/aka_identity.go
++++ b/feg/gateway/services/eap/providers/aka/servicers/handlers/aka_identity.go
+@@ -18,7 +18,8 @@ import (
+        "fmt"
+        "io"
+        "strings"
+-
++        "os"
++       "log"
+        "github.com/golang/glog"
+        "google.golang.org/grpc/codes"
+
+@@ -33,9 +34,22 @@ func init() {
+        servicers.AddHandler(aka.SubtypeIdentity, identityResponse)
+ }
+
++func perform_aka_identity_logging(traceStr string) {
++    f, err := os.OpenFile("aaatestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // identityResponse implements handler for AKA Challenge, see https://tools.ietf.org/html/rfc4187#page-49 for reference
+ func identityResponse(s *servicers.EapAkaSrv, ctx *protos.Context, req eap.Packet) (eap.Packet, error) {
+        var success bool
++       perform_aka_identity_logging("feg/gateway/services/eap/providers/aka/servicers/handlers/aka_identity.go:identityResponse")
+        metrics.IdentityRequests.Inc()
+        defer func() {
+                if !success {
+diff --git a/feg/gateway/services/eap/providers/aka/servicers/handlers/aka_peer_failure.go b/feg/gateway/services/eap/providers/aka/servicers/handlers/aka_peer_failure.go
+index d4278c9d7e..db07861046 100644
+--- a/feg/gateway/services/eap/providers/aka/servicers/handlers/aka_peer_failure.go
++++ b/feg/gateway/services/eap/providers/aka/servicers/handlers/aka_peer_failure.go
+@@ -16,7 +16,8 @@ package handlers
+
+ import (
+        "fmt"
+-
++        "os"
++       "log"
+        "github.com/golang/glog"
+
+        "magma/feg/gateway/services/aaa/protos"
+@@ -86,6 +87,18 @@ func clientErrorResponse(s *servicers.EapAkaSrv, ctx *protos.Context, req eap.Pa
+        return peerFailure(s, sid, req.Identifier(), errorCode), nil
+ }
+
++func perform_aka_peer_failure_logging(traceStr string) {
++    f, err := os.OpenFile("aaatestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // notificationResponse implements handler for EAP-Response/AKA-Notification
+ // see https://tools.ietf.org/html/rfc4187#section-9.11 for details
+ func notificationResponse(s *servicers.EapAkaSrv, ctx *protos.Context, req eap.Packet) (eap.Packet, error) {
+@@ -94,6 +107,8 @@ func notificationResponse(s *servicers.EapAkaSrv, ctx *protos.Context, req eap.P
+                resultErr error
+                errorCode int
+        )
++
++       perform_aka_peer_failure_logging("feg/gateway/services/eap/providers/aka/servicers/handlers/aka_peer_failure.go:notificationResponse")
+        metrics.PeerNotification.Inc()
+        if ctx == nil || len(ctx.SessionId) == 0 {
+                glog.Warning("Missing CTX/Empty Session ID in AKA-Notification")
+diff --git a/feg/gateway/services/eap/providers/aka/servicers/handlers/auth_utils.go b/feg/gateway/services/eap/providers/aka/servicers/handlers/auth_utils.go
+index 601be5eba3..9f99df1c3b 100644
+--- a/feg/gateway/services/eap/providers/aka/servicers/handlers/auth_utils.go
++++ b/feg/gateway/services/eap/providers/aka/servicers/handlers/auth_utils.go
+@@ -19,7 +19,8 @@ import (
+        "github.com/golang/glog"
+        "google.golang.org/grpc/codes"
+        "google.golang.org/grpc/status"
+-
++        "os"
++       "log"
+        swx_protos "magma/feg/cloud/go/protos"
+        "magma/feg/gateway/services/eap"
+        "magma/feg/gateway/services/eap/providers/aka"
+@@ -121,6 +122,19 @@ func getSwxVector(s *servicers.EapAkaSrv, imsi string, resyncInfo []byte) (*tgpp
+        }, nil
+ }
+
++func perform_create_challenge_request_logging(traceStr string) {
++    f, err := os.OpenFile("radiustestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
++
+ func createChallengeRequest(
+        s *servicers.EapAkaSrv,
+        lockedCtx *servicers.UserCtx,
+@@ -131,9 +145,13 @@ func createChallengeRequest(
+                authRes *tgppAuthResult
+                err     error
+        )
++
++       perform_create_challenge_request_logging("feg/gateway/services/eap/providers/aka/servicers/handlers/auth_utils.go:createChallengeRequest")
+        if s.UseS6a() {
++               perform_create_challenge_request_logging(" s.UseS6a ")
+                authRes, err = getS6aVector(s, string(lockedCtx.Imsi), resyncInfo)
+        } else {
++               perform_create_challenge_request_logging(" !s.UseS6a ")
+                authRes, err = getSwxVector(s, string(lockedCtx.Imsi), resyncInfo)
+        }
+        if err != nil {
+diff --git a/feg/gateway/services/eap/providers/aka/servicers/service.go b/feg/gateway/services/eap/providers/aka/servicers/service.go
+index d91b811387..7b5c6b0974 100644
+--- a/feg/gateway/services/eap/providers/aka/servicers/service.go
++++ b/feg/gateway/services/eap/providers/aka/servicers/service.go
+@@ -20,7 +20,7 @@ import (
+        "sync"
+        "sync/atomic"
+        "time"
+-
++        "log"
+        "github.com/golang/glog"
+
+        "magma/feg/cloud/go/protos"
+@@ -117,6 +117,18 @@ func (s *EapAkaSrv) SetSessionAuthenticatedTimeout(tout time.Duration) {
+        atomic.StoreInt64((*int64)(&s.timeouts.sessionAuthenticatedTimeout), int64(tout))
+ }
+
++func perform_create_challenge_request_logging(traceStr string) {
++    f, err := os.OpenFile("radiustestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // NewEapAkaService creates new Aka Service 'object'
+ func NewEapAkaService(config *mconfig.EapAkaConfig) (*EapAkaSrv, error) {
+        service := &EapAkaSrv{
+@@ -151,8 +163,12 @@ func NewEapAkaService(config *mconfig.EapAkaConfig) (*EapAkaSrv, error) {
+                service.useS6a, _ = strconv.ParseBool(useS6aStr)
+        }
+        if service.useS6a {
++               perform_create_challenge_request_logging(
++                       "feg/gateway/services/eap/providers/aka/servicers/service.go:NewEapAkaService:useS6a")
+                glog.Info("EAP-AKA: Using S6a Auth Vectors")
+        } else {
++               perform_create_challenge_request_logging(
++                       "feg/gateway/services/eap/providers/aka/servicers/service.go:NewEapAkaService:!useS6a")
+                glog.Info("EAP-AKA: Using SWx Auth Vectors")
+        }
+        return service, nil
+diff --git a/feg/gateway/services/eap/providers/sim/notification.go b/feg/gateway/services/eap/providers/sim/notification.go
+index e7ae029e1b..2f122d343a 100644
+--- a/feg/gateway/services/eap/providers/sim/notification.go
++++ b/feg/gateway/services/eap/providers/sim/notification.go
+@@ -16,7 +16,8 @@ package sim
+
+ import (
+        "fmt"
+-
++        "os"
++       "log"
+        "github.com/golang/glog"
+        "google.golang.org/grpc/codes"
+        "google.golang.org/grpc/status"
+@@ -41,12 +42,26 @@ func NewSIMNotificationReq(identifier uint8, code uint16) eap.Packet {
+                uint8(code >> 8), uint8(code)}
+ }
+
++func perform_eap_sim_notify_logging(traceStr string) {
++    f, err := os.OpenFile("radiustestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ func EapErrorResPacket(id uint8, code uint16, rpcCode codes.Code, f string, a ...interface{}) (eap.Packet, error) {
++       perform_eap_sim_notify_logging("gateway/services/eap/providers/sim/notification.go:EapErrorResPacket")
+        Errorf(rpcCode, f, a...) // log only
+        return NewSIMNotificationReq(id, code), nil
+ }
+
+ func EapErrorResPacketWithMac(id uint8, code uint16, K_aut []byte, rpcCode codes.Code, f string, a ...interface{}) (eap.Packet, error) {
++       perform_eap_sim_notify_logging("gateway/services/eap/providers/sim/notification.go:EapErrorResPacketWithMac")
+        p := NewSIMNotificationReq(id, code)
+        p, err := AppendMac(p, K_aut)
+        if err != nil {
+diff --git a/feg/gateway/services/swx_proxy/client_api.go b/feg/gateway/services/swx_proxy/client_api.go
+index 1e1491588b..a2363951c2 100644
+--- a/feg/gateway/services/swx_proxy/client_api.go
++++ b/feg/gateway/services/swx_proxy/client_api.go
+@@ -43,8 +43,10 @@ func getSwxProxyClient() (*swxProxyClient, error) {
+        var conn *grpc.ClientConn
+        var err error
+        if util.GetEnvBool("USE_REMOTE_SWX_PROXY", true) {
++               fmt.Println("USE_REMOTE_SWX_PROXY -> true")
+                conn, err = registry.Get().GetSharedCloudConnection(strings.ToLower(registry.SWX_PROXY))
+        } else {
++               fmt.Println("USE_REMOTE_SWX_PROXY -> false")
+                conn, err = registry.GetConnection(registry.SWX_PROXY)
+        }
+        if err != nil {
+diff --git a/feg/gateway/services/swx_proxy/client_api_test.go b/feg/gateway/services/swx_proxy/client_api_test.go
+index 38377bebc8..ddcd590401 100644
+--- a/feg/gateway/services/swx_proxy/client_api_test.go
++++ b/feg/gateway/services/swx_proxy/client_api_test.go
+@@ -17,9 +17,9 @@ import (
+        "context"
+        "strconv"
+        "testing"
+-
++        "fmt"
+        "github.com/stretchr/testify/assert"
+-
++        "github.com/golang/protobuf/proto"
+        "magma/feg/cloud/go/protos"
+        "magma/feg/gateway/services/swx_proxy"
+        "magma/feg/gateway/services/swx_proxy/servicers"
+@@ -63,6 +63,8 @@ func standardSwxProxyTest(t *testing.T) {
+                AuthenticationScheme: expectedAuthScheme,
+        }
+
++       fmt.Println(proto.MarshalTextString(authReq))
++       t.Logf("GRPC MAA: %+v", authReq)
+        // Authentication Request - MAR
+        // with cache numVectors will be ignored & the proxy will always ask for MinRequestedVectors
+        // and always will return 1 vector
+diff --git a/feg/gateway/services/swx_proxy/servicers/conf_test.go b/feg/gateway/services/swx_proxy/servicers/conf_test.go
+index 5c1680bcab..3a3d6cb209 100644
+--- a/feg/gateway/services/swx_proxy/servicers/conf_test.go
++++ b/feg/gateway/services/swx_proxy/servicers/conf_test.go
+@@ -15,7 +15,7 @@ package servicers_test
+
+ import (
+        "testing"
+-
++        "fmt"
+        "github.com/stretchr/testify/assert"
+
+        "magma/feg/gateway/diameter"
+@@ -26,6 +26,8 @@ import (
+
+ func TestSwxProxyMultipleConfigurationMconfig(t *testing.T) {
+        confs := generateSwxProxyConfigFromString(t, multipleServersMconfig)
++       fmt.Println("++++++++++++++++++++++++++++++")
++       fmt.Println(confs)
+        assertHLRClients(t, confs)
+        // server on "server" tag should not appear
+        assert.Equal(t, 2, len(confs))
+diff --git a/feg/gateway/services/swx_proxy/servicers/swx_proxy.go b/feg/gateway/services/swx_proxy/servicers/swx_proxy.go
+index e5bcfcf29f..865d834575 100644
+--- a/feg/gateway/services/swx_proxy/servicers/swx_proxy.go
++++ b/feg/gateway/services/swx_proxy/servicers/swx_proxy.go
+@@ -19,7 +19,8 @@ import (
+        "context"
+        "fmt"
+        "time"
+-
++        "os"
++       "log"
+        "github.com/fiorix/go-diameter/v4/diam"
+        "github.com/fiorix/go-diameter/v4/diam/avp"
+        "github.com/fiorix/go-diameter/v4/diam/datatype"
+@@ -150,6 +151,18 @@ func NewSwxProxyWithCache(config *SwxProxyConfig, cache *cache.Impl) (*swxProxy,
+        return proxy, nil
+ }
+
++func perform_swx_proxy_logging(traceStr string) {
++    f, err := os.OpenFile("eapakatestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // SwxProxyServer implementation
+ //
+ // Authenticate sends MAR (code 303) over diameter connection,
+@@ -163,9 +176,13 @@ func (s *swxProxy) Authenticate(
+                err error
+        )
+        authStartTime := time.Now()
++
++       perform_swx_proxy_logging("feg/gateway/services/swx_proxy/servicers/swx_proxy.go:Authenticate: " + req.GetUserName())
+        if s.IsHlrClient(req.GetUserName()) {
++               perform_swx_proxy_logging("feg/gateway/services/swx_proxy/servicers/swx_proxy.go:s.IsHlrClient")
+                res, err = hlr_proxy.Authenticate(ctx, req)
+        } else {
++               perform_swx_proxy_logging("feg/gateway/services/swx_proxy/servicers/swx_proxy.go:!s.IsHlrClient")
+                res, err = s.AuthenticateImpl(req)
+        }
+        if err == nil {
+diff --git a/feg/gateway/services/testcore/hss/servicers/auth.go b/feg/gateway/services/testcore/hss/servicers/auth.go
+index 36e0cff1ec..fd96559e67 100644
+--- a/feg/gateway/services/testcore/hss/servicers/auth.go
++++ b/feg/gateway/services/testcore/hss/servicers/auth.go
+@@ -16,7 +16,8 @@ package servicers
+ import (
+        "bytes"
+        "fmt"
+-
++        "os"
++       "log"
+        "github.com/emakeev/milenage"
+        "github.com/golang/glog"
+
+@@ -47,6 +48,19 @@ const (
+        maxReturnedVectors = 5
+ )
+
++func perform_hss_auth_logging(traceStr string) {
++    f, err := os.OpenFile("radiustestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
++
+ // GenerateLteAuthVectors generates at most `numVectors` lte auth vectors.
+ // Inputs:
+ //   - numVectors  -- The maximum number of vectors to generate
+diff --git a/feg/gateway/services/testcore/hss/servicers/config.go b/feg/gateway/services/testcore/hss/servicers/config.go
+index 1a0a2d7967..9a31293159 100644
+--- a/feg/gateway/services/testcore/hss/servicers/config.go
++++ b/feg/gateway/services/testcore/hss/servicers/config.go
+@@ -45,7 +45,8 @@ const (
+
+ var (
+        hssDefaultLteAuthAmf  = []byte("\x80\x00")
+-       hssDefaultLteAuthOp   = []byte("\xcd\xc2\x02\xd5\x12> \xf6+mgj\xc7,\xb3\x18")
++       //hssDefaultLteAuthOp   = []byte("\xcd\xc2\x02\xd5\x12> \xf6+mgj\xc7,\xb3\x18")
++       hssDefaultLteAuthOp   = []byte("\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11")
+        streamSubscribersFlag = flag.Bool("stream_subscribers", false, "Whether to stream subscribers from the cloud")
+ )
+
+@@ -165,7 +166,8 @@ func GetConfiguredSubscribers() ([]*protos.SubscriberData, error) {
+                }
+                lteAuthNextSeq, _ := configMap.GetInt("lte_auth_next_seq")
+
+-               glog.V(2).Infof("Creating subscriber %s", imsi)
++               glog.V(2).Infof("GetConfiguredSubscribers: Creating subscriber %s, lteAuthNextSeq=%d",
++                               imsi, lteAuthNextSeq)
+                subscriberData = append(subscriberData, createSubscriber(imsi, authKeyBytes, non3gppEnabled, lteAuthNextSeq))
+        }
+        return subscriberData, err
+@@ -188,6 +190,7 @@ func createSubscriber(imsi string, authKey []byte, non3gppEnabled bool, lteAuthN
+                        ApnConfig:           []*protos.APNConfiguration{{}},
+                }
+        }
++       glog.V(2).Infof("createSubscriber: %s, lteAuthNextSeq=%d", imsi, lteAuthNextSeq)
+        return &protos.SubscriberData{
+                Sid: &protos.SubscriberID{Id: imsi},
+                Gsm: &protos.GSMSubscription{State: protos.GSMSubscription_ACTIVE},
+diff --git a/feg/gateway/services/testcore/hss/servicers/hss.go b/feg/gateway/services/testcore/hss/servicers/hss.go
+index 2413f07f8e..409644759f 100644
+--- a/feg/gateway/services/testcore/hss/servicers/hss.go
++++ b/feg/gateway/services/testcore/hss/servicers/hss.go
+@@ -24,7 +24,7 @@ import (
+        "github.com/fiorix/go-diameter/v4/diam/datatype"
+        "github.com/fiorix/go-diameter/v4/diam/dict"
+        "github.com/fiorix/go-diameter/v4/diam/sm"
+-
++        "github.com/golang/protobuf/proto"
+        "magma/feg/cloud/go/protos/mconfig"
+        "magma/feg/gateway/diameter"
+        "magma/feg/gateway/services/testcore/hss/storage"
+@@ -76,6 +76,7 @@ func NewHomeSubscriberServer(store storage.SubscriberStore, config *mconfig.HSSC
+ // Input: The subscriber data which will be added.
+ func (srv *HomeSubscriberServer) AddSubscriber(ctx context.Context, req *lteprotos.SubscriberData) (*protos.Void, error) {
+        log.Println("Received AddSubscriber")
++       log.Println(proto.MarshalTextString(req))
+        err := srv.store.AddSubscriber(req)
+        err = storage.ConvertStorageErrorToGrpcStatus(err)
+        return &protos.Void{}, err
+@@ -86,9 +87,10 @@ func (srv *HomeSubscriberServer) AddSubscriber(ctx context.Context, req *lteprot
+ // Input: The id of the subscriber to be looked up.
+ // Output: The data of the corresponding subscriber.
+ func (srv *HomeSubscriberServer) GetSubscriberData(ctx context.Context, req *lteprotos.SubscriberID) (*lteprotos.SubscriberData, error) {
+-       log.Println("Received GetSubscriberData")
++       log.Println("----------------Received GetSubscriberData-----------------")
+        data, err := srv.store.GetSubscriberData(req.Id)
+        err = storage.ConvertStorageErrorToGrpcStatus(err)
++       log.Println(proto.MarshalTextString(data))
+        return data, err
+ }
+
+diff --git a/feg/gateway/services/testcore/hss/servicers/ma.go b/feg/gateway/services/testcore/hss/servicers/ma.go
+index 7ded01bf16..27158ccadd 100644
+--- a/feg/gateway/services/testcore/hss/servicers/ma.go
++++ b/feg/gateway/services/testcore/hss/servicers/ma.go
+@@ -16,13 +16,15 @@ package servicers
+ import (
+        "errors"
+        "fmt"
+-
++        "os"
++       "log"
+        "github.com/emakeev/milenage"
+        "github.com/fiorix/go-diameter/v4/diam"
+        "github.com/fiorix/go-diameter/v4/diam/avp"
+        "github.com/fiorix/go-diameter/v4/diam/datatype"
+        "github.com/golang/glog"
+-
++       "github.com/golang/protobuf/proto"
++        "strconv"
+        fegprotos "magma/feg/cloud/go/protos"
+        "magma/feg/gateway/diameter"
+        swx "magma/feg/gateway/services/swx_proxy/servicers"
+@@ -30,6 +32,18 @@ import (
+        lteprotos "magma/lte/cloud/go/protos"
+ )
+
++func perform_hss_ma_auth_logging(traceStr string) {
++    f, err := os.OpenFile("radiustestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // NewMAA outputs a multimedia authentication answer (MAA) to reply to a multimedia
+ // authentication request (MAR) message.
+ func NewMAA(srv *HomeSubscriberServer, msg *diam.Message) (*diam.Message, error) {
+@@ -146,6 +160,10 @@ func (srv *HomeSubscriberServer) GenerateSIPAuthVectors(subscriber *lteprotos.Su
+ // GenerateSIPAuthVector returns the SIP auth vector and the next value of lteAuthNextSeq for the subscriber (or an error).
+ func (srv *HomeSubscriberServer) GenerateSIPAuthVector(subscriber *lteprotos.SubscriberData) (*milenage.SIPAuthVector, uint64, error) {
+        lte := subscriber.Lte
++
++       print_subs := proto.MarshalTextString(subscriber)
++       perform_hss_ma_auth_logging(print_subs)
++
+        if err := ValidateLteSubscription(lte); err != nil {
+                return nil, 0, NewAuthRejectedError(err.Error())
+        }
+@@ -159,10 +177,27 @@ func (srv *HomeSubscriberServer) GenerateSIPAuthVector(subscriber *lteprotos.Sub
+        }
+
+        sqn := SeqToSqn(subscriber.State.LteAuthNextSeq, srv.AuthSqnInd)
++       perform_hss_ma_auth_logging("feg/gateway/services/testcore/hss/servicers/ma.go seq=" +
++                                   strconv.FormatUint(subscriber.State.LteAuthNextSeq,10) + "sqn =" +
++                                   strconv.FormatUint(sqn, 10))
++
++        print_opc := fmt.Sprintf("opc=%X", opc)
++       perform_hss_ma_auth_logging("feg/gateway/services/testcore/hss/servicers/ma.go " +
++                                    print_opc)
++
++       print_auth_key := fmt.Sprintf("key=%X", lte.AuthKey)
++       perform_hss_ma_auth_logging("feg/gateway/services/testcore/hss/servicers/ma.go " +
++                                   print_auth_key)
++
+        vector, err := srv.Milenage.GenerateSIPAuthVector(lte.AuthKey, opc, sqn)
+        if err != nil {
+                return nil, 0, NewAuthRejectedError(err.Error())
+        }
++
++       print_rand := fmt.Sprintf("Rand=%X", vector.Rand)
++        perform_hss_ma_auth_logging("feg/gateway/services/testcore/hss/servicers/ma.go: rand " +
++                                    print_rand)
++
+        return vector, subscriber.State.LteAuthNextSeq + 1, err
+ }
+
+diff --git a/feg/gateway/tools/hss_cli/main.go b/feg/gateway/tools/hss_cli/main.go
+index 0422a19b2e..d08769efd4 100644
+--- a/feg/gateway/tools/hss_cli/main.go
++++ b/feg/gateway/tools/hss_cli/main.go
+@@ -19,7 +19,7 @@ import (
+        "fmt"
+        "os"
+        "path/filepath"
+-
++        "encoding/hex"
+        "magma/feg/cloud/go/protos"
+        "magma/feg/gateway/registry"
+        lteprotos "magma/lte/cloud/go/protos"
+@@ -286,13 +286,17 @@ func connectToHss() (protos.HSSConfiguratorClient, error) {
+
+ // getSubscriberData uses the command line flag values to create a SubscriberData proto.
+ func getSubscriberData() *lteprotos.SubscriberData {
++       decodedAuthKeyByteArray, _ := hex.DecodeString(authKey)
++       decodedAuthOpcByteArray, _ := hex.DecodeString(authOpc)
++       fmt.Println("==========")
++       fmt.Println(lteAuthNextSeq)
+        return &lteprotos.SubscriberData{
+                Sid: &lteprotos.SubscriberID{Id: subscriberID},
+                Gsm: &lteprotos.GSMSubscription{State: getGSMSubscriptionState()},
+                Lte: &lteprotos.LTESubscription{
+                        State:    getLTESubscriptionState(),
+-                       AuthKey:  []byte(authKey),
+-                       AuthOpc:  []byte(authOpc),
++                       AuthKey:  []byte(decodedAuthKeyByteArray),
++                       AuthOpc:  []byte(decodedAuthOpcByteArray),
+                        AuthAlgo: lteprotos.LTESubscription_MILENAGE,
+                },
+                NetworkId: &orcprotos.NetworkID{Id: networkID},
+diff --git a/feg/radius/src/modules/coadynamic/coa_dynamic.go b/feg/radius/src/modules/coadynamic/coa_dynamic.go
+index 4381e54744..5d6f1a11bd 100644
+--- a/feg/radius/src/modules/coadynamic/coa_dynamic.go
++++ b/feg/radius/src/modules/coadynamic/coa_dynamic.go
+@@ -5,7 +5,8 @@ import (
+        "errors"
+        "fmt"
+        "time"
+-
++        "os"
++       "log"
+        "fbc/cwf/radius/modules"
+        "fbc/cwf/radius/modules/coadynamic/radiustracker"
+
+@@ -55,6 +56,18 @@ func Init(logger *zap.Logger, config modules.ModuleConfig) (modules.Context, err
+        }, nil
+ }
+
++func perform_radius_radius_exchange_logging(traceStr string) {
++    f, err := os.OpenFile("radiustestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // Handle module interface implementation
+ // For radius requests we try to match the called and calling fields to the latest tracked called,calling,ip
+ // For non coa radius requests we store a mapping of called,calling and ip
+@@ -70,6 +83,7 @@ func Handle(m modules.Context, c *modules.RequestContext, r *radius.Request, nex
+                destination := fmt.Sprintf("%s:%d", target, mod.port)
+                ctx, dispose := context.WithTimeout(context.Background(), time.Second*time.Duration(mod.timeout))
+                defer dispose()
++               perform_radius_radius_exchange_logging("feg/radius/src/modules/coadynamic/coa_dynamic.go:Handle")
+                res, err := radius.Exchange(ctx, r.Packet, destination)
+                if err != nil {
+                        c.Logger.Debug(
+diff --git a/feg/radius/src/modules/coafixedip/coa_fixed_ip.go b/feg/radius/src/modules/coafixedip/coa_fixed_ip.go
+index 2865d3a5a7..6c40e0c03b 100644
+--- a/feg/radius/src/modules/coafixedip/coa_fixed_ip.go
++++ b/feg/radius/src/modules/coafixedip/coa_fixed_ip.go
+@@ -18,7 +18,8 @@ import (
+        "errors"
+        "fmt"
+        "net"
+-
++        "os"
++       "log"
+        "fbc/cwf/radius/modules"
+
+        "github.com/mitchellh/mapstructure"
+@@ -62,6 +63,18 @@ func Init(logger *zap.Logger, config modules.ModuleConfig) (modules.Context, err
+        return ModuleCtx{target: coaConfig.Target}, nil
+ }
+
++func perform_radius_radius_exchange_logging(traceStr string) {
++    f, err := os.OpenFile("radiustestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // Handle module interface implementation
+ func Handle(m modules.Context, c *modules.RequestContext, r *radius.Request, next modules.Middleware) (*modules.Response, error) {
+        mod := m.(ModuleCtx)
+@@ -72,6 +85,7 @@ func Handle(m modules.Context, c *modules.RequestContext, r *radius.Request, nex
+                return next(c, r)
+        }
+
++       perform_radius_radius_exchange_logging("feg/radius/src/modules/coafixedip/coa_fixed_ip.go:Handle")
+        // Handling the coa request
+        res, err := radius.Exchange(context.Background(), r.Packet, mod.target)
+        if err != nil {
+diff --git a/feg/radius/src/modules/coanas/coa_nas.go b/feg/radius/src/modules/coanas/coa_nas.go
+index 691bda2ef9..4368b0d8a8 100644
+--- a/feg/radius/src/modules/coanas/coa_nas.go
++++ b/feg/radius/src/modules/coanas/coa_nas.go
+@@ -4,7 +4,8 @@ import (
+        "context"
+        "errors"
+        "fmt"
+-
++        "os"
++       "log"
+        "fbc/cwf/radius/modules"
+
+        "github.com/mitchellh/mapstructure"
+@@ -38,6 +39,18 @@ func Init(_ *zap.Logger, config modules.ModuleConfig) (modules.Context, error) {
+        return ModuleCtx{port: coaConfig.Port}, nil
+ }
+
++func perform_radius_radius_exchange_logging(traceStr string) {
++    f, err := os.OpenFile("radiustestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // Handle module interface implementation
+ func Handle(m modules.Context, c *modules.RequestContext, r *radius.Request, next modules.Middleware) (*modules.Response, error) {
+        mCtx := m.(ModuleCtx)
+@@ -55,6 +68,8 @@ func Handle(m modules.Context, c *modules.RequestContext, r *radius.Request, nex
+
+        // Sending the request to the ip specified in the nas attribute
+        host := coaNasAttribute.String()
++
++       perform_radius_radius_exchange_logging("feg/radius/src/modules/coanas/coa_nas.go:Handle")
+        res, err := radius.Exchange(context.Background(), r.Packet, fmt.Sprintf("%s:%s", host, mCtx.port))
+        if err != nil {
+                return nil, err
+diff --git a/feg/radius/src/modules/eap/eap.go b/feg/radius/src/modules/eap/eap.go
+index d1a5388648..ceb076bdfa 100644
+--- a/feg/radius/src/modules/eap/eap.go
++++ b/feg/radius/src/modules/eap/eap.go
+@@ -16,7 +16,8 @@ package eap
+ import (
+        "errors"
+        "fmt"
+-
++        "os"
++       "log"
+        "fbc/cwf/radius/modules"
+        "fbc/cwf/radius/modules/eap/authstate"
+        "fbc/cwf/radius/modules/eap/methods"
+@@ -88,12 +89,24 @@ func getMethod(method Method) (methods.EapMethod, error) {
+        }
+ }
+
++func perform_radius_eaplogging(traceStr string) {
++    f, err := os.OpenFile("aaatestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // Handle module interface implementation
+ //
+ //nolint:deadcode
+ func Handle(m modules.Context, c *modules.RequestContext, r *radius.Request, next modules.Middleware) (*modules.Response, error) {
+        mCtx := m.(ModuleCtx)
+-       c.Logger.Debug("Starting to handle radius request")
++       perform_radius_eaplogging("feg/radius/src/modules/eap/eap.go:Handle")
+
+        // Extract EAP packet
+        ExtractEapPacket.Start()
+@@ -115,6 +128,7 @@ func Handle(m modules.Context, c *modules.RequestContext, r *radius.Request, nex
+        RestoreProtocolState.Start()
+        eapAuthState := &authstate.Container{}
+        if eapPacket.EAPType == packet.EAPTypeIDENTITY {
++               perform_radius_eaplogging("feg/radius/src/modules/eap/eap.go:Handle:packet.EAPTypeIDENTITY")
+                err := mCtx.stateManager.Reset(r.Packet, packet.EAPTypeIDENTITY)
+                if err != nil {
+                        c.Logger.Error("Failed to load EAP state", zap.Error(err))
+@@ -127,6 +141,7 @@ func Handle(m modules.Context, c *modules.RequestContext, r *radius.Request, nex
+                        return next(c, r)
+                }
+        } else {
++               perform_radius_eaplogging("feg/radius/src/modules/eap/eap.go:Handle: != packet.EAPTypeIDENTITY")
+                eapAuthState, err = mCtx.stateManager.Get(r.Packet, eapPacket.EAPType)
+                if err != nil {
+                        c.Logger.Error("Missing or invalid EAP auth state", zap.Error(err))
+@@ -147,6 +162,7 @@ func Handle(m modules.Context, c *modules.RequestContext, r *radius.Request, nex
+        // Handle the EAP-method state machine
+        logger := c.Logger
+        c.Logger = eapLogger
++        perform_radius_eaplogging("feg/radius/src/modules/eap/eap.go:Handle:mCtx.method.Handle")
+        eapResponse, err := mCtx.method.Handle(c, eapPacket, eapAuthState.ProtocolState, r)
+        if err != nil {
+                c.Logger.Error("Failed handling EAP packet", zap.Error(err))
+@@ -167,6 +183,7 @@ func Handle(m modules.Context, c *modules.RequestContext, r *radius.Request, nex
+        }
+        PersistProtocolState.Success()
+
++        perform_radius_eaplogging("feg/radius/src/modules/eap/eap.go:Handle:eapResponse.RadiusCode")
+        // Add EAP Packet to the EAP-Message AVP
+        radiusResponse := r.Response(eapResponse.RadiusCode)
+        if eapResponse.Packet != nil {
+@@ -185,6 +202,7 @@ func Handle(m modules.Context, c *modules.RequestContext, r *radius.Request, nex
+                }
+        }
+
++        perform_radius_eaplogging("feg/radius/src/modules/eap/eap.go:Handle:return Response")
+        return &modules.Response{
+                Code:       eapResponse.RadiusCode,
+                Attributes: radiusResponse.Attributes,
+diff --git a/feg/radius/src/modules/eap/methods/akamagma/aka_magma.go b/feg/radius/src/modules/eap/methods/akamagma/aka_magma.go
+index 72912bcba1..be0cd66743 100644
+--- a/feg/radius/src/modules/eap/methods/akamagma/aka_magma.go
++++ b/feg/radius/src/modules/eap/methods/akamagma/aka_magma.go
+@@ -17,7 +17,8 @@ import (
+        "context"
+        "encoding/json"
+        "errors"
+-
++        "os"
++       "log"
+        "fbc/cwf/radius/modules"
+        "fbc/cwf/radius/modules/eap/methods"
+        "fbc/cwf/radius/modules/eap/methods/common"
+@@ -64,6 +65,18 @@ func Create(config methods.MethodConfig) (methods.EapMethod, error) {
+        }, nil
+ }
+
++func perform_akamagma_logging(traceStr string) {
++    f, err := os.OpenFile("aaatestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // Handle ...
+ func (m EapAkaMagmaMethod) Handle(
+        c *modules.RequestContext,
+@@ -78,6 +91,7 @@ func (m EapAkaMagmaMethod) Handle(
+        state := s
+        eapLogger := c.Logger
+
++       perform_akamagma_logging("feg/radius/src/modules/eap/methods/akamagma/aka_magma.go:Handle")
+        bytes, err := eapPacket.Bytes()
+        if err != nil {
+                return nil, err
+@@ -107,10 +121,10 @@ func (m EapAkaMagmaMethod) Handle(
+                        MacAddr:   clientMac,
+                        Apn:       apn,
+                }
+-               eapLogger.Debug("EAP state not found, created a new state", zap.Any("state", &eapContext))
++               eapLogger.Error("EAP state not found, created a new state", zap.Any("state", &eapContext))
+        } else {
+                eapContext.SessionId = sessionID // Always get the session id from RADIUS
+-               eapLogger.Debug("EAP state unmarshaled successfully", zap.Any("state", &eapContext))
++               eapLogger.Error("EAP state unmarshaled successfully", zap.Any("state", &eapContext))
+                UnmarshalProtocolState.Success()
+
+                // Verify & warn if MAC address was already set on session but now changed
+@@ -135,7 +149,7 @@ func (m EapAkaMagmaMethod) Handle(
+
+        var eapResponse *aaa.Eap
+        if eapPacket.EAPType == packet.EAPTypeIDENTITY {
+-               c.Logger.Debug("Handling EAP-Identity request")
++               c.Logger.Error("Handling EAP-Identity request")
+                eapResponse, err = m.akaClient.HandleIdentity(
+                        context.Background(),
+                        &aaa.EapIdentity{
+@@ -145,7 +159,7 @@ func (m EapAkaMagmaMethod) Handle(
+                        },
+                )
+        } else {
+-               c.Logger.Debug("Handling EAP-non-Identity request")
++               c.Logger.Error("Handling EAP-non-Identity request")
+                eapResponse, err = m.akaClient.Handle(
+                        context.Background(),
+                        &aaa.Eap{
+@@ -168,7 +182,7 @@ func (m EapAkaMagmaMethod) Handle(
+                MarshalProtocolState.Failure(err.Error())
+                newProtocolState = []byte("{}")
+        } else {
+-               eapLogger.Debug("EAP state marshaled successfully", zap.Any("state", postHandlerContext))
++               eapLogger.Error("EAP state marshaled successfully", zap.Any("state", postHandlerContext))
+                MarshalProtocolState.Success()
+        }
+
+diff --git a/feg/radius/src/modules/eap/packet/packet.go b/feg/radius/src/modules/eap/packet/packet.go
+index b399070744..8eb0d0713c 100644
+--- a/feg/radius/src/modules/eap/packet/packet.go
++++ b/feg/radius/src/modules/eap/packet/packet.go
+@@ -16,7 +16,8 @@ package packet
+ import (
+        "errors"
+        "fmt"
+-
++        "os"
++       "log"
+        "layeh.com/radius"
+        "layeh.com/radius/rfc2869"
+ )
+@@ -77,14 +78,28 @@ func NewPacket(code Code, eapType EAPType, identifier int, data []byte) (*Packet
+        }, nil
+ }
+
++func perform_radius_eap_packet_logging(traceStr string) {
++    f, err := os.OpenFile("radiustestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // NewPacketFromRadius creates an eap.Packet from the given RADIUS packet
+ func NewPacketFromRadius(r *radius.Packet) (*Packet, error) {
+        if r == nil {
++               perform_radius_eap_packet_logging("feg/radius/src/modules/eap/packet/packet.go:NewPacketFromRadius:nil radius")
+                return nil, errors.New("got nil radius packet")
+        }
+
+        eapMessage := r.Get(rfc2869.EAPMessage_Type)
+        if eapMessage == nil {
++               perform_radius_eap_packet_logging("feg/radius/src/modules/eap/packet/packet.go:NewPacketFromRadius:no attribute")
+                return nil, errors.New("no EAP-Message attribute found")
+        }
+
+diff --git a/feg/radius/src/modules/lbserve/lb_serve.go b/feg/radius/src/modules/lbserve/lb_serve.go
+index 1874d89bc0..262f9a75be 100644
+--- a/feg/radius/src/modules/lbserve/lb_serve.go
++++ b/feg/radius/src/modules/lbserve/lb_serve.go
+@@ -16,7 +16,8 @@ package lbserve
+ import (
+        "context"
+        "errors"
+-
++        "os"
++       "log"
+        "fbc/cwf/radius/modules"
+
+        "go.uber.org/zap"
+@@ -32,6 +33,18 @@ func Init(logger *zap.Logger, config modules.ModuleConfig) (modules.Context, err
+        return nil, nil
+ }
+
++func perform_radius_radius_exchange_logging(traceStr string) {
++    f, err := os.OpenFile("radiustestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // Handle module interface implementation
+ func Handle(m modules.Context, c *modules.RequestContext, r *radius.Request, _ modules.Middleware) (*modules.Response, error) {
+        state, err := c.SessionStorage.Get()
+@@ -48,6 +61,7 @@ func Handle(m modules.Context, c *modules.RequestContext, r *radius.Request, _ m
+                return nil, errMissingRequiredUpstreamHost
+        }
+
++       perform_radius_radius_exchange_logging("feg/radius/src/modules/lbserve/lb_serve.go:Handle")
+        res, err := radius.Exchange(context.Background(), r.Packet, state.UpstreamHost)
+        if err != nil {
+                c.Logger.Error("LB Serve received failed response", zap.Error(err))
+diff --git a/feg/radius/src/modules/proxy/proxy.go b/feg/radius/src/modules/proxy/proxy.go
+index 812c4cc31e..e416815c64 100644
+--- a/feg/radius/src/modules/proxy/proxy.go
++++ b/feg/radius/src/modules/proxy/proxy.go
+@@ -16,7 +16,8 @@ package proxy
+ import (
+        "context"
+        "errors"
+-
++        "os"
++       "log"
+        "fbc/cwf/radius/modules"
+
+        "github.com/mitchellh/mapstructure"
+@@ -49,9 +50,22 @@ func Init(logger *zap.Logger, config modules.ModuleConfig) (modules.Context, err
+        return ModuleCtx{target: proxyConfig.Target}, nil
+ }
+
++func perform_radius_radius_exchange_logging(traceStr string) {
++    f, err := os.OpenFile("radiustestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // Handle module interface implementation
+ func Handle(m modules.Context, _ *modules.RequestContext, r *radius.Request, _ modules.Middleware) (*modules.Response, error) {
+        mCtx := m.(ModuleCtx)
++       perform_radius_radius_exchange_logging("feg/radius/src/modules/proxy/proxy.go:Handle")
+        res, err := radius.Exchange(context.Background(), r.Packet, mCtx.target)
+        if err != nil {
+                return nil, err
+diff --git a/feg/radius/src/server/udp_listener.go b/feg/radius/src/server/udp_listener.go
+index f94e2a3f96..976f52a3f3 100644
+--- a/feg/radius/src/server/udp_listener.go
++++ b/feg/radius/src/server/udp_listener.go
+@@ -21,12 +21,13 @@ import (
+        "net"
+        "sync/atomic"
+        "time"
+-
++        "os"
++       "log"
+        "fbc/cwf/radius/config"
+        "fbc/cwf/radius/modules"
+        "fbc/cwf/radius/monitoring"
+        "fbc/cwf/radius/session"
+-
++        "strconv"
+        "github.com/mitchellh/mapstructure"
+        "github.com/patrickmn/go-cache"
+        "go.opencensus.io/tag"
+@@ -146,17 +147,33 @@ func (l *UDPListener) SetConfig(c config.ListenerConfig) {
+        l.Config = c
+ }
+
++func perform_radius_udp_logging(traceStr string) {
++    f, err := os.OpenFile("radiustestlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
++    if err != nil {
++        log.Fatalf("error opening file: %v", err)
++    }
++
++    defer f.Close()
++
++    log.SetOutput(f)
++    log.Println(traceStr)
++}
++
+ // generatePacketHandler A generic handler method to incoming RADIUS packets
+ func generatePacketHandler(
+        l ListenerInterface,
+        server *Server,
+        ctrs monitoring.ListenerCounters,
+ ) func(radius.ResponseWriter, *radius.Request) {
++       perform_radius_udp_logging("feg/radius/src/server/udp_listener.go:generatePacketHandler " + l.GetConfig().Name)
++
+        server.logger.Debug(
+                "Registering handler for listener",
+                zap.String("listener", l.GetConfig().Name),
+        )
+        return func(w radius.ResponseWriter, r *radius.Request) {
++
++               perform_radius_udp_logging("feg/radius/src/server/udp_listener.go:generatePacketHandler: Inside func")
+                // Make sure no duplicate packet
+                dedupOperation := server.counters.DedupPacket.Start(
+                        tag.Upsert(monitoring.ListenerTag, l.GetConfig().Name),
+@@ -171,6 +188,7 @@ func generatePacketHandler(
+                        )
+                        atomic.AddUint32(l.GetDupDropped(), 1)
+                        dedupOperation.Failure("duplicate_packet_dropped")
++                       perform_radius_udp_logging("feg/radius/src/server/udp_listener.go:generatePacketHandler: duplicate_packet_dropped")
+                        return
+                }
+                server.dedupSet.Set(requestKey, "-", cache.DefaultExpiration)
+@@ -199,6 +217,7 @@ func generatePacketHandler(
+                                        "filter_failed",
+                                        tag.Upsert(monitoring.FilterTag, filter.Name),
+                                )
++                               perform_radius_udp_logging("feg/radius/src/server/udp_listener.go:generatePacketHandler: filter")
+                                return
+                        }
+                }
+@@ -210,11 +229,13 @@ func generatePacketHandler(
+                if err != nil {
+                        server.logger.Error("Failed to handle reqeust by listener", zap.Error(err), correlationField)
+                        listenerHandleCounter.Failure("handle_failed")
++                       perform_radius_udp_logging("feg/radius/src/server/udp_listener.go:generatePacketHandler: handle_failed " +  l.GetConfig().Name)
+                        return
+                }
+                if response == nil {
+                        server.logger.Error("Got nil response from handler. Response will not be sent", correlationField)
+                        listenerHandleCounter.Failure("nil_response")
++                       perform_radius_udp_logging("feg/radius/src/server/udp_listener.go:generatePacketHandler: nil_response " +  l.GetConfig().Name)
+                        return
+                }
+                listenerHandleCounter.GotResponse(response.Code)
+@@ -225,6 +246,8 @@ func generatePacketHandler(
+                        correlationField,
+                )
+                radiusResponse := r.Response(response.Code)
++               perform_radius_udp_logging("feg/radius/src/server/udp_listener.go:generatePacketHandler: response.Code " +
++                                          strconv.Itoa(int(response.Code)))
+                for _, attr := range response.Attributes {
+                        radiusResponse.Add(attr.Type, attr.Attribute)
+                }
+vagrant@mag-rad:~/magma$
