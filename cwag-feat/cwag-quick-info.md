@@ -9,7 +9,7 @@
 * ~/magma/feg/radius/src
 * go test ./...
 
-## Brining up cwag
+## Bringing up cwag
 * Apply the patch [link](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/cwag-only-components.diff)
 * Run the following commands
   ```
