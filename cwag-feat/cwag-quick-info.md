@@ -20,7 +20,7 @@
 
 ## gateway.mconfig for generic params
 [gateway.mconfig](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/gateway.mconfig)
-
+* Folder : /var/opt/magma/config
 ## Execute uesim testcase
 ### Subscriber creation using hss
 * [sample-hss.yml](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/hss.yml)
