@@ -10,6 +10,9 @@
 * go test ./...
 
 ## Bringing up cwag
+* Pre-requisites:
+*   docker
+*   docker-compose: [link](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04)
 * Apply the patch [link](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/cwag-only-components.diff)
 * Run the following commands
   ```
