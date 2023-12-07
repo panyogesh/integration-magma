@@ -13,14 +13,14 @@ RUN apt update
 RUN apt install -y iproute2
 RUN apt install -y net-tools
 
-RUN git clone git://w1.fi/hostap.git  && cp hostap wpa_supplicant -R
+RUN git clone git://w1.fi/hostap.git
+RUN cp hostap wpa_supplicant -R
 
 RUN mkdir -p /var/configs/
-ADD aka_config /var/configs/ 
+ADD aka_config /var/configs/
 
-#WORKDIR /hostap/hostapd/
+RUN cp /hostap/tests/hwsim/example-hostapd.config /hostap/hostapd/.config
 WORKDIR /hostap/hostapd/
-COPY  /hostap/tests/hwsim/example-hostapd.config /hostap/hostapd/.config 
 RUN make
 RUN make hlr_auc_gw
 
@@ -28,7 +28,7 @@ RUN make hlr_auc_gw
 WORKDIR /wpa_supplicant/wpa_supplicant/
 
 # Compare defconfig, if different, fail -> We may need to update our config (wpa_supplicant)
-COPY /hostap/tests/hwsim/example-wpa_supplicant.config /wpa_supplicant/wpa_supplicant/.config
+RUN cp /hostap/tests/hwsim/example-wpa_supplicant.config /wpa_supplicant/wpa_supplicant/.config
 RUN make
 RUN make eapol_test
 
