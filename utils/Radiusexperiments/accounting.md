@@ -9,4 +9,4 @@
 * Starting the client : python3.8 acct.py
 
 ## Pcap Snapshot
-![Uploading image.png…]()
+![image](https://github.com/panyogesh/integration-magma/assets/69527565/456b4b80-8775-43dc-9da4-ac13b28ecaf9)
