@@ -1,5 +1,8 @@
 # This repository is to have lint and unit test for CWAG feature
 
+## Special Note
+If docker version 24.0.5 is being used an additional plugin needs to be installed 'sudo apt install docker-compose-v2'
+
 ## Lint test
 - Directory: feg/gateway/docker
 - sudo ./build.py --lint
