@@ -2,6 +2,7 @@
 
 ## Special Note
 If docker version 24.0.5 is being used an additional plugin needs to be installed 'sudo apt install docker-compose-v2'
+[issue-link](https://askubuntu.com/questions/1488582/docker-24-0-5-on-ubuntu-22-04-using-ubuntu-repositories-not-docker-official-pp)
 
 ## Lint test
 - Directory: feg/gateway/docker
