@@ -16,6 +16,6 @@ If docker version 24.0.5 is being used an additional plugin needs to be installe
 - Directory: feg/gateway/docker
 - sudo ./build.py --test
 - If the above step failes then
--   sudo docker exec -it test bash
--   go install gotest.tools/gotestsum@latest
--   make test
+   * sudo docker exec -it test bash
+   * go install gotest.tools/gotestsum@latest
+   * make test
