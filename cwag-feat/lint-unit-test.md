@@ -9,7 +9,7 @@ If docker version 24.0.5 is being used an additional plugin needs to be installe
 - sudo ./build.py --lint
 - golangci-lint run -c  ~/PMN-SYSTEMS/pmn-systems//.golangci.yml (from feg/radius/src)
 - If Lint test fails use the following command to fix the regular errors:
--   gofmt -s -w  ./gateway/services/aaa/servicers/accounting.go
+-   gofmt -s -w  ./gateway/services/aaa/servicers/accounting.go (from Host Machine)
 
 
 ## Unit test
