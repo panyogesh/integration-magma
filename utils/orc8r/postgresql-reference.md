@@ -9,6 +9,10 @@ magma_dev=# \dt
 magma_dev=# \l
 magma_dev=# \d+ bootstrapper
 SELECT * FROM cfg_network_configs;
+
+Connect to the database:
+magma_dev=# \c magma_dev
+
 ```
 
 
