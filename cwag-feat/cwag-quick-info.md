@@ -58,3 +58,37 @@ cd /home/vagrant/magma/cwf/gateway/tools/uesim_cli/
 go run main.go  add_ue 001011234567890
 go run main.go  auth 001011234567890
 ```
+
+
+### Verifying the accounting procedure in radius
+
+Modify the highlighted values based on your authentication pcap. Secret is a configurable value in uesim.yml
+
+Use the [Pyrad](https://github.com/panyogesh/integration-magma/blob/main/utils/Radiusexperiments/accounting.md)  utility
+
+```
+index c5a09fe..0e9519b 100755
+--- a/example/acct.py
++++ b/example/acct.py
+@@ -18,15 +18,15 @@ def SendPacket(srv, req):
+         print("Network error: " + error[1])
+         sys.exit(1)
+
+-srv = Client(server="localhost", secret=b"Kah3choteereethiejeimaeziecumi", dict=Dictionary("dictionary"))
++srv = Client(server="localhost", secret=b"123456", dict=Dictionary("dictionary"))
+
+-req = srv.CreateAcctPacket(User_Name="wichert")
++req = srv.CreateAcctPacket(User_Name="001011234567890@wlan.mnc001.mcc001.3gppnetwork.org")
+
+ req["NAS-IP-Address"] = "192.168.1.10"
+ req["NAS-Port"] = 0
+ req["NAS-Identifier"] = "trillian"
+-req["Called-Station-Id"] = "00-04-5F-00-0F-D1"
+-req["Calling-Station-Id"] = "00-01-24-80-B3-9C"
++req["Called-Station-Id"] = "76-02-DE-AD-BE-FF"
++req["Calling-Station-Id"] = "76-02-5B-80-EC-44"
+ req["Framed-IP-Address"] = "10.0.0.100"
+
+ print("Sending accounting start packet")
+vagrant@mag-rad:~/pyrad/example$
+```
