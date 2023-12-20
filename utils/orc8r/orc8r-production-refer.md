@@ -34,6 +34,12 @@ done
       ```
       curl  -k --cert ./admin_operator.pem --key admin_operator.key.pem -X 'GET'   'https://api.magma.local/magma/v1/tenants'   -H 'accept: application/json'
       []
+
+    wavelabs@mercury ~/SW_BUILD1/magma/.cache/test_certs (v1.8)$ curl  -k --cert ./admin_operator.pem --key admin_operator.key.pem -X 'GET'           
+     'https://172.16.4.38:9443/magma/v1/tenants'   -H 'accept: application/json'
+      [{"id":1,"name":"host","networks":null},{"id":2,"name":"fb-test","networks":null},{"id":3,"name":"magma-test","networks": 
+      ["dummytestnetwork","feg_lte_test","feg_test","mpk_test","myownnetwork","test","cwf"]}]
+
       ```
 ## References
 https://wiki.magmacore.org/display/HOME/2023-03-09+Meeting
