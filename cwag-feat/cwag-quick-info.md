@@ -39,7 +39,8 @@
 * go run main.go mar 001011234567890
 
 ```
-cd /home/vagrant/magma/feg/gateway/tools/hss_cli        
+cd /home/vagrant/pmn-systems/feg/gateway/tools/hss_cli (Magma: cd /home/vagrant/magma/feg/gateway/tools/hss_cli)
+     
 - Working option
 go run main.go add -subscriber_id 001011234567890  -auth_key 465B5CE8B199B49FAA5F0A2EE238A6BC -auth_opc C4D5E43991B0C551AFF8B9253C1331AB -lte_auth_next_seq 8 -lte_subscription_active true
 
@@ -54,7 +55,7 @@ cd ~/magma/feg/gateway/tools/swx_cli
 go run main.go mar 001011234567890
 go run main.go sar 001011234567890
 
-cd /home/vagrant/magma/cwf/gateway/tools/uesim_cli/
+cd /home/vagrant/pmn-systems/cwf/gateway/tools/uesim_cli/ (Magma: cd /home/vagrant/magma/cwf/gateway/tools/uesim_cli/)
 go run main.go  add_ue 001011234567890
 go run main.go  auth 001011234567890
 ```
