@@ -14,11 +14,17 @@
 *   docker
 *   docker-compose: [link](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04)
 * Apply the patch [link](https://github.com/panyogesh/integration-magma/blob/main/cwag-feat/cwag-only-components.diff)
-* Run the following commands
+* Run the following commands (magma)
   ```
   sudo docker-compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.integ-test.yml down
   sudo docker-compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.integ-test.yml build
   sudo docker-compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.integ-test.yml up -d
+  ```
+* Run the following commands for pmn
+  ```
+  sudo docker-compose -f docker-compose.yml  down
+  sudo docker-compose -f docker-compose.yml  up -d
+  sudo docker-compose -f docker-compose.yml -f docker-compose.override.yml  build
   ```
 
 ## gateway.mconfig for generic params
