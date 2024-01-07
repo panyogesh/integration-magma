@@ -6,6 +6,11 @@
 * sudo apt-get install libpcap-dev
 * sudo pip install pycryptodome
 * sudo pip install pyrad
+* sudo apt install libssl-dev build-essential checkinstall  pkg-config
+* sudo  apt install dbus libdbus-1-dev libdbus-glib-1-2 libdbus-glib-1-dev libreadline-dev libncurses5-dev
+* sudo apt install libnl-genl-3-dev libnl-3-dev
+* sudo apt install libnl-genl-3-dev libnl-route-3-dev
+* sudo apt install libiberty-dev zlib1g-dev
 
 ## Steps to bring the repository
 * git  clone git://w1.fi/hostap.git
