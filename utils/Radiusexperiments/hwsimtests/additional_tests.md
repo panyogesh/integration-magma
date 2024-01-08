@@ -30,7 +30,8 @@
 * sudo ./run-tests.py eap_proto
 * sudo ./run-tests.py ap_wpa2_eap_aka
 
-
+## Additional Reference
+https://github.com/clearlinux/distribution/issues/640
 
 
 
