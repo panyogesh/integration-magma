@@ -20,8 +20,10 @@
 * make clean
 * make
 * cd ../wpa_supplicant/
-* cp ../hostap/tests/hwsim/example-wpa_supplicant.config .config
+* cp ../tests/hwsim/example-wpa_supplicant.config .config
 * make clean
+* make
+* cd ~/hostap/hostapd
 * make hostapd hostapd_cli hlr_auc_gw
 
 ## Run thes tests
