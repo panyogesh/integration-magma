@@ -38,6 +38,8 @@
 * sudo ./run-tests.py ap_wpa2_eap_aka
 
 ## Additional Reference
+If wlan0 interface is not created
+Check : /home/vagrant/hostap/tests/hwsim/logs/1704701166/log0
 https://github.com/clearlinux/distribution/issues/640
 
 
