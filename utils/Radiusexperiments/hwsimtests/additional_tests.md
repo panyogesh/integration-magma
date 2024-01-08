@@ -12,6 +12,10 @@
 * sudo apt install libnl-genl-3-dev libnl-3-dev
 * sudo apt install libnl-genl-3-dev libnl-route-3-dev
 * sudo apt install libiberty-dev zlib1g-dev
+* sudo apt-get install libxml2-dev
+* sudo apt-get install libcurl4-openssl-dev
+
+
 
 ## Steps to bring the repository
 * git  clone git://w1.fi/hostap.git
