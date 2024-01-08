@@ -4,6 +4,7 @@
 * sudo apt-get install binutils-dev
 * sudo apt-get install libsqlite3-dev
 * sudo apt-get install libpcap-dev
+* sudo apt-get install python3-pip
 * sudo pip install pycryptodome
 * sudo pip install pyrad
 * sudo apt install libssl-dev build-essential checkinstall  pkg-config
