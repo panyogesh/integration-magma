@@ -36,6 +36,7 @@
 * sudo ./start.sh
 * sudo ./run-tests.py eap_proto
 * sudo ./run-tests.py ap_wpa2_eap_aka
+* sudo ./run-tests.py ap_hs20_aka
 
 ## Additional Reference
 If wlan0 interface is not created
