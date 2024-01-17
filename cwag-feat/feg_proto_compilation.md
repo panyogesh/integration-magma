@@ -9,7 +9,11 @@ Purpose of this document is to show how *.pb.go files are generated for feg rela
 * sudo docker ps : ```**20d89c280c56**   feg_gateway_go_base:latest   "bash" 35 minutes ago   Up 35 minutes ```
 * sudo docker run -it --name radiusexperiments --security-opt apparmor=unconfined --cap-add CAP_SYS_ADMIN --cap-add=NET_ADMIN  --rm feg_gateway_go_base:latest bash
 ```
-  root@20d89c280c56:/magma/feg/gateway/services/aaa/protos# make gen  <<< There might be some errors
+  root@20d89c280c56:/magma/feg/gateway/s# make gen  <<< There might be some errors
+
+  sbi/gen.go:14: running "oapi-codegen": exec: "oapi-codegen": executable file not found in $PATH
+  services/csfb/servicers/gen.go:14: running "bash": exit status 127
+
 ```
 
 ## Copy the pb.go file from container to local
