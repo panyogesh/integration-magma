@@ -11,6 +11,10 @@ If docker version 24.0.5 is being used an additional plugin needs to be installe
 - If Lint test fails use the following command to fix the regular errors:
 -   gofmt -s -w  ./gateway/services/aaa/servicers/accounting.go (from Host Machine)
 
+## Another option
+cd feg/gateway/docker/
+export MAGMA_ROOT=/home/vagrant/pmn-systems/
+make lint
 
 ## Unit test
 - Directory: feg/gateway/docker
