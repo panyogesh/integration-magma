@@ -10,7 +10,9 @@ If docker version 24.0.5 is being used an additional plugin needs to be installe
 - golangci-lint run -c  ~/PMN-SYSTEMS/pmn-systems//.golangci.yml (from feg/radius/src)
 - If Lint test fails use the following command to fix the regular errors:
 -   gofmt -s -w  ./gateway/services/aaa/servicers/accounting.go (from Host Machine)
-
+-  go install golang.org/x/tools/cmd/goimports@latest
+-  goimports -l -w .
+  
 ## Another option
 - cd feg/gateway/docker/
 - export MAGMA_ROOT=/home/vagrant/pmn-systems/
