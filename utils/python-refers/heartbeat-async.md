@@ -5,6 +5,9 @@
 2. Server sending "heartbeat" to client
 3. If client doesn't receives it for 3 consecutive attempts it re-initiates connection with server
 
+## /etc/hosts setting
+- 127.0.0.1 notifier  (attempt-1)
+- 172.16.0.1 notifier  (replaced in attempt-2)
 ## Client-Side Code
 ```
 import asyncio
@@ -58,7 +61,7 @@ async def tcp_reconnect(host, port):
 
 
 if __name__ == "__main__":
-    host = "127.0.0.1"
+    host = "notifier"
     port = 8888
     asyncio.run(tcp_reconnect(host, port))
 ```
@@ -93,7 +96,7 @@ async def heartbeat_server(host, port):
         await server.serve_forever()
 
 if __name__ == "__main__":
-    host = "127.0.0.1"
+    host = ""
     port = 8888
     asyncio.run(heartbeat_server(host, port))
 ```
