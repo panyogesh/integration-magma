@@ -4,4 +4,4 @@
    - Tested following scenarios
    - Restarted client (with some delay)
    - Restarted server (with some delay)
-   - Change the URL
+   - Changed the URL/hostname
