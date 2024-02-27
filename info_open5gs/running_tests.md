@@ -1,0 +1,18 @@
+# Running the unit tests in open5gs
+
+## Setting it up
+- Follow the steps mentioned in [link](https://open5gs.org/open5gs/docs/guide/02-building-open5gs-from-sources/) to setup open5gs
+
+## Running Unit tsets
+- Run the command 'meson test -v' from open5gs/build
+
+## Issues 
+- Address already in use.
+-   Somehow meson test starts the process and does not kills it. Either we can comment out in 'src/main.c' the initialization part ```rv = app_initialize(argv_out);```
+Or run the testcase individually :
+-  kill -9 $(ps -eaf | grep open5gs | awk '{print $2}')
+-  Run the cases:
+```
+./tests/attach/attach
+./tests/vonr/vonr
+```
