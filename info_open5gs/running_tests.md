@@ -16,4 +16,12 @@
 ```
 ./tests/attach/attach
 ./tests/vonr/vonr
+ubuntu@dev-meson:~/open5gs/build$ ./tests/vonr/vonr
+qos-flow-test       : SUCCESS
+session-test        : SUCCESS
+simple-test         : SUCCESS
+af-test             : SUCCESS
+video-test          : SUCCESS
+All tests passed.
+ubuntu@dev-meson:~/open5gs/build$ ls
 ```
