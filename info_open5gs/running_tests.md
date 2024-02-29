@@ -11,7 +11,7 @@
 - **Option:1**
   -   Somehow meson test starts the process and does not kills it. Either we can comment out in 'src/main.c' the initialization part ```rv = app_initialize(argv_out);```
 -  **Option:2**
-  * Kill -9 $(ps -eaf | grep open5gs | awk '{print $2}')
+  * kill -9 $(ps -eaf | grep open5gs | awk '{print $2}')
   * Run the cases:
 ```
 ./tests/attach/attach
