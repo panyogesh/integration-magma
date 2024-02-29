@@ -43,3 +43,11 @@ video-test          : SUCCESS
 All tests passed.
 ubuntu@dev-meson:~/open5gs/build$ ls
 ```
+
+## Decoding HTTP2 packets of Open5gs
+Following steps are tried in Ubuntu-22.0.4
+- Follow : https://www.youtube.com/watch?v=yAbgQ0a_ikc
+- Main Repo: https://github.com/telekom/OpenAPI-Dissector?tab=readme-ov-file
+- Missing step for Ubuntu-22.04 : sudo apt install lua-rex-pcre2
+
+- 
