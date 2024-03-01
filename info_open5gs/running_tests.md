@@ -30,6 +30,8 @@ vagrant@exp-open5gs:~/open5gs$
   -   Somehow meson test starts the process and does not kills it. Either we can comment out in 'src/main.c' the initialization part ```rv = app_initialize(argv_out);```
 -  **Option:2**
   * kill -9 $(ps -eaf | grep open5gs | awk '{print $2}')
+  * sudo systemctl stop mongod
+  * sudo systemctl start mongod
   * Run the cases:
 ```
 ./tests/attach/attach
