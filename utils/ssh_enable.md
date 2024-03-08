@@ -15,4 +15,6 @@ sudo service sshd restart
 ## Additional
 ```
 sshpass -p vagrant ssh vagrant@192.168.60.179
+sudo apt install -y python3-pip
+pip install pyroute2
 ```
