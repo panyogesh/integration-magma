@@ -7,7 +7,7 @@ https://gist.github.com/sathiyaseelan/529695891e290991573d278a56180535
 * Set the enviornment variable and download golang
 ```
 sudo rm -rf /usr/bin/go
-VERSION="1.19.8"
+VERSION="1.21.8"
 ARCH="amd64" # go archicture
 curl -O -L "https://golang.org/dl/go${VERSION}.linux-${ARCH}.tar.gz"
 wget -L "https://golang.org/dl/go${VERSION}.linux-${ARCH}.tar.gz"
