@@ -10,3 +10,11 @@ echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb
 sudo apt-get update
 sudo apt-get install -y mongodb-mongosh
 ```
+
+## Adding the command
+[References](https://himanshup.hashnode.dev/5g-sa-lab-setup-using-srsran-open5gs)
+```
+wget https://raw.githubusercontent.com/open5gs/open5gs/main/misc/db/open5gs-dbctl
+chmod +x open5gs-dbctl
+./open5gs-dbctl add 999700000000001 465B5CE8B199B49FAA5F0A2EE238A6BC E8ED289DEBA952E4283B54E88E6183CA
+```
