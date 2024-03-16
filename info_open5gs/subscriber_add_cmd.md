@@ -1,6 +1,8 @@
 # Adding subscriber in open5gs command line
 
-## Installing mongosh
+## Two procedures for the same (apart from WebUI)
+
+### 1. Installing mongosh
 [Reference](https://www.mongodb.com/docs/mongodb-shell/install/)
 ```
 wget -qO- https://www.mongodb.org/static/pgp/server-7.0.asc | sudo tee /etc/apt/trusted.gpg.d/server-7.0.asc
@@ -11,10 +13,12 @@ sudo apt-get update
 sudo apt-get install -y mongodb-mongosh
 ```
 
-## Adding the command
+### 1.1 Using the add command
 [References](https://himanshup.hashnode.dev/5g-sa-lab-setup-using-srsran-open5gs)
 ```
 wget https://raw.githubusercontent.com/open5gs/open5gs/main/misc/db/open5gs-dbctl
 chmod +x open5gs-dbctl
 ./open5gs-dbctl add 999700000000001 465B5CE8B199B49FAA5F0A2EE238A6BC E8ED289DEBA952E4283B54E88E6183CA
 ```
+
+### 2. Using the mongo direct command
