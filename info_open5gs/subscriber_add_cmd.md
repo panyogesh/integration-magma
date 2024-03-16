@@ -22,3 +22,5 @@ chmod +x open5gs-dbctl
 ```
 
 ### 2. Using the mongo direct command
+* Using the [shell-script](https://raw.githubusercontent.com/panyogesh/integration-magma/main/info_open5gs/subscriber_script.sh)
+* References: [Ope5GS-github-link](https://github.com/open5gs/open5gs/issues/2061)
