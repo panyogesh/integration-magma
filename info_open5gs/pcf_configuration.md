@@ -1,8 +1,8 @@
 # This section covers the PCF Configuration with Open5GS
 
 ## Topology
-Single Ubuntu VM: 20.0.4
-[Open5gs --- (127.0.0.X) ---- UERANSIM]
+* Single Ubuntu VM: 20.0.4
+* [Open5gs --- (127.0.0.X) ---- UERANSIM]
 
 ## Pre-Requisites
 * Open5GS up and Running with default configuration
