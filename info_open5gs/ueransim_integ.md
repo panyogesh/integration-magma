@@ -1,5 +1,6 @@
 # This is place holder notes for Open5GS and UERANSIM integration
 
+```
 sudo systemctl restart open5gs-mmed
 sudo systemctl restart open5gs-sgwcd
 sudo systemctl restart open5gs-smfd
@@ -18,3 +19,4 @@ sudo systemctl restart open5gs-nssfd
 sudo systemctl restart open5gs-bsfd
 sudo systemctl restart open5gs-udrd
 sudo systemctl restart open5gs-webui
+```
