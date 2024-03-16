@@ -1,0 +1,41 @@
+"192.168.60.179"
+"192.168.60.174"
+PyRoute2
+- Netlink library
+- 	
+
+Host-1
+sudo ip netns add red
+sudo ip link add red-in type veth peer name red-out
+sudo ip link set red-in netns red
+sudo ip netns exec red ip addr add 192.168.60.13/16 dev red-in
+sudo ip netns exec red ip link set red-in up
+sudo ip link add bridge-main type bridge
+sudo ip addr add 192.168.60.14/16 dev bridge-main
+sudo ip link set red-out master bridge-main
+sudo ip link set red-out up
+sudo ip link set bridge-main up
+sudo ip netns exec red ip route add default via 192.168.60.14
+sudo ip link add vxlan-red type vxlan id 100 local 192.168.60.11 remote 192.168.60.12 dev eth1
+
+sudo ip link set vxlan-red master bridge-main
+sudo ip link set vxlan-red up
+
+
+Host-2
+sudo ip netns add blue
+sudo ip link add blue-in type veth peer name blue-out
+sudo ip link set blue-in netns blue
+sudo ip netns exec blue ip addr add 192.168.60.15/16 dev blue-in
+sudo ip netns exec blue ip link set blue-in up
+sudo ip link add bridge-main type bridge
+sudo ip addr add 192.168.60.16/16 dev bridge-main
+sudo ip link set blue-out master bridge-main
+sudo ip link set blue-out up
+sudo ip link set bridge-main up
+sudo ip netns exec blue ip route add default via 192.168.60.16
+sudo ip link add vxlan-blue type vxlan id 100 local 192.168.60.12 remote 192.168.60.11 dev eth1
+
+
+sudo ip link set vxlan-blue master bridge-main
+sudo ip link set vxlan-blue up

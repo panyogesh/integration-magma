@@ -1,0 +1,8 @@
+host_machine_config:
+  ipaddrBridge: 192.168.60.16/16
+  vxlanLocalIP: 192.168.60.12
+  vxlanRemoteIP: 192.168.60.11
+  vxlanid: '100'
+namespace_config:
+  nscolor: blue
+  nsipaddr: 192.168.60.15/16
