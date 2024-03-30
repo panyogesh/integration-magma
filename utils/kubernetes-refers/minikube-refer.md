@@ -19,13 +19,6 @@
 * chmod +x ./kubectl
 * sudo mv ./kubectl /usr/local/bin/kubectl
 * kubectl version --client
-```
-vagrant@ebpf-test:~$ kubectl get nodes
-NAME       STATUS   ROLES           AGE    VERSION
-minikube   Ready    control-plane   7h1m   v1.28.3
-vagrant@ebpf-test:~$
-```
-
 
 ## Install minikube
 * curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
@@ -34,3 +27,9 @@ vagrant@ebpf-test:~$
 ## Bringing up Minikube
 * minikube start
 * kubectl get nodes
+```
+vagrant@ebpf-test:~$ kubectl get nodes
+NAME       STATUS   ROLES           AGE    VERSION
+minikube   Ready    control-plane   7h1m   v1.28.3
+vagrant@ebpf-test:~$
+```
