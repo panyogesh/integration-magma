@@ -53,4 +53,6 @@ spec:
 * kubectl describe service nginx-service
 * kubectl get -o wide pods  (for getting the ip address of the pods)
 * kubectl get deployment nginx-deployment - yaml
+* kubectl get all
+
 
