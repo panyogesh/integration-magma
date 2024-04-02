@@ -47,4 +47,5 @@ spec:
 
 ## Steps to validate
 * kubectl describe service nginx-service
-* 
+* kubectl get -o wide pods  (for getting the ip address of the pods)
+
