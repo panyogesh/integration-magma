@@ -1,4 +1,4 @@
-# Example shows the basic Kubernetes steps for getting started
+# Basic Kubernetes steps for getting started
 
 ## Sample Kubernetes Deployment
 
