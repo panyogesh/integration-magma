@@ -1,0 +1,29 @@
+#my-test-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-test-pod
+  labels:
+    app: my-test-pod
+    type: mobile-front-end-app
+spec:
+  containers:
+  - name: nginx-controller
+    image: nginx
+---
+# my-test-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-test-service
+spec:
+  type: NodePort
+
+  ports:
+    - targetPort: 80
+      port: 80
+      nodePort: 30038
+
+  selector:
+    app: my-test-pod
+    type: mobile-front-end-app
