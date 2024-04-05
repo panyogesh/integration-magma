@@ -49,3 +49,29 @@ Windows (HOST) (192.168.99.1)---> (192.168.99.199)Virtual-Box: VM(ubuntu-22.0.4)
 
  ## Login and Password for mongo-express
  admin / pass [Ref](https://stackoverflow.com/questions/77559161/why-does-the-mongo-express-service-external-service-in-my-browser-require-a-user#:~:text=You%20need%20to%20enter%20credentials,in%20mongo%2Dexpress%20documentation%20here.)
+
+## Connecting minkube dashboard runninng inside VM from Windows host on same subnet
+Windows (HOST) (192.168.99.1)---> (192.168.99.199)Virtual-Box: VM(ubuntu-22.0.4) ---> minikube (ip:192.168.49.2)
+
+Terminal-1
+```
+vagrant@ubuntu-jammy:~/KubernetesProgram/IngressExample$  minikube dashboard --url
+* Verifying dashboard health ...
+* Launching proxy ...
+* Verifying proxy health ...
+http://127.0.0.1:39505/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:/proxy/
+```
+Terminal-2
+```
+kubectl proxy --address='0.0.0.0' --disable-filter=true
+```
+
+Terminal-3
+```
+sudo apt install firewalld
+sudo firewall-cmd --zone=public --add-port=8001/tcp --permanent
+sudo firewall-cmd --reload
+```
+
+Access : 
+http://192.168.99.199:8001/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:/proxy/
