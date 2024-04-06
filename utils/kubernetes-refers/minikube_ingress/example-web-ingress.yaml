@@ -16,3 +16,10 @@ spec:
                 name: web
                 port:
                   number: 8080
+          - path: /v2
+            pathType: Prefix
+            backend:
+              service:
+                name: web2
+                port:
+                  number: 8080
