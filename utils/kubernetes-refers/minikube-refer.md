@@ -1,4 +1,8 @@
-# This section is to install minikube on top of ubuntu 22.0.4
+# This section is to install & experiment minikube on top of ubuntu 22.0.4
+
+## Refrences
+* [Techworld with Nana Kubernetes](https://www.youtube.com/watch?v=X48VuDVv0do)
+* [Kubernetes Refrences](https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/)
 
 ## Install Dockers
 * sudo apt update
