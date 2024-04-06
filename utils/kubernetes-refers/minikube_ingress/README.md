@@ -10,8 +10,8 @@
 ``` minikube start```
 * Start the ingress on minikube
 ```
-minikube addons enable ingress
-kubectl get pods -n ingress-nginx
+  minikube addons enable ingress
+  kubectl get pods -n ingress-nginx
 ```
 * Create the web-app with NodePort service:- 
   kubectl apply -f [example-web-deployment.yaml](https://raw.githubusercontent.com/panyogesh/integration-magma/main/utils/kubernetes-refers/minikube_ingress/example-web-deployment.yaml)
