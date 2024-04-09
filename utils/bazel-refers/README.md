@@ -51,3 +51,25 @@ ERROR: Build did NOT complete successfully
 vagrant@ubuntu-jammy:~/GoPrograms/NEWBAZEL/integration-magma/utils/bazel-refers$
 ```
 
+
+## COMMIT-3
+
+### Changes
+* More operational my_custom_rule.bzl
+
+### Command used
+```
+bazel build //:write_my_custom_message_into_file
+```
+
+### Final Output
+
+```
+INFO: Build completed successfully, 1 total action
+```
+
+Output created in 
+```
+ls  bazel-bin/my_output_awsome.txt
+```
+
