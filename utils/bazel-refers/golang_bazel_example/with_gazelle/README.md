@@ -43,8 +43,8 @@ gazelle_dependencies()
 ```
 
 ### Option-2
-cd medium-bazel-getting-started
-patch -p1 < ../patch-apply-with-gazelle.diff 
+* cd medium-bazel-getting-started;
+* patch -p1 < ../patch-apply-with-gazelle.diff 
 
 ## Build Bazel
 * bazel run //:gazelle
