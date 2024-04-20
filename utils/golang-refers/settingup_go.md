@@ -42,3 +42,13 @@ vagrant@distro-magma:~/radpoc$ ls
 go.mod  go.sum  rad-client.go
 vagrant@distro-magma:~/radpoc$
 ```
+
+## Installing Dockers
+* sudo apt  install docker.io
+* mkdir -p ~/.docker/cli-plugins/
+* curl -SL https://github.com/docker/compose/releases/download/v2.18.1/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
+* chmod +x ~/.docker/cli-plugins/docker-compose
+* ln -s ~/.docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
+
+
+
