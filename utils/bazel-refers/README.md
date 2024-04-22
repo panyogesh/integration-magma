@@ -22,3 +22,6 @@ go install github.com/bazelbuild/bazel-gazelle/cmd/gazelle@latest
 
 * Bazel-from-Scratch
 * golang_bazel_example
+
+## Refrences
+* [all-round](https://github.com/johanbrandhorst/bazel-mono/tree/master)
