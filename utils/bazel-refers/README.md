@@ -25,3 +25,4 @@ go install github.com/bazelbuild/bazel-gazelle/cmd/gazelle@latest
 
 ## Refrences
 * [all-round](https://github.com/johanbrandhorst/bazel-mono/tree/master)
+* [Good-Refrence](https://www.tweag.io/blog/2021-09-08-rules_go-gazelle/)
