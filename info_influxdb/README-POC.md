@@ -9,7 +9,6 @@
 
 ## Build & Run the influxDB
 - sudo docker build . -t influxdb_1_8
-- sudo docker run -it opengenerator-api bash
 - sudo docker run -d --name influxdb18 -d -p 8086:8086 influxdb_1_8
 
 ## Interact with InfluxDB
