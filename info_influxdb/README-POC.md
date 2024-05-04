@@ -40,4 +40,13 @@ go_influx  <<<< Newly created database
 ```
 > use go_influx
 > select * from products
+> select * from products
+name: products
+time                ProductID ProductName product
+----                --------- ----------- -------
+1714816503000000000 0         watch       watch
+1714816524000000000 1         Camera      Camera
+1714816529000000000 0         watch       watch
+>
+
 ```
