@@ -26,9 +26,9 @@
 
 ## Creating databse in influx
 - sudo docker exec -it influxdb18 influx
+```
 > create database go_influx
 > show databases
-```
 ...
 ...
 go_influx  <<<< Newly created database
