@@ -1,5 +1,7 @@
 # Tuotorial for golang interaction with influx DB
 
+## References
+- [Medium-link](https://medium.com/spankie/getting-started-with-influxdb-with-golang-example-10990c5efee7)
 ## Checkout the docker image of influxdb
 - git clone --depth=1 https://github.com/influxdata/influxdata-docker.git
 - cd influxdata-docker
