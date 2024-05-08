@@ -1,3 +1,6 @@
+Refers:
+  - https://github.com/Code-Hex/go-generics-cache/tree/main/policy/simple
+  - https://github.com/akutz/go-generics-the-hard-way/blob/main/03-getting-started/01-what-is-a-generic.md
 package main
 
 import (
