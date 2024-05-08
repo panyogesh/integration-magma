@@ -30,22 +30,6 @@ sudo bash agw_install_docker.sh
 -----------------------------------------------------------------------------------
 git clone https://github.com/magma/magma
 
-5.1 Use the Following patch 
------------------------------------------------------------------------------------
-git diff lte/gateway/docker/services/c/Dockerfile
-diff --git a/lte/gateway/docker/services/c/Dockerfile b/lte/gateway/docker/services/c/Dockerfile
-index 5dfdf2682..22ad29f24 100644
---- a/lte/gateway/docker/services/c/Dockerfile
-+++ b/lte/gateway/docker/services/c/Dockerfile
-@@ -182,6 +182,8 @@ RUN apt-get update && apt-get install -y \
-   tzdata \
-   iproute2 \
-   iptables \
-+  libssl-dev \
-   && rm -rf /var/lib/apt/lists/*
- 
- RUN echo "deb https://facebookconnectivity.jfrog.io/artifactory/list/dev-focal/ focal main" > /etc/apt/sources.list.d/magma.list
-
 6. Generate Magma's Docker Images
 -----------------------------------------------------------------------------------
 cd lte/gateway/docker
