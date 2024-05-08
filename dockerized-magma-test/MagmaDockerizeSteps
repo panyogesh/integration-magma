@@ -7,6 +7,7 @@ openssl x509 -text -noout -in /var/opt/magma/certs/rootCA.pem
 2. Fetch the Docker Scripts
 -----------------------------------------------------------------------------------
 wget  https://github.com/magma/magma/raw/master/lte/gateway/deploy/agw_install_docker.sh
+wget https://github.com/magma/magma/blob/v1.9/lte/gateway/deploy/agw_install_docker.sh
 
 3. Rename the interfaces to eth0,eth1 and eth2
 -----------------------------------------------------------------------------------
