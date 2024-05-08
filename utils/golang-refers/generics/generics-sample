@@ -1,0 +1,151 @@
+package main
+
+import (
+	"fmt"
+)
+
+type Person interface {
+	Work()
+}
+
+type worker string
+
+func (w worker) Work() {
+	fmt.Printf("%s is working\n", w)
+}
+
+func DoWork[T Person](things []T) {
+	for _, v := range things {
+		v.Work()
+	}
+}
+
+func main() {
+	var a, b, c worker
+	a = "A"
+	b = "B"
+	c = "C"
+	DoWork([]worker{a, b, c})
+}
+
+
+
+package main
+
+import(
+	"fmt"
+)
+
+type Number interface {
+    type int, float64
+}
+
+func MultiplyTen[T Number](a T) T{
+	return a*10
+}
+
+func main() {
+	fmt.Println(MultiplyTen(10))
+	fmt.Println(MultiplyTen(5.55))
+}
+
+==
+
+package main
+
+import "fmt"
+
+type GenericSlice[T any] []T
+
+func (g GenericSlice[T]) Print() {
+	for _, v := range g {
+		fmt.Println(v)
+	}
+}
+
+func Print[T any](g GenericSlice[T]) {
+	for _, v := range g {
+		fmt.Println(v)
+	}
+}
+
+func main() {
+
+	g := GenericSlice[int]{1, 2, 3}
+
+	g.Print() //1 2 3
+	Print(g)  //1 2 3
+}
+
+================================
+
+Any type using Interface
+
+package main
+
+import (
+	"fmt"
+	"log"
+)
+
+// Sum returns the sum of the provided arguments.
+//
+// An error is returned if the arguments are not of a supported
+// type or of mixed types.
+func Sum(args ...interface{}) (interface{}, error) {
+
+	var sum interface{}
+
+	for i := 0; i < len(args); i++ {
+		switch a := args[i].(type) {
+		case int64:
+			if sum == nil {
+				sum = int64(0)
+			}
+
+			tsum, ok := sum.(int64)
+			if !ok {
+				return nil, fmt.Errorf("previous arg was not an int64")
+			}
+
+			tsum += a
+			sum = tsum
+
+		case uint32:
+			if sum == nil {
+				sum = uint32(0)
+			}
+
+			tsum, ok := sum.(uint32)
+			if !ok {
+				return nil, fmt.Errorf("previous arg was not an uint32")
+			}
+
+			tsum += a
+			sum = tsum
+		default:
+			return nil, fmt.Errorf("%T is not supported", args[i])
+		}
+	}
+	return sum, nil
+}
+
+func main() {
+	sum, err := Sum(int64(1), int64(2))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(sum)
+
+	sum, err = Sum(uint32(1), uint32(2))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(sum)
+
+	sum, err = Sum(1, 2)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(sum)
+}
