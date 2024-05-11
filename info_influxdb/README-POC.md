@@ -6,7 +6,7 @@
 - git clone --depth=1 https://github.com/influxdata/influxdata-docker.git
 - cd influxdata-docker
 - git sparse-checkout set influxdb
-- cd 1.8
+- cd influxdb/1.8
 
 
 ## Build & Run the influxDB
