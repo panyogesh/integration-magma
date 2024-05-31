@@ -113,7 +113,7 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-### Step 5: Implement the server using Golang
+### Step 5: Implement the client using Golang
 
 ```
 vagrant@radius-exp:~/certs$ cat clients_tls.go
