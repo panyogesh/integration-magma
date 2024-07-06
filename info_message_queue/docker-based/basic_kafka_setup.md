@@ -10,10 +10,10 @@
 
 ## Execution steps
 * sudo docker-compose up -d
-* [Terminal-1]:docker exec -it <kafka_container_id_or_name> /bin/bash
-* [Terminal-1]: kafka-topics.sh --create --topic test-topic --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
-* [Terminal-1]: kafka-console-producer.sh --topic test-topic --bootstrap-server localhost:9092
-* [Terminal-2]: kafka-console-consumer.sh --topic test-topic --bootstrap-server localhost:9092 --from-beginning
+* **[Terminal-1]**:docker exec -it <kafka_container_id_or_name> /bin/bash
+* **[Terminal-1]**: kafka-topics.sh --create --topic test-topic --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+* **[Terminal-1]**: kafka-console-producer.sh --topic test-topic --bootstrap-server localhost:9092
+* **[Terminal-2]**: kafka-console-consumer.sh --topic test-topic --bootstrap-server localhost:9092 --from-beginning
 
 * 
 
