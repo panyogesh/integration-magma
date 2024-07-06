@@ -6,7 +6,7 @@
     - docker exec -it <kafka_container_id_or_name> /bin/bash
     - Create topic branch : ```kafka-topics.sh --create --topic test-topic --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1```
     - Create producer: ```kafka-console-producer.sh --topic test-topic --bootstrap-server localhost:9092```
-    - Create consumer: kafka-console-consumer.sh --topic test-topic --bootstrap-server localhost:9092 --from-beginning```
+    - Create consumer: ```kafka-console-consumer.sh --topic test-topic --bootstrap-server localhost:9092 --from-beginning```
 
 ## Execution steps
 * sudo docker-compose up -d
