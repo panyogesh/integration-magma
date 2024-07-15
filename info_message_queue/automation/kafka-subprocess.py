@@ -6,12 +6,13 @@ def kafka_producer(topic, message, pod_name='my-release-kafka-client', namespace
     command = [
         'kubectl', 'exec', '--tty', '-i', pod_name, '--namespace', namespace, '--',
         'kafka-console-producer.sh',
-        '--broker-list', 'localhost:9092',
+        '--broker-list',
+        'my-release-kafka-controller-0.my-release-kafka-controller-headless.default.svc.cluster.local:9092,my-release-kafka-controller-1.my-release-kafka-controller-headless.default.svc.cluster.local:9092,my-release-kafka-controller-2.my-release-kafka-controller-headless.default.svc.cluster.local:9092',
         '--topic', topic
     ]
     producer = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = producer.communicate(input=message.encode())
-    
+
     if producer.returncode != 0:
         print(f"Error producing message: {stderr.decode()}")
     else:
@@ -21,12 +22,12 @@ def kafka_consumer(topic, pod_name='my-release-kafka-client', namespace='default
     command = [
         'kubectl', 'exec', '--tty', '-i', pod_name, '--namespace', namespace, '--',
         'kafka-console-consumer.sh',
-        '--bootstrap-server', 'localhost:9092',
+        '--bootstrap-server', 'my-release-kafka.default.svc.cluster.local:9092',
         '--topic', topic,
         '--from-beginning'
     ]
     consumer = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    
+
     try:
         while True:
             output = consumer.stdout.readline()
@@ -37,7 +38,7 @@ def kafka_consumer(topic, pod_name='my-release-kafka-client', namespace='default
     except KeyboardInterrupt:
         consumer.terminate()
         consumer.wait()
-    
+
     stderr = consumer.stderr.read()
     if consumer.returncode != 0:
         print(f"Error consuming messages: {stderr.decode()}")
@@ -66,3 +67,4 @@ if __name__ == '__main__':
 
     # Wait for the consumer thread to finish
     consumer_thread.join()
+
