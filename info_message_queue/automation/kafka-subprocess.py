@@ -2,9 +2,10 @@ import subprocess
 import threading
 import time
 
-def kafka_producer(topic, message, kafka_bin_path='/path/to/kafka/bin'):
+def kafka_producer(topic, message, pod_name='my-release-kafka-client', namespace='default'):
     command = [
-        f'{kafka_bin_path}/kafka-console-producer.sh',
+        'kubectl', 'exec', '--tty', '-i', pod_name, '--namespace', namespace, '--',
+        'kafka-console-producer.sh',
         '--broker-list', 'localhost:9092',
         '--topic', topic
     ]
@@ -16,9 +17,10 @@ def kafka_producer(topic, message, kafka_bin_path='/path/to/kafka/bin'):
     else:
         print(f"Produced message: {message}")
 
-def kafka_consumer(topic, kafka_bin_path='/path/to/kafka/bin'):
+def kafka_consumer(topic, pod_name='my-release-kafka-client', namespace='default'):
     command = [
-        f'{kafka_bin_path}/kafka-console-consumer.sh',
+        'kubectl', 'exec', '--tty', '-i', pod_name, '--namespace', namespace, '--',
+        'kafka-console-consumer.sh',
         '--bootstrap-server', 'localhost:9092',
         '--topic', topic,
         '--from-beginning'
