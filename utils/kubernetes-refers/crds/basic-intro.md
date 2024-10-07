@@ -1,5 +1,8 @@
 # Basic information on Custom Resource Definition
 
+## Refrences
+* [Link-1](https://www.youtube.com/watch?v=u1X5Rf7fWwM)
+
 ## List resources with cluster
 * kubectl api-resources
 ```
@@ -21,3 +24,12 @@ volumeattachments                                storage.k8s.io/v1              
 * Resources
   - A resource is an end point in kubernetes api that store collection of API objects.
   - "apps/v1" is API Endpoint Group
+  - Depoloyment is resource - API Object
+* Custom Resources
+  - Customized Resources are extension of the Kubernetes API
+  - Resource which is not available by default
+  - Once created, can be accessed using kubectl
+  - Provides declarative API
+* Definition
+  - Declarative commands to API server in the form of YAML construct 
+
