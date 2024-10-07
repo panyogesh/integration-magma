@@ -31,5 +31,5 @@ volumeattachments                                storage.k8s.io/v1              
   - Once created, can be accessed using kubectl
   - Provides declarative API
 * Definition
-  - Declarative commands to API server in the form of YAML construct 
+  - Declarative commands to API server in the form of YAML construct (example of declartive yaml file: kubectl get po etcd-kind-control-plane -n kube-system -o yaml)
 
